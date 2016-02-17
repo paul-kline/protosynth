@@ -45,24 +45,28 @@ Check DescriptionR PCR Index. *)
 Check pcrM.    
 
 Definition HashT := nat. 
-Definition VersionT := nat. 
-Definition measurementType {n} {a}( m : DescriptionR n a) : Set :=
+Definition VersionT := nat.
+Add LoadPath "/users/paulkline/Documents/coqs/dependent-crypto".
+Add LoadPath "/users/paulkline/Documents/coqs/cpdt/src".
+Require Import Crypto.
+  
+Definition measurementType {n} {a}( m : DescriptionR n a) : Sendable :=
 match m with
- | pcrM n => nat
- | virusCheckerName => string
- | virusCheckerVersion => VersionT
+ | pcrM n => Nat
+ | virusCheckerName => Nat
+ | virusCheckerVersion => Nat
 end%type.
 
 Check measurementType.
 Eval compute in (measurementType (pcrM 4)). 
-
-Open Scope string_scope.
+ 
+Open Scope string_scope. (* 
 Definition measure {noun} {a} (m : DescriptionR noun a) : measurementType m :=
 match m with
  | pcrM n => n * n
  | virusCheckerName => "Hello!!!"
  | virusCheckerVersion => 7
-end. 
+end.  *)
 
 Inductive request : Set :=
  | nothin : request
@@ -140,15 +144,16 @@ end.
 
 Add LoadPath "/users/paulkline/Documents/coqs/dependent-crypto".
 Add LoadPath "/users/paulkline/Documents/coqs/cpdt/src".
+Add LoadPath "/users/paulkline/Documents/coqs/mysfProgress". 
 Require Import Signing. 
 
-Inductive Session : Type :=
- | Stop : Session
- | Send {t : type} : message t -> Session -> Session
- | Receive {t : type}: message t -> Session -> Session. 
+Inductive SessionT : Type :=
+ | StopT : SessionT
+ | SendT : SendableT  -> SessionT -> SessionT
+ | ReceiveT : SendableT -> SessionT -> SessionT. 
  
 Inductive GlobalSession : Type :=
- | globalSession : Session -> Session -> GlobalSession.
+ | globalSession : SessionT -> SessionT -> GlobalSession.
 
 Add LoadPath "/users/paulkline/Documents/coqs".
 Require Import MyShortHand. 
@@ -161,19 +166,19 @@ Case "Stop, Receive _"; exact False.
 destruct s0 eqn : sessRIGHT.
 Case "Send _, Stop"; exact False.
 Case "Send _, Send _"; exact False.
-Case "Send _, Receive _"; generalize eq_type_dec.  intros X; specialize X with t t0; destruct X. 
-    SCase "types param of messages are equal"; generalize message_eq_dec; intros.
+Case "Send _, Receive _".   generalize eq_type_dec.  intros X; specialize X with t t0. destruct X. 
+    SCase "types param of messages are equal"; exact True; (*  generalize message_eq_dec; intros.
       clear sessRIGHT. rewrite <- e in m0.   specialize X with t m m0; destruct X.
       SSCase "messages are equal"; exact True.
-      SSCase "message NOT equal"; exact False.
-    SCase "types param of message NOT equal"; exact False.
-destruct s0  eqn : sessRIGHT.
+      SSCase "message NOT equal"; exact False. *)
+    SCase "types param of message NOT equal". exact False.
+ destruct s0  eqn : sessRIGHT.
 Case "Receive _, Stop"; exact False.
 Case "Receive _, Send _"; generalize eq_type_dec.  intros X; specialize X with t t0; destruct X. 
-    SCase "types param of messages are equal"; generalize message_eq_dec; intros.
+    SCase "types param of messages are equal"; exact True. (*  generalize message_eq_dec; intros.
       clear sessRIGHT. rewrite <- e in m0.   specialize X with t m m0; destruct X.
       SSCase "messages are equal"; exact True.
-      SSCase "message NOT equal"; exact False.
+      SSCase "message NOT equal"; exact False. *)
     SCase "types param of message NOT equal"; exact False.
 Case "Receive _, Receive _"; exact False.
 Defined.
@@ -198,7 +203,7 @@ Notation "g1 '++' g2" := (globalAppend g1 g2).
 Fixpoint createReturns (req : list Set) : GlobalSession :=
  match req with 
   | nil => Global Stop Stop
-  | t :: ls => 
+  | t :: ls => Global (Receive Basic Stop) (Send (basic  
 Fixpoint synth'  (rq : request) (sendBackReqs : list Set) : GlobalSession  :=
  match rq with
  | nothin => createReturns sendBackReqs
