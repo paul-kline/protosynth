@@ -149,8 +149,8 @@ Require Import Signing.
 
 Inductive SessionT : Type :=
  | StopT : SessionT
- | SendT : SendableT  -> SessionT -> SessionT
- | ReceiveT : SendableT -> SessionT -> SessionT. 
+ | SendT : Sendable  -> SessionT -> SessionT
+ | ReceiveT : Sendable -> SessionT -> SessionT. 
  
 Inductive GlobalSession : Type :=
  | globalSession : SessionT -> SessionT -> GlobalSession.
@@ -166,7 +166,7 @@ Case "Stop, Receive _"; exact False.
 destruct s0 eqn : sessRIGHT.
 Case "Send _, Stop"; exact False.
 Case "Send _, Send _"; exact False.
-Case "Send _, Receive _".   generalize eq_type_dec.  intros X; specialize X with t t0. destruct X. 
+Case "Send _, Receive _".   generalize eq_dec_Sendable.  intros X. specialize X with s1 s3. destruct X. 
     SCase "types param of messages are equal"; exact True; (*  generalize message_eq_dec; intros.
       clear sessRIGHT. rewrite <- e in m0.   specialize X with t m m0; destruct X.
       SSCase "messages are equal"; exact True.
@@ -174,7 +174,7 @@ Case "Send _, Receive _".   generalize eq_type_dec.  intros X; specialize X with
     SCase "types param of message NOT equal". exact False.
  destruct s0  eqn : sessRIGHT.
 Case "Receive _, Stop"; exact False.
-Case "Receive _, Send _"; generalize eq_type_dec.  intros X; specialize X with t t0; destruct X. 
+Case "Receive _, Send _"; generalize eq_dec_Sendable.  intros X. specialize X with s1 s3; destruct X. 
     SCase "types param of messages are equal"; exact True. (*  generalize message_eq_dec; intros.
       clear sessRIGHT. rewrite <- e in m0.   specialize X with t m m0; destruct X.
       SSCase "messages are equal"; exact True.
@@ -186,31 +186,58 @@ Defined.
 Inductive ValidatedGlobalSessionType : Type :=
   | validGlobalSession : { g | isValidGlobal g} -> ValidatedGlobalSessionType.
 
-Fixpoint sessionAppend (s1 s2 : Session) : Session :=
+Fixpoint sessionAppend (s1 s2 : SessionT) : SessionT :=
 match s1 with
- | Stop => s2
- | Send x x0 => Send x (sessionAppend x0 s2)
- | Receive x x0 => Receive x (sessionAppend x0 s2)
+ | StopT => s2
+ | SendT x x0 => SendT x (sessionAppend x0 s2)
+ | ReceiveT x x0 => ReceiveT x (sessionAppend x0 s2)
 end. 
 Notation "s1 '++' s2" := (sessionAppend s1 s2).
  
 Fixpoint globalAppend (g1 g2 : GlobalSession) : GlobalSession :=
 match g1,g2 with
- | globalSession l r, globalSession l2 r2 => globalSession (l ++ l2) (l2 ++ r2) 
+ | globalSession l r, globalSession l2 r2 => globalSession (l ++ l2) (r ++ r2) 
 end.
 Notation "g1 '++' g2" := (globalAppend g1 g2). 
 
-Fixpoint createReturns (req : list Set) : GlobalSession :=
- match req with 
-  | nil => Global Stop Stop
-  | t :: ls => Global (Receive Basic Stop) (Send (basic  
-Fixpoint synth'  (rq : request) (sendBackReqs : list Set) : GlobalSession  :=
+
+Fixpoint createReturns (req : request) : GlobalSession :=
+ match req with
+ | nothin => globalSession StopT StopT
+ | somethin t ls => (globalSession (ReceiveT (measurementType t) StopT) 
+               (SendT (measurementType t) StopT)) 
+               ++
+               (createReturns ls)
+end.
+
+
+Fixpoint synth'  (rq : request) (sendBackReqs : request) : GlobalSession  :=
  match rq with
  | nothin => createReturns sendBackReqs
- | somethin no a x x0 => _
-end
+ | somethin r ls => (globalSession (SendT (measurementType r) StopT) 
+                                  (ReceiveT (measurementType r) StopT))
+                     ++
+                     (synth' ls (somethin r sendBackReqs))
+end. 
 
-Definition synth (rq : request) : GlobalSession := synth' rq [].
+Definition synth (rq : request) : GlobalSession := synth' rq nothin.
+
+(*Inductive DescriptionR : Noun -> Adjective -> Set :=
+  | pcrM : forall n, DescriptionR PCR (Index n) 
+  | virusCheckerName : DescriptionR VirusChecker Name
+  | virusCheckerVersion : DescriptionR VirusChecker Version.
+    *)
+Definition pcrRequestPart := pcrM 1.
+Definition vcNameRequestPart := virusCheckerName.
+Definition vcVersionRequestPart := virusCheckerVersion .
+Definition pcrRequestPart2 := pcrM 2.
+Definition myRequest := somethin pcrRequestPart 
+                        (somethin vcNameRequestPart
+                        (somethin vcVersionRequestPart
+                        (somethin pcrRequestPart2 nothin)
+                        )).
+Eval compute in synth nothin.                         
+Eval compute in synth myRequest.                         
 
 
 
