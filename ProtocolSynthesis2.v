@@ -3,108 +3,22 @@ Inductive Noun : Set:=
   | VirusChecker
   | PCR.
   
-Print Noun.
+Create HintDb eq_dec_db. 
+Theorem eq_dec_noun : forall n1 n2 : Noun,
+                    {n1 = n2} + {n1 <> n2}.
+Proof. intros.   destruct n1, n2; 
+  try (left;reflexivity); right; unfold not; intros H; inversion H.
+Defined.  
 
+Hint Resolve eq_dec_noun : eq_dec_db. 
 Require Import String. 
- 
+Require Import Coq.Relations.Relation_Definitions.
+Require Import Coq.Classes.EquivDec. 
 Inductive Adjective : Set :=
   | Name : Adjective
   | Hash : Adjective
   | Index : nat -> Adjective
-  | Version : Adjective. 
-(* 
-Inductive type : Set :=
-  | Nat
-  | Bool.
- *)
-
-Inductive DescriptionR : Noun -> Adjective -> Set :=
-  | pcrM : forall n, DescriptionR PCR (Index n) 
-  | virusCheckerName : DescriptionR VirusChecker Name
-  | virusCheckerVersion : DescriptionR VirusChecker Version.
-    
-Require Import Coq.Relations.Relation_Definitions.
-
-Check pcrM.
-Check DescriptionR.
-Check DescriptionR PCR. (* 
-Check DescriptionR PCR Index. *)
-Check pcrM.
-
-Definition HashT := nat. 
-Definition VersionT := nat.
-Add LoadPath "/users/paulkline/Documents/coqs/dependent-crypto".
-Add LoadPath "/users/paulkline/Documents/coqs/cpdt/src".
-Add LoadPath "C:\Users\Paul\Documents\coqs\dependent-crypto".
-Add LoadPath "C:\Users\Paul\Documents\coqs\cpdt\src". 
-(*Require Import Crypto.*)
-
-Inductive type :=
-| Nat : type
-| Bool : type.
-
-Inductive Sendable : Set :=
-| Sendable_Measurement : type -> Sendable
-| RequestS {n: Noun} {a: Adjective} : DescriptionR n a -> Sendable.
-
-Definition measurementType {n} {a}( m : DescriptionR n a) : type :=
-match m with
- | pcrM n => Nat
- | virusCheckerName => Nat
- | virusCheckerVersion => Nat
-end%type.
-
-Fixpoint realType (t : type) : Set :=
-match t with
- | Nat => nat
- | Bool => bool
-
-end.
-
-Inductive Requirement {n : Noun} {a : Adjective} (d : DescriptionR n a) :=
-| requirement : ( realType (measurementType d) -> Prop) -> Requirement d. 
-Check requirement.
-Eval compute in (realType (measurementType (pcrM 1))).
- (* 
- Check (requirement (fun (x : nat) => x > 7)).  *)
-Definition req1 : (Requirement (pcrM 1)).
-apply requirement. simpl. exact ((fun (x : nat) => x > 7)).
-Defined.
- 
-Definition req2 := 
- requirement (pcrM 1) ((fun (x : nat) => x > 7)).
- 
-Inductive Privacy { n : Noun} {a : Adjective} (my : DescriptionR n a) :=  
-| privreq { n2 : Noun} {a2 : Adjective} {your : DescriptionR n2 a2} : (Requirement your) -> Privacy my
-| free : Privacy my
-| multiReq : Privacy my -> Privacy my -> Privacy my.   
-
-Check req1.
-
-Definition myPrivacy := privreq (pcrM 1) (requirement (pcrM 2) (fun x : nat => x > 9)).
-Check myPrivacy.
- 
-     
- := requirement (fun (x : nat) => x > 7). 
- 
-Definition privacy { n n2:Noun} {a a2: Adjective} (x : (DescriptionR n a)) := 
-  ( DescriptionR n2 a2, 
-       (realType (measurementType d)) => Prop)  ).
-Check privacy.
-
-Definition myrequirement1 := fun (x : nat) => (x > 7).
-
-Definition myprivacy1 :=     
-
-Definition  privacy { n1 n2 : Noun} {a1 a2 : Adjective} 
-(x : (DescriptionR n1 a1)):= (DescriptionR n2 a2, 
-(fun ( x : (realType (DescriptionR n1 a1))) => Prop ) ). 
-
-Check privacy.  
-
-
-Require Import Coq.Classes.EquivDec. 
-
+  | Version : Adjective.
 
 Ltac rec_eq :=
  match goal with
@@ -120,14 +34,209 @@ Ltac rec_eq :=
             intros Hpaul; apply paul; inversion Hpaul; reflexivity)
     end.  
 
+
+
+Theorem eq_dec_adjective : forall a1 a2 : Adjective,
+                    {a1 = a2} + {a1 <> a2}.
+Proof. intros; destruct a1, a2;
+  try rec_eq;
+  try (left;reflexivity);
+  try (right; unfold not; intros H; inversion H).
+Defined. 
+Hint Resolve eq_dec_adjective : eq_dec_db. 
+Require Import Coq.Program.Equality. 
+Inductive DescriptionR : Noun -> Adjective -> Set :=
+  | pcrMR : forall n, DescriptionR PCR (Index n)
+  | virusCheckerNameR : DescriptionR VirusChecker Name
+  | virusCheckerVersionR : DescriptionR VirusChecker Version.
+  
+Theorem eq_dec_DescriptionR1 : 
+forall n : Noun,
+forall a : Adjective,
+forall x y : DescriptionR n a,
+x = y.
+Proof. intros;
+induction x; dependent induction y;
+( reflexivity).
+Qed.
+
+
+Inductive Description : Set :=
+  | descriptor (n : Noun) (a : Adjective) : DescriptionR n a -> Description.
+
+
+Theorem eq_dec_Description : 
+forall d1 d2 : Description,
+{d1 = d2} + {d1 <> d2}. 
+Proof. intros. destruct d1, d2.   
+specialize eq_dec_adjective with a a0. intros. destruct H.
+ specialize eq_dec_noun with n n0. intros.
+destruct H. left. subst. specialize eq_dec_DescriptionR1 with n0 a0 d0 d.
+intros. subst. reflexivity.
+right. unfold not. intros. inversion H. contradiction.
+right. unfold not. intros. inversion H. contradiction.
+Qed.
+Hint Resolve eq_dec_Description : eq_dec_db.
+Hint Resolve eq_dec_DescriptionR1 : eq_dec_db.  
+Definition HashT := nat. 
+Definition VersionT := nat.
+Add LoadPath "/users/paulkline/Documents/coqs/dependent-crypto".
+Add LoadPath "/users/paulkline/Documents/coqs/cpdt/src".
+Add LoadPath "C:\Users\Paul\Documents\coqs\dependent-crypto".
+Add LoadPath "C:\Users\Paul\Documents\coqs\cpdt\src". 
+(*Require Import Crypto.*)
+
+Inductive type :=
+| Nat : type
+| Bool : type.
+
+Theorem eq_dec_type : forall x y : type ,
+{x = y} + { x <> y}.
+Proof.
+decide equality.
+Qed.
+Hint Resolve eq_dec_type : eq_dec_db.
+
+Inductive Sendable : Set :=
+| Sendable_Measurement : type -> Sendable
+| RequestS {n: Noun} {a: Adjective} : Description -> Sendable.
+
 Theorem eq_dec_Sendable : forall x y : Sendable,
   { x = y} + {x <> y}.
-Proof. intros; destruct x, y;
- try rec_eq;
- try (left; reflexivity);
- try ( right; unfold not; intros; inversion H).
-Defined.         
-  
+Proof. intros.
+decide equality; auto with eq_dec_db.
+Qed.         
+
+Definition measurementType( d : Description) : type :=
+match d with
+ | descriptor n a r => match r with
+    | pcrMR n => Nat
+    | virusCheckerNameR => Nat
+    | virusCheckerVersionR => Bool
+end
+
+end. 
+
+Fixpoint realType (t : type) : Set :=
+match t with
+ | Nat => nat
+ | Bool => bool
+
+end.
+
+Inductive Requirement (d : Description) :=
+| requirement : ( realType (measurementType d) -> bool) -> Requirement d. 
+
+
+Theorem two_functions : forall X Y : Set,
+forall f1 f2 : (X -> Y),
+forall x : X, (f1 x) = (f2 x) -> f1 = f2.
+Proof. intros. 
+Abort.
+
+Check requirement.
+Definition  des1 := (descriptor PCR (Index 1) (pcrMR 1)). 
+Eval compute in (realType (measurementType des1)).
+ (* 
+ Check (requirement (fun (x : nat) => x > 7)).  *)
+Definition req1 : (Requirement des1 ).
+Search bool. 
+apply requirement. simpl. exact ((fun (x : nat) => Nat.leb x 7)).
+Defined.
+ 
+Definition req2 := 
+ requirement (des1) ((fun (x : nat) => Nat.leb x 7)).
+ 
+Inductive Rule (mything : Description) :=  
+| rule  {your : Description} : (Requirement your) -> Rule mything
+| free : Rule mything
+| multiReqAnd : Rule mything ->Rule mything -> Rule mything
+| multiReqOr : Rule mything -> Rule mything -> Rule mything.   
+
+
+Inductive PrivacyPolicy :=
+| EmptyPolicy : PrivacyPolicy
+| ConsPolicy {d :Description}: 
+    Rule d -> 
+    PrivacyPolicy -> PrivacyPolicy. 
+Check req1.
+
+Definition myRule1 := rule (des1) (requirement (descriptor PCR (Index 2) (pcrMR 2))
+ (fun x : nat => Nat.leb x 9)).
+Check myRule1.
+Check ConsPolicy.
+Print myRule1. 
+Definition myPrivacyPolicy := ConsPolicy myRule1 EmptyPolicy.
+ 
+ 
+
+
+Definition myrequirement1 := fun (x : nat) => (x > 7).
+
+Inductive Session :=
+ | Send : Sendable -> Session -> Session
+ | Receive : Sendable -> Session -> Session
+ | Stop : Session
+ . 
+Inductive GlobalSession :=
+ | SendtoRight : Sendable -> GlobalSession -> GlobalSession
+ | SendtoLeft : Sendable -> GlobalSession -> GlobalSession
+ | GlobalStop : GlobalSession.
+ 
+Inductive Side :=
+ | LeftSide : Side
+ | RightSide : Side.
+Theorem eq_dec_side : forall s1 s2 : Side,
+{s1 = s2} + {s1<> s2}. Proof.
+decide equality.
+Qed.
+   
+Fixpoint globalToSide (g : GlobalSession) (s : Side) : Session :=
+ match g with
+ | SendtoRight t g' => match s with
+    | LeftSide => Send t (globalToSide g' s)
+    | RightSide => Receive t (globalToSide g' s)
+    end
+ | SendtoLeft t g' => match s with
+    | LeftSide => Receive t (globalToSide g' s)
+    | RightSide => Send t (globalToSide g' s)
+    end
+ | GlobalStop => Stop
+end. 
+Definition global1 := SendtoRight (Sendable_Measurement Nat) (SendtoRight (Sendable_Measurement Bool)
+ (SendtoLeft (Sendable_Measurement Nat) GlobalStop)).
+Eval compute in globalToSide global1 LeftSide.
+Eval compute in globalToSide global1 RightSide.
+
+Fixpoint PrivacyFunction (p : PrivacyPolicy) (d : Description): (realType (measurementType d)) -> bool :=
+match p with
+ | EmptyPolicy => fun _ => false
+ | @ConsPolicy myd x x0 => if eq_dec_Description d myd then true else false
+end.
+
+
+Fixpoint GlobalToLocal (g : GlobalSession) (s : Side) (pol : PrivacyPolicy) : bool :=
+ match g with
+ | SendtoRight t g' => match s with
+    | LeftSide => Send t (globalToSide g' s)
+    | RightSide => Receive t (globalToSide g' s)
+    end
+ | SendtoLeft t g' => match s with
+    | LeftSide => Receive t (globalToSide g' s)
+    | RightSide => Send t (globalToSide g' s)
+    end
+ | GlobalStop => Stop
+end. 
+
+Definition  privacy { n1 n2 : Noun} {a1 a2 : Adjective} 
+(x : (DescriptionR n1 a1)):= (DescriptionR n2 a2, 
+(fun ( x : (realType (DescriptionR n1 a1))) => Prop ) ). 
+
+Check privacy.  
+
+
+
+
 
 Check measurementType.
 Eval compute in (measurementType (pcrM 4)). 
@@ -154,25 +263,11 @@ Instance EqDec_DescriptionR {n0} {a} `(@EqDec (DescriptionR n0 a) eq eq_equivale
  *)
  
  Require Import Coq.Logic.Decidable. 
-Theorem eq_dec_noun : forall n1 n2 : Noun,
-                    {n1 = n2} + {n1 <> n2}.
-Proof. intros.   destruct n1, n2; 
-  try (left;reflexivity); right; unfold not; intros H; inversion H.
-Defined.  
+ 
 
 Require Import Coq.Arith.Peano_dec. 
 Require Import Coq.Classes.EquivDec.
 
-(* Currently with rec_eq, we can prove decidablilty of
-adjectives that (at one level deep only) take arguments of 
-nat, bool, and unit. *)
-Theorem eq_dec_adjective : forall a1 a2 : Adjective,
-                    {a1 = a2} + {a1 <> a2}.
-Proof. intros; destruct a1, a2;
-  try rec_eq;
-  try (left;reflexivity);
-  try (right; unfold not; intros H; inversion H).
-Defined. 
 
 (* 
 Definition eq_dec_DescriptionR {n1 n2} {a1 a2} (m1 : (DescriptionR n1 a1)) 
