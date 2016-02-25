@@ -84,7 +84,7 @@ Add LoadPath "/users/paulkline/Documents/coqs/dependent-crypto".
 Add LoadPath "/users/paulkline/Documents/coqs/cpdt/src".
 Add LoadPath "C:\Users\Paul\Documents\coqs\dependent-crypto".
 Add LoadPath "C:\Users\Paul\Documents\coqs\cpdt\src". 
-(*Require Import Crypto.*)
+Require Import MyShortHand.
 
 Inductive type :=
 | Nat : type
@@ -97,15 +97,64 @@ decide equality.
 Qed.
 Hint Resolve eq_dec_type : eq_dec_db.
 
-Inductive Sendable : Set :=
-| Sendable_Measurement : type -> Sendable
-| RequestS {n: Noun} {a: Adjective} : Description -> Sendable.
 
+Definition realType (t : type) : Set :=
+match t with
+ | Nat => nat
+ | Bool => bool
+
+end.
+
+Inductive Sendable : Set :=
+| Sendable_Measurement {t : type} : (realType t) -> Sendable
+| RequestS : Description -> Sendable.
+
+Theorem eq_dec_bool : forall b c : bool, 
+{b = c} + {b <> c}.
+Proof. decide equality. Qed.  
+
+
+Require Import Coq.Program.Equality.
+Require Import Eqdep_dec.
+Require Import Coq.Arith.EqNat.
+Require Import Coq.Arith.Peano_dec. 
+Theorem sendable_measurment_inversion : forall t : type, forall n n1 : realType t, Sendable_Measurement n = Sendable_Measurement n1 -> n = n1.
+Proof. intros.
+inversion H; apply inj_pair2_eq_dec; apply eq_dec_type + apply H1.
+Qed.
 Theorem eq_dec_Sendable : forall x y : Sendable,
   { x = y} + {x <> y}.
-Proof. intros.
-decide equality; auto with eq_dec_db.
-Qed.         
+Proof. intros. destruct x, y. destruct t, t0.
+Case "Sendable_Measurement";
+  SCase "realType Nat, realType Nat"; 
+    specialize eq_nat_dec with r r0; intro nateq; destruct nateq.
+    SSCase "Nats are eq";
+       subst; left; reflexivity.
+    SSCase "Nats NOT eq";
+       subst; right; unfold not; intros hypo; 
+       apply sendable_measurment_inversion in hypo; contradiction.    
+Case "realType Nat, realType Bool";
+  right; unfold not; intros stupid; inversion stupid.
+Case "realType Bool, realType Nat";
+  right; unfold not; intros stupid; inversion stupid.
+Case "realType Bool, realType Bool";
+  specialize eq_dec_bool with r r0; intro pp; destruct pp.
+  SCase "bools are eq";
+    left; subst; reflexivity.
+  SCase "bools NOT eq";
+    right; unfold not; intros hypo;
+    apply sendable_measurment_inversion in hypo; contradiction.
+Case "realType t, Description";
+  right; unfold not; intros; inversion H.
+Case "Description, realType t";
+  right; unfold not; intros; inversion H.
+Case "Description, Description";
+  specialize eq_dec_Description with d d0; intro dd; destruct dd.
+  SCase "descriptors are equal";
+    left; subst; reflexivity.
+  SCase "descriptors NOT equal";
+    right; unfold not; intro pp; inversion pp; contradiction.
+Qed.
 
 Definition measurementType( d : Description) : type :=
 match d with
@@ -117,22 +166,17 @@ end
 
 end. 
 
-Fixpoint realType (t : type) : Set :=
-match t with
- | Nat => nat
- | Bool => bool
 
-end.
+Definition sendableType (s : Sendable) : Set :=
+match s with
+ | @Sendable_Measurement t _ =>  realType t
+ | RequestS x => Description
+end. 
+
 
 Inductive Requirement (d : Description) :=
-| requirement : ( realType (measurementType d) -> bool) -> Requirement d. 
+| requirement : ( realType (measurementType d) -> bool) -> Requirement d.
 
-
-Theorem two_functions : forall X Y : Set,
-forall f1 f2 : (X -> Y),
-forall x : X, (f1 x) = (f2 x) -> f1 = f2.
-Proof. intros. 
-Abort.
 
 Check requirement.
 Definition  des1 := (descriptor PCR (Index 1) (pcrMR 1)). 
@@ -142,14 +186,15 @@ Eval compute in (realType (measurementType des1)).
 Definition req1 : (Requirement des1 ).
 Search bool. 
 apply requirement. simpl. exact ((fun (x : nat) => Nat.leb x 7)).
-Defined.
  
+Defined.
 Definition req2 := 
  requirement (des1) ((fun (x : nat) => Nat.leb x 7)).
  
 Inductive Rule (mything : Description) :=  
 | rule  {your : Description} : (Requirement your) -> Rule mything
 | free : Rule mything
+| never : Rule mything
 | multiReqAnd : Rule mything ->Rule mything -> Rule mything
 | multiReqOr : Rule mything -> Rule mything -> Rule mything.   
 
@@ -176,6 +221,7 @@ Definition myrequirement1 := fun (x : nat) => (x > 7).
 Inductive Session :=
  | Send : Sendable -> Session -> Session
  | Receive : Sendable -> Session -> Session
+ | Branch : bool -> Session -> Session -> Session
  | Stop : Session
  . 
 Inductive GlobalSession :=
@@ -202,31 +248,50 @@ Fixpoint globalToSide (g : GlobalSession) (s : Side) : Session :=
     | RightSide => Send t (globalToSide g' s)
     end
  | GlobalStop => Stop
-end. 
-Definition global1 := SendtoRight (Sendable_Measurement Nat) (SendtoRight (Sendable_Measurement Bool)
- (SendtoLeft (Sendable_Measurement Nat) GlobalStop)).
+end.
+
+Definition seven : realType Nat := 7.
+  
+Definition global1 := SendtoRight (Sendable_Measurement seven) (SendtoRight (@Sendable_Measurement Bool false)
+ (SendtoLeft (@Sendable_Measurement Nat 3) GlobalStop)).
 Eval compute in globalToSide global1 LeftSide.
 Eval compute in globalToSide global1 RightSide.
 
-Fixpoint PrivacyFunction (p : PrivacyPolicy) (d : Description): (realType (measurementType d)) -> bool :=
-match p with
- | EmptyPolicy => fun _ => false
- | @ConsPolicy myd x x0 => if eq_dec_Description d myd then true else false
+Fixpoint getRule (p : PrivacyPolicy) (someoneWants : Description): Rule someoneWants .
+refine match p with
+ | EmptyPolicy => never someoneWants
+ | @ConsPolicy myd r pol => if eq_dec_Description someoneWants myd then 
+         _
+
+    else 
+    getRule pol someoneWants
+end. 
+subst. exact r. Defined.   
+
+Definition networkSend (s : Sendable) : unit.
+exact tt. Defined.  
+Definition networkReceive (n : nat) : Sendable.
+Admitted. 
+
+Fixpoint GlobalToLocal (g : GlobalSession) (s : Side) (pol : PrivacyPolicy) : Session :=
+match (s,g) with
+ | (LeftSide, SendtoLeft sendable gsess)  => Receive sendable (GlobalToLocal gsess s pol) 
+ | (RightSide, SendtoRight sendable gsess)  => Receive sendable (GlobalToLocal gsess s pol)
+ | (LeftSide, SendtoRight sendable gsess) => 
+   match sendable with
+     | @Sendable_Measurement _ _ => Send sendable (GlobalToLocal gsess s pol)
+     | RequestS d => Send sendable
+        match networkReceive 1 with 
+         |  @Sendable_Measurement t val => match getR
+         |  RequestS d => Stop
+        end
+   end
+
+ | (RightSide, SendtoLeft sendable session)  => Stop
+
+ | (_, GlobalStop) => Stop
 end.
 
-
-Fixpoint GlobalToLocal (g : GlobalSession) (s : Side) (pol : PrivacyPolicy) : bool :=
- match g with
- | SendtoRight t g' => match s with
-    | LeftSide => Send t (globalToSide g' s)
-    | RightSide => Receive t (globalToSide g' s)
-    end
- | SendtoLeft t g' => match s with
-    | LeftSide => Receive t (globalToSide g' s)
-    | RightSide => Send t (globalToSide g' s)
-    end
- | GlobalStop => Stop
-end. 
 
 Definition  privacy { n1 n2 : Noun} {a1 a2 : Adjective} 
 (x : (DescriptionR n1 a1)):= (DescriptionR n2 a2, 
