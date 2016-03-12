@@ -4,14 +4,13 @@ Inductive Noun : Set:=
   | PCR.
   
 Create HintDb eq_dec_db. 
-Theorem eq_dec_noun : forall n1 n2 : Noun,
-                    {n1 = n2} + {n1 <> n2}.
+Theorem eq_dec_noun : forall n1 n2 : Noun, {n1 = n2} + {n1 <> n2}.
 Proof. intros.   destruct n1, n2; 
   try (left;reflexivity); right; unfold not; intros H; inversion H.
 Defined.
 
 Hint Resolve eq_dec_noun : eq_dec_db. 
-Require Import String. 
+(*Require Import String.*) 
 Require Import Coq.Relations.Relation_Definitions.
 Require Import Coq.Classes.EquivDec. 
 Inductive Adjective : Set :=
@@ -38,10 +37,7 @@ Ltac rec_eq :=
 
 Theorem eq_dec_adjective : forall a1 a2 : Adjective,
                     {a1 = a2} + {a1 <> a2}.
-Proof. intros; destruct a1, a2;
-  try rec_eq;
-  try (left;reflexivity);
-  try (right; unfold not; intros H; inversion H).
+Proof. decide equality; rec_eq.
 Defined. 
 Hint Resolve eq_dec_adjective : eq_dec_db. 
 Require Import Coq.Program.Equality.
@@ -59,7 +55,6 @@ Proof. intros;
 induction x; dependent induction y;
 ( reflexivity).
 Defined. 
-
 
 Inductive Description : Set :=
   | descriptor {n : Noun} {a : Adjective} : DescriptionR n a -> Description.
@@ -85,34 +80,6 @@ Add LoadPath "C:\Users\Paul\Documents\coqs\dependent-crypto".
 Add LoadPath "C:\Users\Paul\Documents\coqs\cpdt\src". 
 Require Import MyShortHand.
 
-Inductive type : Set :=
-| Nat : type
-| Bool : type.
-
-Theorem eq_dec_type : forall x y : type ,
-{x = y} + { x <> y}.
-Proof.
-decide equality.
-Defined. 
-Hint Resolve eq_dec_type : eq_dec_db.
-
-
-Definition typeDenote (t : type) : Set :=
-match t with
- | Nat => nat
- | Bool => bool
-
-end.
-
-Definition measurementType( d : Description) : type :=
-match d with
- | descriptor r => match r with
-    | pcrMR n => Nat
-    | virusCheckerNameR => Nat
-    | virusCheckerVersionR => Bool
-end
-
-end.
 Definition measurementDenote (d: Description) :=
 match d with
  | descriptor r => match r with
@@ -144,13 +111,14 @@ forall d : Description, forall n n1 : (measurementDenote d),
 @Sendable_Measurement d n = @Sendable_Measurement d n1 -> n = n1.
 Proof. intros.
 inversion H. apply inj_pair2_eq_dec. apply eq_dec_Description. Print existT.   apply H1.
-
 Qed.
+
+(*
+Theorem eq_dec_Message : forall x y : Message,
+  { x = y} + {x <> y}. Proof. intros. *)
 Theorem eq_dec_Message : forall x y : Message,
   { x = y} + {x <> y}.
 Proof. intros. destruct x, y. specialize eq_dec_Description with d d0; intros.
-
-
 destruct H. subst. specialize sendable_measurment_inversion with d0 m0 m.
 intros.  
 destruct d0. 
@@ -160,30 +128,27 @@ destruct d.
 specialize eq_nat_dec with m m0; intros;
 destruct H0 as [eq |neq]; subst; ( (left; reflexivity) +
 right; unfold not; intros; apply neq; apply symmetry in H0;
-apply H in H0; rewrite H0; reflexivity).
+apply H in H0; rewrite H0; reflexivity). 
+simpl. cbn. simpl in H. simpl in m0. simpl in m.
+destruct eq_nat_dec with m0 m. left. subst. refl.
+right. unfold not; intros. symmetry in H0. apply H in H0. contradiction.
+
+simpl in m0. simpl in m.
+destruct eq_dec_bool with m0 m. left. subst. refl.
+right. unfold not; intros. symmetry in H0. apply H in H0. contradiction.
+subst. simpl in m.  
+destruct d eqn:b. 
 Admitted.
-
-Definition sendableType (s : Message) : Set :=
-match s with
- | @Sendable_Measurement d _ =>  measurementDenote d
- | RequestS x => Description
- | StopMessage => unit
-end. 
-
 
 Inductive Requirement (d : Description) :=
 | requirement : ( (measurementDenote d) -> bool) -> Requirement d.
 
-
 Check requirement.
 Definition  des1 := (descriptor (pcrMR 1)). 
 Eval compute in (measurementDenote des1).
- (* 
- Check (requirement (fun (x : nat) => x > 7)).  *)
 Definition req1 : (Requirement des1 ).
 Search bool. 
 apply requirement. simpl. exact ((fun (x : nat) => Nat.leb x 7)).
- 
 Defined.
 Definition req2 := 
  requirement (des1) ((fun (x : nat) => Nat.leb x 7)).
@@ -220,46 +185,7 @@ Inductive Session :=
  | Receive : (Message -> Session) -> Session
  | Branch : bool -> Session -> Session -> Session
  | Stop : Session
- . 
-Inductive GlobalSession :=
- | SendtoRight : Message -> GlobalSession -> GlobalSession
- | SendtoLeft : Message -> GlobalSession -> GlobalSession
- | GlobalStop : GlobalSession.
- 
-Inductive Side :=
- | LeftSide : Side
- | RightSide : Side.
-Theorem eq_dec_side : forall s1 s2 : Side,
-{s1 = s2} + {s1<> s2}. Proof.
-decide equality.
-Defined. 
-   
-
-Definition seven := 7.
-  Print Sendable_Measurement. Print Description. 
-Definition global1 := SendtoRight (Sendable_Measurement (descriptor (pcrMR 2)) 7) 
- (SendtoRight (Sendable_Measurement (descriptor (pcrMR 3)) 3)
- (SendtoLeft (Sendable_Measurement (descriptor (pcrMR 4)) 5) GlobalStop)).
- 
-(* Takes a privacy policy and gives you back a rule, no matter what.
-If the requested item has no explicit rule. The default is to never give it away.*)
-Fixpoint getRule (p : PrivacyPolicy) (someoneWants : Description): Rule someoneWants .
-refine match p with
- | EmptyPolicy => never someoneWants
- | @ConsPolicy myd r pol => if eq_dec_Description someoneWants myd then 
-         _
-
-    else 
-    getRule pol someoneWants
-end. 
-subst. exact r. Defined.   
-
-Definition networkSend (m : Message) : unit.
-exact tt. Defined.  
-Definition networkReceive (n : nat) : Message.
-Admitted. 
-
-
+ .
 
 Inductive Action : Set :=
  | ASend : Action
@@ -269,19 +195,18 @@ Inductive Action : Set :=
  {x = y} + {x <>y }.
  Proof. decide equality. Defined.
  
- Require Import Coq.Lists.List. 
+ Require Import Coq.Lists.List.
+ 
+ (* placeholder measurement function. need this to exist *) 
  Definition measure (d: Description) : measurementDenote d.
  destruct d. destruct d. simpl. exact n.
  simpl. exact 0.
- simpl. exact true. Defined.         
-Inductive  Continuence : Set :=
- | more : Description -> Continuence
- | final : bool -> Continuence.
+ simpl. exact true. Defined.
  
 Inductive RequestItem : Set :=
  | requestItem (d : Description) : (Requirement d) -> RequestItem.
  Theorem eq_dec_RequestItem : forall x y : RequestItem,
- {x = y} + {x <> y}. Proof. intros.
+ {x = y} + {x <> y}. Proof. intros. 
  Admitted.   
 Inductive RequestLS : Set :=
  | emptyRequestLS : RequestLS
@@ -310,19 +235,14 @@ Inductive Role : Set :=
  | Appraiser
  | Attester. 
 Theorem eq_dec_Role: forall x y : Role, {x = y} + {x <> y}. 
-Proof. decide equality. Defined. 
-(*handleRequest
-input: privacyPolicy, measurmentRequest
-output: measument | request | no (aka Stop)
-*) 
-Inductive HandleRequestResponse :=
- | hr_Mess : PrivacyPolicy -> Message -> RequestItem -> HandleRequestResponse. 
+Proof. decide equality. Defined.
 
 Definition freeRequirement (d : Description): Requirement d:= 
  requirement d (fun _ => true).
 Definition neverRequirement (d : Description): Requirement d:= 
  requirement d (fun _ => false).
-Check neverRequirement. 
+Check neverRequirement.
+ 
 Fixpoint handleRequest (pp : PrivacyPolicy) (d : Description) : 
 (PrivacyPolicy * Message * RequestItem):=
  match pp with
@@ -372,73 +292,11 @@ match n with
  end
  end. 
 
-(*
-match omes with
- | nil => match toRequest with
-     | emptyRequestLS => match role with
-         | Appraiser => Stop (* nothin left *)
-         | Attester => Receive (fun m => match m with
-             | Sendable_Measurement d v => match reduceUnresolved d v unresolved with
-                 | Some newUnresolvedState => getProtocol n' Attester nil myPriv emptyRequestLS newUnresolvedState
-                 | None => Send StopMessage Stop (*fails to meet my reqs I give up *)
-                 end 
-             | RequestS d => match handleRequest myPriv d with 
-                | (newpp,mess,reqItem) => Send mess 
-                     (getProtocol n' Attester nil newpp emptyRequestLS (ConsRequestLS reqItem unresolved) )
-                end
-             | StopMessage => Stop
-             end)
-         end
-     | ConsRequestLS reqItem reqls' => match reqItem with
-         | requestItem d reqment => Send (RequestS d) 
-            (getProtocol n' role nil myPriv reqls' 
-               (ConsRequestLS (requestItem d reqment) unresolved) ) 
-         end
-     end
- | cons mes mesls => Send mes (getProtocol n' role mesls myPriv toRequest unresolved)
- end
-
-end. 
-
- 
-
-Fixpoint getProtocol (n : nat) (role : Role) (a: Action) (omes :  list Message) (myPriv : PrivacyPolicy) 
- (toRequest : RequestLS) (unresolved : RequestLS): Session :=
-match n with
-| O => Stop
-| S n' =>
-match omes with
- | nil => match toRequest with
-     | emptyRequestLS => match role with
-         | Appraiser => Stop (* nothin left *)
-         | Attester => Receive (fun m => match m with
-             | Sendable_Measurement d v => match reduceUnresolved d v unresolved with
-                 | Some newUnresolvedState => getProtocol n' Attester nil myPriv emptyRequestLS newUnresolvedState
-                 | None => Send StopMessage Stop (*fails to meet my reqs I give up *)
-                 end 
-             | RequestS d => match handleRequest myPriv d with 
-                | (newpp,mess,reqItem) => Send mess 
-                     (getProtocol n' Attester nil newpp emptyRequestLS (ConsRequestLS reqItem unresolved) )
-                end
-             | StopMessage => Stop
-             end)
-         end
-     | ConsRequestLS reqItem reqls' => match reqItem with
-         | requestItem d reqment => Send (RequestS d) 
-            (getProtocol n' role nil myPriv reqls' 
-               (ConsRequestLS (requestItem d reqment) unresolved) ) 
-         end
-     end
- | cons mes mesls => Send mes (getProtocol n' role mesls myPriv toRequest unresolved)
- end
-
-end. 
-*)
 Check (Receive _). 
 Inductive IsValid : Session -> Session -> Prop :=
  | both_stop : IsValid Stop Stop
- | lr_stop {f}: (f StopMessage = Stop) -> IsValid (Send StopMessage Stop) (Receive f)
- | rl_stop {f}: (f StopMessage = Stop) -> IsValid (Receive f) (Send StopMessage Stop)
+ | lr_stop {f}: (f StopMessage = Stop) -> IsValid (Send StopMessage Stop) Stop
+ | rl_stop {f}: (f StopMessage = Stop) -> IsValid Stop (Send StopMessage Stop)
  | lr_send {x} {y} {m} {f}: IsValid x y -> (f m = y) -> IsValid (Send m x) (Receive f) 
  | rl_send {x} {y} {m} {f}: IsValid x y -> (f m = x) -> IsValid (Receive f) (Send m y). 
 Hint Constructors IsValid. 
@@ -484,19 +342,8 @@ Example example4 : IsValid
 end)))
 
 .
-Proof. intros. simpl. eauto. (*  specialize example1. intros. specialize example2; intros.
-apply @rl_send with (Send StopMessage Stop) . assumption.  reflexivity. Qed.
-*)
+Proof. intros. simpl. eauto. 
 
-(*
-Definition myRule1 := rule (des1) (requirement (descriptor (pcrMR 2))
- (fun x : nat => Nat.leb x 9)).
-Check myRule1.
-Check ConsPolicy.
-Print myRule1. 
-Definition myPrivacyPolicy := ConsPolicy myRule1 EmptyPolicy.
-
-*) 
 Definition lenientPolicy := ConsPolicy (free (descriptor (pcrMR 1))) 
 (ConsPolicy (free (descriptor (pcrMR 2))) EmptyPolicy). 
 
@@ -610,7 +457,6 @@ Theorem bigStep_implies_IsValid : forall x y : Session, (bigStep x y) = Some (St
     simpl in H0. inversion H0.
     intros. simpl in H. inversion H.
     intros. simpl in H.
-    
     destruct y; (try inversion H).
     auto.
     Qed.
@@ -620,211 +466,60 @@ Proof. intros. apply bigStep_implies_IsValid.
   cbn. unblock_goal. simpl_eq. reflexivity.
   Qed.
   
-(* rewrite inj_pairT2_refl .  rewrite simplification_K.   rewrite <- UIP_refl_refl .  simpl_uip .   unblock_goal. simpl_eq.   auto. eauto 11.   
+  Check getProtocol.
+Theorem WillStop_Receive : forall n a pp rls un f, (getProtocol n a pp rls un) = Receive f ->
+  f StopMessage = Stop. 
+Proof. intros. destruct n, a, pp, rls, un; ( simpl in H; inversion H).  
+try (destruct r; inversion H1).  destruct r. inversion H1. destruct r0. inversion H1.
+destruct r0. inversion H1.
+repeat reflexivity.
+reflexivity.
+reflexivity.
+reflexivity.
+reflexivity.
+reflexivity.
+reflexivity.
+reflexivity.
+Qed.
 
-apply reducingIsOkay. simpl. auto. eauto with *.    
-*)
-eauto 10 with * .  
-apply lr_send. 
-apply @lr_send with (getNext (RequestS (descriptor (pcrMR 1))) 
+Theorem WillStop_Send : forall n a pp rls un r, (getProtocol n a pp rls un) = Send StopMessage r ->
+  r = Stop. 
+Proof. intros. destruct n, a, pp, rls, un; ( simpl in H; inversion H); auto.
+ destruct r0. simpl in H1. inversion H1.
+ destruct r0. inversion H1. 
+ destruct r1. inversion H1.
+ destruct r1. inversion H1.
+ Qed.
 
-(Receive
-     (fun _ : Message =>
-      let (p, reqItem) :=
-        if
-         eq_dec_Description (descriptor (pcrMR 1)) (descriptor (pcrMR 1))
-        then
-         (ConsPolicy (free (descriptor (pcrMR 1)))
-            (ConsPolicy (free (descriptor (pcrMR 2))) EmptyPolicy),
-         Sendable_Measurement (descriptor (pcrMR 1)) 1,
-         requestItem (descriptor (pcrMR 1))
-           (freeRequirement (descriptor (pcrMR 1))))
-        else
-         let (p, reqRes) :=
-           if
-            eq_dec_Description (descriptor (pcrMR 2))
-              (descriptor (pcrMR 1))
-           then
-            (ConsPolicy (free (descriptor (pcrMR 2))) EmptyPolicy,
-            Sendable_Measurement (descriptor (pcrMR 1)) 1,
-            requestItem (descriptor (pcrMR 1))
-              (freeRequirement (descriptor (pcrMR 1))))
-           else
-            (ConsPolicy (free (descriptor (pcrMR 2))) EmptyPolicy,
-            StopMessage,
-            requestItem (descriptor (pcrMR 1))
-              (neverRequirement (descriptor (pcrMR 1)))) in
-         let (ppres, messres) := p in
-         (ConsPolicy (free (descriptor (pcrMR 1))) ppres, messres, reqRes) in
-      let (newpp, mess) := p in
-      Send mess
-        (Receive
-           (fun m : Message =>
-            match m with
-            | Sendable_Measurement d v =>
-                match
-                  match reqItem with
-                  | requestItem dr reqment =>
-                      match eq_dec_Description dr d with
-                      | left H =>
-                          match reqment with
-                          | requirement _ f =>
-                              if
-                               f
-                                 (eq_rec_r
-                                    (fun d0 : Description =>
-                                     measurementDenote d0) v H)
-                              then Some emptyRequestLS
-                              else None
-                          end
-                      | right _ =>
-                          Some (ConsRequestLS reqItem emptyRequestLS)
-                      end
-                  end
-                with
-                | Some _ => Stop
-                | None => Send StopMessage Stop
-                end
-            | RequestS d =>
-                let (p0, _) := handleRequest newpp d in
-                let (_, mess0) := p0 in Send mess0 Stop
-            | StopMessage => Stop
-            end))))
-
-). simpl. simpl. 
-
-
-
- Require Import Coq.Logic.Decidable. 
+Theorem allGood : forall n pp1 pp2 rls1 un1 un2,
+ IsValid (getProtocol n ASend pp1 rls1 un1) (getProtocol n AReceive pp2 emptyRequestLS un2).
+ Proof. intros. induction n; 
+ destruct pp1, pp2, rls1, un1, un2;  
+ try (simpl; eauto).
+ destruct r. simpl.
+ eauto. simpl in IHn.
+ apply @lr_send with (
+ Send StopMessage
+            (getProtocol n AReceive EmptyPolicy emptyRequestLS
+               (ConsRequestLS
+                  (requestItem d (neverRequirement d))
+                  emptyRequestLS))). rewrite WillStop_Send with 
+                  n AReceive EmptyPolicy
+        emptyRequestLS
+        (ConsRequestLS
+           (requestItem d (neverRequirement d))
+           emptyRequestLS) .
+simpl. destruct rls1. simpl. destruct n. simpl.  simpl in IHn.  auto.      
+  apply bigStep_implies_IsValid. simpl. apply IHn in bigStep_implies_IsValid.  with IHn.      
  
-
-Require Import Coq.Arith.Peano_dec. 
-Require Import Coq.Classes.EquivDec.
-
-
-(* 
-Definition eq_dec_DescriptionR {n1 n2} {a1 a2} (m1 : (DescriptionR n1 a1)) 
-                                            (m2 : (DescriptionR n2 a2)) : .
-Proof. case_eq n1.  (n1 = n2). destruct n1. , n2, a1, a2.                       
-                              { m1 = m2} + {m1 <> m2}. 
-     *)
-Fixpoint member {n1} {a1} (m : DescriptionR n1 a1) (rs : request) : bool :=
-match rs with
- | nothin => false
- | @somethin n2 a2  x xs => if eq_dec_noun n1 n2 then 
-                              if eq_dec_adjective a1 a2 then true 
-                              else false
-                            else false
-end.
-
-Fixpoint request_eq (r1 r2 : request) : bool :=
- match r1 with
- | nothin => match r2 with
-    | nothin => true
-    | somethin _ _ => false
-    end
-
- | somethin  x x0 => andb (member x r2) (request_eq x0 r2)
-end.
-
-Add LoadPath "/users/paulkline/Documents/coqs/dependent-crypto".
-Add LoadPath "/users/paulkline/Documents/coqs/cpdt/src".
-Add LoadPath "/users/paulkline/Documents/coqs/mysfProgress". 
-(* Require Import Signing.  *)
-
-Inductive SessionT : Type :=
- | StopT : SessionT
- | SendT : Sendable  -> SessionT -> SessionT
- | ReceiveT : Sendable -> SessionT -> SessionT. 
+   reflexivity).
+ simpl. destruct r. simpl.   
+ destruct rls1. simpl. cbn.  rewrite <- IHn.   
+ simpl.  
+ simpl. reflexivity. simpl. reflexivity. .     cbn. reflexivity. destruct rls1. simpl. reflexivity.
+ simpl. destruct r. simpl.
  
-Inductive GlobalSession : Type :=
- | globalSession : SessionT -> SessionT -> GlobalSession.
-
-Add LoadPath "/users/paulkline/Documents/coqs".
-Require Import MyShortHand.
-
-Fixpoint isValidGlobal ( g : GlobalSession) : Prop.
-destruct g. destruct s eqn : sessLEFT. destruct s0 eqn : sessRIGHT.
-Case "Stop, Stop"; exact True.
-Case "Stop, Send _";  exact False.
-Case "Stop, Receive _"; exact False.
-destruct s0 eqn : sessRIGHT.
-Case "Send _, Stop"; exact False.
-Case "Send _, Send _"; exact False.
-Case "Send _, Receive _".   generalize eq_dec_Sendable.  intros X. specialize X with s1 s3. destruct X. 
-    SCase "types param of messages are equal"; exact True; (*  generalize message_eq_dec; intros.
-      clear sessRIGHT. rewrite <- e in m0.   specialize X with t m m0; destruct X.
-      SSCase "messages are equal"; exact True.
-      SSCase "message NOT equal"; exact False. *)
-    SCase "types param of message NOT equal". exact False.
- destruct s0  eqn : sessRIGHT.
-Case "Receive _, Stop"; exact False.
-Case "Receive _, Send _"; generalize eq_dec_Sendable.  intros X. specialize X with s1 s3; destruct X. 
-    SCase "types param of messages are equal"; exact True. (*  generalize message_eq_dec; intros.
-      clear sessRIGHT. rewrite <- e in m0.   specialize X with t m m0; destruct X.
-      SSCase "messages are equal"; exact True.
-      SSCase "message NOT equal"; exact False. *)
-    SCase "types param of message NOT equal"; exact False.
-Case "Receive _, Receive _"; exact False.
-Defined.
-
-Inductive ValidatedGlobalSessionType : Type :=
-  | validGlobalSession : { g | isValidGlobal g} -> ValidatedGlobalSessionType.
-
-Fixpoint sessionAppend (s1 s2 : SessionT) : SessionT :=
-match s1 with
- | StopT => s2
- | SendT x x0 => SendT x (sessionAppend x0 s2)
- | ReceiveT x x0 => ReceiveT x (sessionAppend x0 s2)
-end. 
-Notation "s1 '++' s2" := (sessionAppend s1 s2).
- 
-Fixpoint globalAppend (g1 g2 : GlobalSession) : GlobalSession :=
-match g1,g2 with
- | globalSession l r, globalSession l2 r2 => globalSession (l ++ l2) (r ++ r2) 
-end.
-Notation "g1 '++' g2" := (globalAppend g1 g2). 
-
-
-Fixpoint createReturns (req : request) : GlobalSession :=
- match req with
- | nothin => globalSession StopT StopT
- | somethin t ls => (globalSession (ReceiveT (measurementType t) StopT) 
-               (SendT (measurementType t) StopT)) 
-               ++
-               (createReturns ls)
-end.
-
-
-Fixpoint synth'  (rq : request) (sendBackReqs : request) : GlobalSession  :=
- match rq with
- | nothin => createReturns sendBackReqs
- | somethin r ls => (globalSession (SendT (measurementType r) StopT) 
-                                  (ReceiveT (measurementType r) StopT))
-                     ++
-                     (synth' ls (somethin r sendBackReqs))
-end. 
-
-Definition synth (rq : request) : GlobalSession := synth' rq nothin.
-
-(*Inductive DescriptionR : Noun -> Adjective -> Set :=
-  | pcrM : forall n, DescriptionR PCR (Index n) 
-  | virusCheckerName : DescriptionR VirusChecker Name
-  | virusCheckerVersion : DescriptionR VirusChecker Version.
-    *)
-Definition pcrRequestPart := pcrM 1.
-Definition vcNameRequestPart := virusCheckerName.
-Definition vcVersionRequestPart := virusCheckerVersion .
-Definition pcrRequestPart2 := pcrM 2.
-Definition myRequest := somethin pcrRequestPart 
-                        (somethin vcNameRequestPart
-                        (somethin vcVersionRequestPart
-                        (somethin pcrRequestPart2 nothin)
-                        )).
-Eval compute in synth nothin.
-Eval compute in synth myRequest.
-
-
-
-
+ destruct rls1. simpl. simpl in IHn.        
+ destruct newpp.  
+ simpl.       
 
