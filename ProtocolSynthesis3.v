@@ -284,6 +284,7 @@ match n with
                  | None => Send StopMessage Stop (*fails to meet my reqs I give up *)
                  end) 
              | RequestS d => (match handleRequest myPriv d with 
+                 | (_, StopMessage,_) => Send StopMessage Stop
                  | (newpp,mess,reqItem) => Send mess 
                      (getProtocol n' AReceive newpp emptyRequestLS (ConsRequestLS reqItem unresolved) )
                  end)
@@ -295,10 +296,11 @@ match n with
 Check (Receive _). 
 Inductive IsValid : Session -> Session -> Prop :=
  | both_stop : IsValid Stop Stop
- | lr_stop {f}: (f StopMessage = Stop) -> IsValid (Send StopMessage Stop) Stop
- | rl_stop {f}: (f StopMessage = Stop) -> IsValid Stop (Send StopMessage Stop)
+ | lr_stop : IsValid (Send StopMessage Stop) Stop
+ | rl_stop : IsValid Stop (Send StopMessage Stop)
  | lr_send {x} {y} {m} {f}: IsValid x y -> (f m = y) -> IsValid (Send m x) (Receive f) 
  | rl_send {x} {y} {m} {f}: IsValid x y -> (f m = x) -> IsValid (Receive f) (Send m y). 
+ 
 Hint Constructors IsValid. 
 Example example1 : IsValid 
 (Send StopMessage Stop) 
@@ -307,7 +309,7 @@ Example example1 : IsValid
    | RequestS x => Send StopMessage Stop
    | StopMessage => Stop
 end)).
-Proof. simpl. intros. auto. Qed. (*  apply lr_stop. reflexivity. Qed. *)     
+Proof. simpl. intros. eauto. Qed. (*  apply lr_stop. reflexivity. Qed. *)     
  
 Example example2 : IsValid 
 (Receive (fun p => match p with
@@ -316,7 +318,7 @@ Example example2 : IsValid
    | StopMessage => Stop
 end))
 (Send StopMessage Stop).
-Proof. simpl. intros. auto. Qed. (*   apply rl_stop. reflexivity. Qed. *)
+Proof. simpl. intros. eauto. Qed. (*   apply rl_stop. reflexivity. Qed. *)
 
 
 Example example3 : IsValid 
@@ -328,7 +330,11 @@ Example example3 : IsValid
 end)))
 
 (Receive (fun p => (Send StopMessage Stop))).
-Proof. intros. simpl. eauto. Qed.  (*  specialize example1. intros. specialize example2; intros.
+Proof. intros. cbn.  simpl. Print lr_send. 
+apply @lr_send with (Send StopMessage Stop).
+apply @rl_send with (Stop). auto.
+auto.
+auto.         Qed.  (*  specialize example1. intros. specialize example2; intros.
 apply @lr_send with (Send StopMessage Stop) . assumption.  reflexivity. Qed.
 *)
 Example example4 : IsValid 
@@ -342,7 +348,9 @@ Example example4 : IsValid
 end)))
 
 .
-Proof. intros. simpl. eauto. 
+Proof. apply @rl_send with (Send StopMessage Stop).
+apply @lr_send with Stop.
+auto. auto. auto. Qed. 
 
 Definition lenientPolicy := ConsPolicy (free (descriptor (pcrMR 1))) 
 (ConsPolicy (free (descriptor (pcrMR 2))) EmptyPolicy). 
@@ -358,6 +366,9 @@ Definition thingsIwant := ConsRequestLS thingIWant1 emptyRequestLS.
 Definition attesterproto1 := getProtocol 2 AReceive lenientPolicy emptyRequestLS emptyRequestLS.
 Definition appraiserProto1 := getProtocol 5 ASend EmptyPolicy thingsIwant emptyRequestLS.
 
+Definition attesterproto2 := getProtocol 5 AReceive EmptyPolicy emptyRequestLS emptyRequestLS.
+Definition appraiserProto2 := getProtocol 5 ASend EmptyPolicy thingsIwant emptyRequestLS.
+
 Eval compute in appraiserProto1.
 
 
@@ -371,12 +382,11 @@ end.
 
 
 Theorem subValid : forall m x f, IsValid (Send m x) (Receive f) -> IsValid x (f m).
-Proof. intros. inversion H. subst. rewrite H1. auto.
-subst. exact H3.
+Proof. intros. inversion H. subst. exact H3.
 Qed. 
 Hint Resolve subValid.
 Theorem subValid2 : forall m x f, IsValid (Receive f) (Send m x) -> IsValid (f m) x.
-Proof. intros. inversion H. subst. rewrite H2. auto.
+Proof. intros. inversion H. subst.
 subst. exact H3.
 Qed. 
 Hint Resolve subValid2.
@@ -385,8 +395,7 @@ Theorem reducingIsOkay : forall f m x, IsValid (Send m x) (Receive f) <->
   IsValid (Send m x) (reduce m (Receive f)).
 Proof. split.  intros. simpl. apply subValid in H. apply @lr_send  with ( f m). exact H.
 reflexivity.
-intros. simpl. simpl in H. apply @lr_send with (f m). inversion H. subst. rewrite H1. auto.
-subst. exact H3.
+intros. simpl. simpl in H. apply @lr_send with (f m). inversion H. subst. exact H3.
 reflexivity.           
  Qed.
 
@@ -394,8 +403,7 @@ Theorem reducingIsOkay2 : forall f m x, IsValid (Receive f) (Send m x) <->
   IsValid (reduce m (Receive f)) (Send m x) .
 Proof. split.  intros. simpl. apply subValid2 in H. apply @rl_send  with ( f m). exact H.
 reflexivity.
-intros. simpl. simpl in H. apply @rl_send with (f m). inversion H. subst. rewrite H2. auto.
-subst. exact H3. 
+intros. simpl. simpl in H. apply @rl_send with (f m). inversion H. subst. exact H3. 
 reflexivity.
  Qed.
 
@@ -436,7 +444,13 @@ Eval compute in appraiserProto1.
  Import Coq.Program.Equality. 
 Example eijeifjfij : (bigStep appraiserProto1 attesterproto1) = Some (Stop,Stop).
 Proof. unfold appraiserProto1. unfold attesterproto1. cbn. unblock_goal. simpl. cbn.
-cbn. eauto 11. simpl_eq. reflexivity.
+cbn. eauto. simpl_eq. reflexivity.
+Qed.
+
+Eval compute in smallStep (smallStep (smallStep (twoSessions appraiserProto2 attesterproto2))). 
+Example eefffees2 : (bigStep appraiserProto2 attesterproto2) = Some (Stop,Stop).
+Proof.  unfold appraiserProto2. unfold attesterproto2. simpl.
+reflexivity.
 Qed.
 
 Theorem IsValid_IsValid : forall x y, IsValid x y -> IsValid y x.
@@ -491,9 +505,49 @@ Proof. intros. destruct n, a, pp, rls, un; ( simpl in H; inversion H); auto.
  destruct r1. inversion H1.
  Qed.
 
+
+Ltac proto := match goal with 
+  | [  |- IsValid (Send ?M ?X) (Receive ?F)] => 
+           apply @lr_send with (F M)
+  | [  |- IsValid (Receive ?F) (Send ?M ?X)] => 
+           apply @rl_send with (F M)
+  | [  |- IsValid Stop Stop ] => 
+           apply  both_stop
+  | [  |- IsValid Stop  (Send StopMessage Stop)] => 
+           apply lr_stop
+  | [  |- IsValid (Send StopMessage Stop) Stop] => 
+           apply rl_stop
+  end.  
+
+Theorem IsValid_inc : forall n pp1 pp2 rls1 rls2 un1 un2,
+  IsValid (getProtocol n ASend pp1 rls1 un1) (getProtocol n AReceive pp2 rls2 un2) ->
+  IsValid (getProtocol (S n) ASend pp1 rls1 un1) (getProtocol (S n) AReceive pp2 rls2 un2).
+  Proof. intros. generalize dependent rls2.
+    induction rls1. simpl. intros. proto. auto. auto. intros.       destruct rls1. proto. proto. reflexivity.
+  destruct r. proto. subst.   
+  
+        subst.  
+  simpl. 
+   induction n. simpl in H.  simpl.   simpl. destruct a1. destruct rls1. destruct a2. destruct rls2.
+  proto.     simpl.    
+  
 Theorem allGood : forall n pp1 pp2 rls1 un1 un2,
  IsValid (getProtocol n ASend pp1 rls1 un1) (getProtocol n AReceive pp2 emptyRequestLS un2).
- Proof. intros. induction n; 
+ Proof. intros. generalize dependent n.
+ (* generalize dependent un1.
+ generalize dependent un2. *)
+ induction rls1. intros. destruct n. simpl. proto.
+ simpl. eauto.
+ destruct n. simpl. auto.
+ simpl. destruct r. proto. destruct n. simpl. apply rl_stop.  proto.   auto.   apply IHrls1.  eauto.      
+ 
+ simpl. eauto. destruct r.
+ eauto.    
+ intros. destruct n. simpl. auto.
+ simpl. destruct r. simpl. proto. simpl. cbn.   apply rl_stop.     eauto.               
+ 
+ 
+   induction n; 
  destruct pp1, pp2, rls1, un1, un2;  
  try (simpl; eauto).
  destruct r. simpl.
@@ -503,7 +557,10 @@ Theorem allGood : forall n pp1 pp2 rls1 un1 un2,
             (getProtocol n AReceive EmptyPolicy emptyRequestLS
                (ConsRequestLS
                   (requestItem d (neverRequirement d))
-                  emptyRequestLS))). rewrite WillStop_Send with 
+                  emptyRequestLS))). destruct n. simpl. auto.
+                  simpl in IHn.
+                  apply IsValid_IsValid.  
+      simpl. eauto.  assumption.  simpl_eq.  rewrite WillStop_Send with 
                   n AReceive EmptyPolicy
         emptyRequestLS
         (ConsRequestLS
