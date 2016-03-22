@@ -590,12 +590,20 @@ forall x, exists p : x = x, eq_dec_Description x x = left p.
  intros. case_eq (eq_dec_Description x0 x0). intros. exists e. reflexivity.
  intros. assert (x0 = x0). refl. contradiction. Qed.
  
+ 
+Theorem IguessThatsOkay1 : forall d m, 
+IsValid Stop (Send (Sendable_Measurement d m) Stop).
+Admitted. 
+Theorem IguessThatsOkay2 : forall d, 
+IsValid Stop (Send (RequestS d) Stop).
+Admitted.
+ 
 Theorem IsValid_inc : forall n pp1 pp2 rls1 rls2 un1 un2,
   IsValid (getProtocol (n) ASend pp1 rls1 un1) (getProtocol ( n) AReceive pp2 rls2 un2) ->
   IsValid (getProtocol (S n) ASend pp1 rls1 un1) (getProtocol (S n ) AReceive pp2 rls2 un2).
   Proof. intro. induction n. simpl. intros.  destruct rls1.  proto_simpler.
   auto. auto. destruct r. proto_simpler. destruct (handleRequest pp2 d).
-  destruct p. destruct m . admit. admit. auto.
+  destruct p. destruct m . apply IguessThatsOkay1. apply IguessThatsOkay2. auto.
   destruct (handleRequest pp2 d). destruct p.
   destruct m. auto. auto. auto. intros.  simpl. proto_simpler.
   destruct rls1. proto_simpler.  
@@ -608,27 +616,8 @@ Theorem IsValid_inc : forall n pp1 pp2 rls1 rls2 un1 un2,
  IsValid (getProtocol (S n) ASend pp1 rls1 un1) (getProtocol (S n) AReceive pp2 emptyRequestLS un2).
  Proof. intro. induction n. simpl. intros. destruct rls1. proto_simpler. auto. auto.
  destruct r. proto_simpler. destruct (handleRequest pp2 d).
- destruct p. destruct m. admit. admit. auto.
+ destruct p. destruct m. apply IguessThatsOkay1. apply IguessThatsOkay2. auto.
  destruct (handleRequest pp2 d). destruct p.
  destruct m. refl. refl. refl.          
- specialize IsValid_inc. intros. apply H. apply IHn.    
- 
- 
- induction pp2. simpl. auto.
- simpl. destruct (eq_dec_Description d0 d). simpl. subst. destruct r0.
- admit. admit. auto. auto. auto. cbn .
-  destruct (handleRequest pp2 d ). 
- destruct ((ConsPolicy r0 ppres, messres, reqRes)). cbv. simpl. cbn. cbv zeta.    apply simpl__eq .  simpl_eq. unblock_goal. simpl_eq.  rewrite JMeq_eq_refl. simpl_eq.   cb   
- cbv in IHpp2. simpl_eq in IHpp2.  .  
- inversion IHpp2.  
- easy. 
- eauto.  apply IHpp2. 
- 
- destruct pp2. simpl. auto. 
- simpl. destruct (eq_dec_Description d1 d). simpl. subst. destruct r1.
- admit. admit. auto. auto. auto.                     
- 
- induction pp2. simpl. auto. 
- simpl. destruct (eq_dec_Description d2 d). simpl. subst. destruct r2.
- admit. admit. auto. auto. auto.
- auto. eauto. rewrite IHpp2.    
+ specialize IsValid_inc. intros. apply H. apply IHn.
+ Qed.
