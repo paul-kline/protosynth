@@ -591,11 +591,8 @@ forall x, exists p : x = x, eq_dec_Description x x = left p.
  intros. assert (x0 = x0). refl. contradiction. Qed.
  
  
-Theorem IguessThatsOkay1 : forall d m, 
-IsValid Stop (Send (Sendable_Measurement d m) Stop).
-Admitted. 
-Theorem IguessThatsOkay2 : forall d, 
-IsValid Stop (Send (RequestS d) Stop).
+Theorem IguessThatsOkay : forall m, 
+IsValid Stop ((Send m) Stop).
 Admitted.
  
 Theorem IsValid_inc : forall n pp1 pp2 rls1 rls2 un1 un2,
@@ -603,7 +600,7 @@ Theorem IsValid_inc : forall n pp1 pp2 rls1 rls2 un1 un2,
   IsValid (getProtocol (S n) ASend pp1 rls1 un1) (getProtocol (S n ) AReceive pp2 rls2 un2).
   Proof. intro. induction n. simpl. intros.  destruct rls1.  proto_simpler.
   auto. auto. destruct r. proto_simpler. destruct (handleRequest pp2 d).
-  destruct p. destruct m . apply IguessThatsOkay1. apply IguessThatsOkay2. auto.
+  destruct p. destruct m . apply IguessThatsOkay. apply IguessThatsOkay. auto.
   destruct (handleRequest pp2 d). destruct p.
   destruct m. auto. auto. auto. intros.  simpl. proto_simpler.
   destruct rls1. proto_simpler.  
@@ -616,7 +613,7 @@ Theorem IsValid_inc : forall n pp1 pp2 rls1 rls2 un1 un2,
  IsValid (getProtocol (S n) ASend pp1 rls1 un1) (getProtocol (S n) AReceive pp2 emptyRequestLS un2).
  Proof. intro. induction n. simpl. intros. destruct rls1. proto_simpler. auto. auto.
  destruct r. proto_simpler. destruct (handleRequest pp2 d).
- destruct p. destruct m. apply IguessThatsOkay1. apply IguessThatsOkay2. auto.
+ destruct p. destruct m. apply IguessThatsOkay. apply IguessThatsOkay. auto.
  destruct (handleRequest pp2 d). destruct p.
  destruct m. refl. refl. refl.          
  specialize IsValid_inc. intros. apply H. apply IHn.
