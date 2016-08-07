@@ -266,7 +266,7 @@ Fixpoint handleRequest (pp : PrivacyPolicy) (d : Description) :
        | (ppres,messres,reqRes) => (@ConsPolicy dp rule_d ppres,messres,reqRes)
      end
  end. 
-
+ 
 Definition canSend (ls : list Description) (priv : PrivacyPolicy) : option Description :=
 (match ls with
  | nil => None
@@ -343,9 +343,33 @@ Unless, of course, it was a StopMessage, then stop. *)
              end)
  end)
  end). 
+Ltac findForExists hypo := match goal with
+| [ hypo :context[?T]   |- exists T, _ ] => exists T; (try reflexivity)
+  end.
+ 
+Require Import Omega. 
+Theorem WillReceive : forall n a pp rls un ls m s, m <> StopMessage ->  (getProtocol (S n) a pp rls un ls) = Send m s -> 
+ exists f, s = Receive f. 
+Proof. intro n. induction n. intros. simpl in H0. destruct a. destruct (canSend ls pp).
+findForExists H0. inversion H0.  reflexivity. destruct rls.
+inversion H0. subst. elim H. reflexivity. destruct r.
+findForExists H0. inversion H0. reflexivity. inversion H0.
+intros. simpl in H0. destruct a. destruct (canSend ls pp). inversion H0. eauto.
+ destruct rls. inversion H0. subst. elim H. reflexivity. destruct r. inversion H0. 
+findForExists H3. inversion H0. Qed.
 
-
-
+Require Import CpdtTactics. 
+Theorem WillSend : forall n a pp rls un ls f, (getProtocol (S n) a pp rls un ls) = Receive f -> 
+( forall m, m <> StopMessage -> exists m2 s', (f m) = Send m2 s').
+Proof. intro n. induction n. intros. simpl in H. destruct a. destruct (canSend ls pp). inversion H.
+destruct rls. inversion H. destruct r. inversion H. inversion H. destruct m eqn : M. destruct (reduceUnresolved d m0 un). eauto. eauto.
+destruct (handleRequest pp d). destruct p. destruct m0. exists (Sendable_Measurement d0 m0). eauto. eauto. eauto.
+elim H0. reflexivity. intros. simpl in H. destruct a. destruct (canSend ls pp). inversion H. subst. destruct rls. inversion H.
+destruct r. inversion H. simpl_eq. simpl in H. destruct m. inversion H. subst.
+destruct (reduceUnresolved d m un). destruct (canSend ls (reducePrivacy d m pp)).
+eauto. destruct rls. eauto. destruct r0. eauto. eauto. inversion H. destruct (handleRequest pp d). destruct p.
+destruct m. eauto. eauto. eauto. elim H0. reflexivity.
+Qed.
 
 Check (Receive _). 
 Inductive IsValid : Session -> Session -> Prop :=
@@ -475,21 +499,28 @@ match sess with
  | Stop => Stop
 end.
 
-Inductive TwoSessions :=
- | twoSessions : Session -> Session -> TwoSessions. 
-Definition smallStep dos : TwoSessions:=
+Definition smallStep (dos : (Session * Session)) : option (Session * Session):=
  match dos with 
-  | twoSessions (Send m s1') (Receive f) => twoSessions s1' (f m) 
-  | twoSessions (Receive f) (Send m s2') => twoSessions (f m) s2'
-  | _ => dos
+  | ((Send m s1'), (Receive f)) => Some (s1', (f m)) 
+  | ((Receive f), (Send m s2')) => Some ((f m), s2')
+  | _ => None
  end.
  
  Eval cbn in getNext (Sendable_Measurement 
     (descriptor (pcrMR 1)) 1) (getNext _ appraiserProto1). 
-  
-Definition x := Eval cbn in  smallStep (smallStep (smallStep (twoSessions appraiserProto1 attesterproto1))).
-Print x .
+Fixpoint smallStepn (n : nat) (x : (Session*Session)): ((Session*Session) *nat) :=
+  match n with
+  | O => (x,0)
+  | S n' => match (smallStep x) with 
+              | Some r => smallStepn n'  r
+              | None   => (x,n)
+            end
+  end.
 
+(*
+Definition x := Eval cbn in  smallStep (smallStep (smallStep (appraiserProto1, attesterproto1))).
+Print x .
+*)
 Fixpoint bigStep (s1 : Session) (s2 : Session) : option (Session*Session) :=
  match (s1,s2) with 
   | ((Send m s1'), (Receive f)) => bigStep s1' (f m) 
@@ -506,8 +537,8 @@ Example eijeifjfij : (bigStep appraiserProto1 attesterproto1) = Some (Stop,Stop)
 Proof. unfold appraiserProto1. unfold attesterproto1. cbn. unblock_goal. simpl. cbn.
 cbn. eauto. simpl_eq. reflexivity.
 Qed.
-
-Eval compute in smallStep (smallStep (smallStep (twoSessions appraiserProto2 attesterproto2))). 
+(*
+Eval compute in smallStep (smallStep (smallStep (appraiserProto2, attesterproto2))).  *)
 Example eefffees2 : (bigStep appraiserProto2 attesterproto2) = Some (Stop,Stop).
 Proof.  unfold appraiserProto2. unfold attesterproto2. simpl.
 reflexivity. Qed. 
@@ -518,10 +549,10 @@ Proof. intros. induction H; auto || eauto.
 Qed. 
 
 Theorem bigStep_implies_IsValid : forall x y : Session, (bigStep x y) = Some (Stop,Stop) -> 
- IsValid x y. Proof. intro. induction x0. simpl. destruct y eqn:what. simpl.
+ IsValid x y. Proof. intro. induction x. simpl. destruct y eqn:what. simpl.
  intros.
  inversion H.
- intros. apply IHx0 in H. eauto.
+ intros. apply IHx in H. eauto.
  intros. inversion H.
  intros. inversion H.
  intros. eauto.
@@ -553,9 +584,21 @@ Ltac proto := match goal with
            apply lr_stop
   | [  |- IsValid (Send StopMessage Stop) Stop] => 
            apply rl_stop
-  
   end.
-  
+Ltac pH H:= match goal with 
+  | [ H : IsValid (Send ?M ?X) (Receive ?F) |- _] => 
+           apply @lr_send with (F M) in H
+  | [ H : context[IsValid (Receive ?F) (Send ?M ?X)] |- _] => 
+           apply @rl_send with (F M) in H
+  | [ H :context[IsValid Stop Stop] |- _  ] => 
+           apply  both_stop in H 
+  | [ H : context[IsValid Stop  (Send StopMessage Stop)] |- _] => 
+           apply lr_stop in H 
+  | [ H : context[IsValid (Send StopMessage Stop) Stop] |- _] => 
+           apply rl_stop in H
+           end. 
+
+
   Eval compute in bigStep appraiserProto3 attesterproto3. 
 Example efijefijeg3 : IsValid appraiserProto3 attesterproto3.
 unfold appraiserProto3. unfold attesterproto3. simpl. proto. 
@@ -580,6 +623,8 @@ Proof. intros.  destruct n. simpl in H. inversion H.
 simpl in H. destruct a. destruct (canSend ls pp).  inversion H.
 destruct rls.  inversion H.
 destruct r. inversion H. inversion H. reflexivity.
+simpl in H. destruct a. destruct (canSend ls pp). inversion H. destruct rls.
+inversion H. destruct r. inversion H. inversion H. reflexivity.          
 Qed.
 
 Theorem willReceive : forall n pp rls un ls, exists f, (getProtocol (S n) AReceive pp rls un ls) = Receive f. 
@@ -599,22 +644,25 @@ Theorem WillStop_Send : forall n a pp rls un r ls, (getProtocol n a pp rls un ls
 Proof. intros. destruct n. simpl in H. inversion H.
 simpl in H. destruct a. destruct (canSend ls pp). inversion H.
 destruct rls. inversion H. reflexivity.    
+destruct r0. inversion H. inversion H. refl. inversion H. refl.
+inversion H. simpl in H. destruct a. destruct (canSend ls pp). inversion H. destruct rls. inversion H. refl.
+destruct r. destruct r0. inversion H. destruct r0. inversion H. destruct r0. inversion H.
 destruct r0. inversion H. inversion H. Qed.
 
 Theorem wellduh_eq_dec_Adjective :
  forall x, exists p : x =x, eq_dec_adjective  x x= left p.
- intros. case_eq (eq_dec_adjective x0 x0). intros. exists e. reflexivity.
- intros. assert (x0 = x0). refl. contradiction. Qed.
+ intros. case_eq (eq_dec_adjective x x). intros. exists e. reflexivity.
+ intros. assert (x = x). refl. contradiction. Qed.
  
  Theorem wellduh_eq_dec_Noun :
 forall x, exists p : x =x, eq_dec_noun  x x= left p.
- intros. case_eq (eq_dec_noun x0 x0). intros. exists e. reflexivity.
- intros. assert (x0 = x0). refl. contradiction. Qed.
+ intros. case_eq (eq_dec_noun x x). intros. exists e. reflexivity.
+ intros. assert (x = x). refl. contradiction. Qed.
  
 Theorem wellduh_eq_dec_Description : 
 forall x, exists p : x = x, eq_dec_Description x x = left p.
- intros. case_eq (eq_dec_Description x0 x0). intros. exists e. reflexivity.
- intros. assert (x0 = x0). refl. contradiction. Qed.
+ intros. case_eq (eq_dec_Description x x). intros. exists e. reflexivity.
+ intros. assert (x = x). refl. contradiction. Qed.
  
  
 Theorem IguessThatsOkay :
@@ -708,48 +756,87 @@ Theorem IsValid_inc2 : forall  pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
     how to merge with Adam.
   
   *)
+  (*
+Theorem IsValid_AnyPrivacy : forall n pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
+  IsValid (getProtocol (n) ASend pp1 rls1 un1 ls1) (getProtocol (n) AReceive pp2 rls2 un2 ls2) ->
+  forall pp1',
+  IsValid (getProtocol (n) ASend pp1' rls1 un1 ls1) (getProtocol (n ) AReceive pp2 rls2 un2 ls2).
+  Proof. intros. eauto. intros. eapply IHn.       generalize dependent pp2.  induction pp1. destruct n.  simpl. eauto. intros.  simpl. destruct (canSend ls1 EmptyPolicy). intros.
+  destruct (canSend ls1 pp1').   proto.
+  destruct (reduceUnresolved d0 (measure d0) un2). eauto.         
 
+Theorem IsValid_Pred : forall n pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
+  IsValid (getProtocol (S n) ASend pp1 rls1 un1 ls1) (getProtocol (S n) AReceive pp2 rls2 un2 ls2) ->
+  IsValid (getProtocol (n) ASend pp1 rls1 un1 ls1) (getProtocol (n ) AReceive pp2 rls2 un2 ls2).
+  Proof. simpl. intros. induction n. simpl. eauto. simpl.  
+      destruct (canSend ls1 pp1). proto. 
+  destruct (reduceUnresolved d (measure d) un2). eauto.    
+  apply @lr_send with (m :=(Sendable_Measurement d (measure d))) (f :=(fun m : Message =>
+          match m with
+          | Sendable_Measurement d v =>
+              match reduceUnresolved d v un2 with
+              | Some newUnresolvedState =>
+                  getProtocol n ASend (reducePrivacy d v pp2) rls2
+                    newUnresolvedState ls2
+              | None => Send StopMessage Stop
+              end
+          | RequestS d =>
+              let (p, reqItem) := handleRequest pp2 d in
+              let (newpp, mess) := p in
+              match mess with
+              | Sendable_Measurement _ _ =>
+                  Send mess
+                    (getProtocol n AReceive newpp emptyRequestLS
+                       (ConsRequestLS reqItem un2) ls2)
+              | RequestS _ =>
+                  Send mess
+                    (getProtocol n AReceive newpp emptyRequestLS
+                       (ConsRequestLS reqItem un2) ls2)
+              | StopMessage => Send StopMessage Stop
+              end
+          | StopMessage => Stop
+          end)) in H.  in H. simpl in H.   auto in H.  pH H. .  proto in H. .   intros.  
+*)
 Theorem IsValid_inc : forall n pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
   IsValid (getProtocol (n) ASend pp1 rls1 un1 ls1) (getProtocol ( n) AReceive pp2 rls2 un2 ls2) ->
   IsValid (getProtocol (S n) ASend pp1 rls1 un1 ls1) (getProtocol (S n ) AReceive pp2 rls2 un2 ls2).
-  Proof. intros. simpl.  destruct rls1.  proto_simpler.
-  auto. auto. destruct r. proto_simpler. destruct (handleRequest pp2 d).
-  destruct p. destruct m. Admitted.
-  
-Axiom selfishAppraiser : forall f, IsValid Stop (Receive f). 
-Theorem IsValid_inc_r : forall n pp1 pp2 rls1 rls2 un1 un2,
-  IsValid (getProtocol (n) ASend pp1 rls1 un1) (getProtocol ( n) AReceive pp2 rls2 un2) ->
-  IsValid (getProtocol  n ASend pp1 rls1 un1) (getProtocol (S n ) AReceive pp2 rls2 un2).
-  Proof. intros. simpl.  destruct rls1. destruct n. simpl. apply selfishAppraiser.
-  simpl.      proto_simpler. proto_simpler. auto. auto.  Admitted.
-  Theorem allGood : forall n pp1 pp2 rls1 un1 un2,
- IsValid (getProtocol (S n) ASend pp1 rls1 un1) (getProtocol (S n) AReceive pp2 emptyRequestLS un2).
- Proof. intro. induction n. simpl. intros. destruct rls1. proto_simpler. auto. auto.
- destruct r. proto_simpler. destruct (handleRequest pp2 d).
- destruct p. destruct m. apply IguessThatsOkay. apply IguessThatsOkay. auto.
- destruct (handleRequest pp2 d). destruct p.
- destruct m. refl. refl. refl.          
- specialize IsValid_inc. intros. apply H. apply IHn.
- Qed.
- 
+  Proof. intro. induction n. intros. simpl. destruct (canSend ls1 pp2). destruct (canSend ls1 pp1). proto.
+  destruct (reduceUnresolved d0 (measure d0) un2). proto. auto. auto. proto. auto. auto. destruct (reduceUnresolved d0 (measure d0) un2).
+  auto. auto. destruct rls1. proto. auto. auto. destruct r. proto .     destruct (handleRequest pp2 d0). destruct p. destruct m. proto. apply IguessThatsOkay. auto.
+  proto. apply IguessThatsOkay. auto. proto. auto. auto. destruct (handleRequest pp2 d0). destruct p. destruct m. auto. auto. auto.
+  destruct (canSend ls1 pp1). proto. destruct (reduceUnresolved _ _ _). eauto. eauto. auto.
+  destruct rls1. eauto. destruct r. proto. destruct (handleRequest _ _). destruct p. destruct m.
+  proto. apply IguessThatsOkay. auto. proto. apply IguessThatsOkay. auto. proto. auto. auto.
+  intros. eauto.
+  (*Case 2 *)
+   intros. simpl. destruct (canSend ls1 pp1). proto. destruct (reduceUnresolved d (measure d) un2). 
+   destruct (canSend ls2 (reducePrivacy d (measure d) pp2)). proto. 
+   destruct (reduceUnresolved d0 (measure d0) un1). eauto.    intros.  Admitted.
+
+
+Theorem allGood : forall n pp1 pp2 rls1 un1 un2 ls1 ls2,
+ IsValid (getProtocol (S n) ASend pp1 rls1 un1 ls1) (getProtocol (S n) AReceive pp2 emptyRequestLS un2 ls2).
+ Proof. intro. induction n. simpl. intros. destruct rls1. destruct (canSend _ _).  proto_simpler. destruct (reduceUnresolved _ _ _).  eauto. eauto. auto.
+ proto. auto. auto.  
+ destruct r. destruct (canSend ls1 pp1).   proto_simpler. destruct (reduceUnresolved d0 (measure d0)).
+proto. destruct (handleRequest pp2 d). auto. auto. eauto. destruct (reduceUnresolved d0 (measure d0) un2). auto. auto.
+proto. destruct (handleRequest pp2 d). destruct p. destruct m. proto. apply IguessThatsOkay. auto. proto. apply IguessThatsOkay. auto. proto. auto. auto.
+destruct (handleRequest pp2 d). destruct p. destruct m. auto. auto. auto. intros. apply IsValid_inc. apply IHn. Qed.
+
+
  Fixpoint reqMember (r : RequestItem) (ls : RequestLS) : bool :=
  match ls with
  | emptyRequestLS => false
  | ConsRequestLS x x0 => if (eq_dec_RequestItem x r) then true else reqMember r x0
  end.
 Print smallStep. 
- Fixpoint smallStepn (n : nat) (x : TwoSessions) : TwoSessions :=
-  match n with
-  | O => x
-  | S n' => smallStepn n' (smallStep x)
-  end. 
  Definition get_desc (r :RequestItem) : Description :=
   match r with
    | requestItem d x => d
-    end. 
+    end.
 
-  Theorem IgetWhatIWant : forall n pp1 rls1 un1 r proto2, (reqMember r rls1) = true -> 
-   IsValid (getProtocol n ASend pp1 rls1 un1) proto2 -> exists p l rest, 
-     smallStepn p (twoSessions (getProtocol n ASend pp1 rls1 un1) proto2) = twoSessions (Send (RequestS (get_desc r)) l) rest.
-     intros. inversion H0. subst.     . 
-  *)
+Theorem goSmall :  forall n pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
+  bigStep (getProtocol (n) ASend pp1 rls1 un1 ls1) (getProtocol ( n) AReceive pp2 rls2 un2 ls2) 
+  = Some (Stop, Stop) -> exists p, smallStepn p ((getProtocol (n) ASend pp1 rls1 un1 ls1), (getProtocol ( n) AReceive pp2 rls2 un2 ls2)) = ((Stop,Stop),0).
+  Proof. intros. induction n. simpl in H. exists 1. simpl. refl.
+    subst.   proto.      
