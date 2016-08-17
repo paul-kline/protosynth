@@ -1,3 +1,17 @@
+(* Goals:
+1. Generate protocols from:
+     a. A list of what one would like to know about the other
+     b. One's own privacy policy
+
+2. The protocol generator should:
+     a. Ask for all items listed in (1)a.
+     b. Never violate the privacy policy in (1)b.
+     c. Never generate protocols that don't "match up."
+        i.e. all protocols are valid and will execute properly.
+     d. Always terminate.
+*)
+
+(* The first step is to define what it is for which we would like to ask. Hence "nouns". *)
 
 Inductive Noun : Set:=
   | VirusChecker
@@ -9,15 +23,18 @@ Proof. intros.   destruct n1, n2;
   try (left;reflexivity); right; unfold not; intros H; inversion H.
 Defined.
 
-Hint Resolve eq_dec_noun : eq_dec_db. 
+Hint Resolve eq_dec_noun : eq_dec_db.
+ 
 (*Require Import String.*) 
 Require Import Coq.Relations.Relation_Definitions.
-Require Import Coq.Classes.EquivDec. 
-Inductive Adjective : Set :=
-  | Name : Adjective
-  | Hash : Adjective
-  | Index : nat -> Adjective
-  | Version : Adjective.
+Require Import Coq.Classes.EquivDec.
+
+ (* Now we define what it is we would like to know about these nouns. *)
+Inductive Attribute : Set :=
+  | Name : Attribute
+  | Hash : Attribute
+  | Index : nat -> Attribute
+  | Version : Attribute.
 
 Ltac rec_eq :=
  match goal with
@@ -35,20 +52,23 @@ Ltac rec_eq :=
 
 
 
-Theorem eq_dec_adjective : forall a1 a2 : Adjective,
+Theorem eq_dec_attribute : forall a1 a2 : Attribute,
                     {a1 = a2} + {a1 <> a2}.
 Proof. decide equality; rec_eq.
 Defined. 
-Hint Resolve eq_dec_adjective : eq_dec_db. 
+Hint Resolve eq_dec_attribute : eq_dec_db. 
 Require Import Coq.Program.Equality.
-Inductive DescriptionR : Noun -> Adjective -> Set :=
+
+(*We only want to disallow nonsensical combinations, like a (PCR, version),
+ hence this relation. *)
+Inductive DescriptionR : Noun -> Attribute -> Set :=
   | pcrMR : forall n, DescriptionR PCR (Index n)
   | virusCheckerNameR : DescriptionR VirusChecker Name
   | virusCheckerVersionR : DescriptionR VirusChecker Version.
   
 Theorem eq_dec_DescriptionR1 : 
 forall n : Noun,
-forall a : Adjective,
+forall a : Attribute,
 forall x y : DescriptionR n a,
 x = y.
 Proof. intros;
@@ -56,15 +76,18 @@ induction x; dependent induction y;
 ( reflexivity).
 Defined. 
 
+(* This 'extra step' is done simply so that comparison between descriptors
+is 'easy.'It is much more involved to be able to compare indexed types. *)
+
 Inductive Description : Set :=
-  | descriptor {n : Noun} {a : Adjective} : DescriptionR n a -> Description.
+  | descriptor {n : Noun} {a : Attribute} : DescriptionR n a -> Description.
 
 
 Theorem eq_dec_Description : 
 forall d1 d2 : Description,
 {d1 = d2} + {d1 <> d2}. 
 Proof. intros. destruct d1, d2.   
-specialize eq_dec_adjective with a a0. intros. destruct H.
+specialize eq_dec_attribute with a a0. intros. destruct H.
  specialize eq_dec_noun with n n0. intros.
 destruct H. left. subst. specialize eq_dec_DescriptionR1 with n0 a0 d0 d.
 intros. subst. reflexivity.
@@ -80,6 +103,8 @@ Add LoadPath "C:\Users\Paul\Documents\coqs\dependent-crypto".
 Add LoadPath "C:\Users\Paul\Documents\coqs\cpdt\src". 
 Require Import MyShortHand.
 
+(*This defines what the type of measuring these things should be. *)
+
 Definition measurementDenote (d: Description) :=
 match d with
  | descriptor r => match r with
@@ -90,6 +115,19 @@ end
 
 end.
 
+
+(*Let us add to our building blocks by defining what a message can be.
+  In it's simplest form, a message can only be a request (RequestS) or a response to a request.
+  It turns out a response to a request can take the form of any of the 3 defined messages. 
+   1. You can comply with the request and send a "Sendable_Measurement."
+   2. You can conditionally comply with the request by countering with another request, depending on its
+      result. 
+   3. You can refuse all together with a StopMessage.
+  A StopMessage is also used to indicate good termination, i.e. I'm done.
+  
+  
+  We must "lock in" what it is that we have measured. We do this in
+  the type of Sendable_Measurement.*)
 
 Inductive Message : Set :=
 | Sendable_Measurement (d: Description) : (measurementDenote d) -> Message
@@ -113,37 +151,36 @@ Proof. intros.
 inversion H. apply inj_pair2_eq_dec. apply eq_dec_Description. Print existT.   apply H1.
 Qed.
 
+
+
+Theorem lemma1 : forall d : Description, forall m1 m2 : (measurementDenote d), {m1 = m2} + {m1 <> m2}.
+Proof. intros. destruct d. destruct d; simpl in m1; simpl in m2; (apply nat_eq_eqdec) || (apply bool_eqdec).
+Qed.
 (*
 Theorem eq_dec_Message : forall x y : Message,
   { x = y} + {x <> y}. Proof. intros. *)
+  
+  Ltac not_eq := let x := fresh "beats" in (let y := fresh "beats" in  ((try right); unfold not; intros x; inversion x as [y];
+     (try (apply inj_pair2_eq_dec in y); auto with eq_dec_db)  )).
 Theorem eq_dec_Message : forall x y : Message,
-  { x = y} + {x <> y}.
-Proof. intros. destruct x, y. specialize eq_dec_Description with d d0; intros.
-destruct H. subst. specialize sendable_measurment_inversion with d0 m0 m.
-intros.  
-destruct d0. 
-destruct n,a.
-destruct d.
-    simpl in m0, m;
-specialize eq_nat_dec with m m0; intros;
-destruct H0 as [eq |neq]; subst; ( (left; reflexivity) +
-right; unfold not; intros; apply neq; apply symmetry in H0;
-apply H in H0; rewrite H0; reflexivity). 
-simpl. cbn. simpl in H. simpl in m0. simpl in m.
-destruct eq_nat_dec with m0 m. left. subst. refl.
-right. unfold not; intros. symmetry in H0. apply H in H0. contradiction.
+  { x = y} + {x <> y}.   
+Proof. intros. destruct x. destruct y.   destruct (eq_dec_Description d d0). subst. destruct (lemma1 d0 m m0); subst.
+left. refl. right. not_eq. not_eq. not_eq. not_eq.
+destruct y. not_eq.
+destruct (eq_dec_Description d d0). subst. left. refl.
+not_eq. not_eq. destruct y. not_eq. not_eq. left; refl.
+Defined. 
 
-simpl in m0. simpl in m.
-destruct eq_dec_bool with m0 m. left. subst. refl.
-right. unfold not; intros. symmetry in H0. apply H in H0. contradiction.
-subst. simpl in m.  
-destruct d eqn:b. 
-Admitted.
+
+(* Here we begin specificiation of requirements. So not only do I want a particular measurment,
+   but I want it to be certain values. *) 
 
 Inductive Requirement (d : Description) :=
 | requirement : ( (measurementDenote d) -> bool) -> Requirement d.
 
 Check requirement.
+
+(*Examples *)
 Definition  des1 := (descriptor (pcrMR 1)). 
 Eval compute in (measurementDenote des1).
 Definition req1 : (Requirement des1 ).
@@ -153,6 +190,16 @@ Defined.
 Definition req2 := 
  requirement (des1) ((fun (x : nat) => Nat.leb x 7)).
  
+ (* This begins the defining of what a privacy policy is. First we define a rule.
+    A rule regulates the release of a measurement. We could decide to release information if
+    some counter condition holds; we could release it for free; we could explicitly never release it; 
+    or some combination of and-ing and or-ing rules.
+    Note that at this point we've allowed for nonsensical release rules like, "never release or release for free",
+     "release for free and never release".
+    
+    
+    NOTE: If we can't request something twice, what if duplicate occurs in rule req?
+          todo: keep all received measurements and check those first for the value *) 
 Inductive Rule (mything : Description) :=  
 | rule  {your : Description} : (Requirement your) -> Rule mything
 | free : Rule mything
@@ -161,6 +208,7 @@ Inductive Rule (mything : Description) :=
 | multiReqOr : Rule mything -> Rule mything -> Rule mything.   
 
 
+(* simply a list of rules. *)
 Inductive PrivacyPolicy :=
 | EmptyPolicy : PrivacyPolicy
 | ConsPolicy {d :Description}: 
@@ -180,6 +228,9 @@ Definition myPrivacyPolicy := ConsPolicy myRule1 EmptyPolicy.
 
 Definition myrequirement1 := fun (x : nat) => (x > 7).
 
+(* Here is what a session is: We either send something
+   and then another Session, or receive a message and 
+   produce another session. A Branch is shown here, but never used.*)
 Inductive Session :=
  | Send : Message -> Session -> Session
  | Receive : (Message -> Session) -> Session
@@ -187,6 +238,7 @@ Inductive Session :=
  | Stop : Session
  .
 
+(* This helps with protocol generation. *)
 Inductive Action : Set :=
  | ASend : Action
  | AReceive : Action.
@@ -199,19 +251,30 @@ Inductive Action : Set :=
  
  (* placeholder measurement function. need this to exist *) 
  Definition measure (d: Description) : measurementDenote d.
- destruct d. destruct d. simpl. exact n.
+ Proof. destruct d. destruct d. simpl. exact n.
  simpl. exact 0.
- simpl. exact true. Defined.
+ simpl. exact true. 
+ Defined.
  
+ (*A RequestItem is used to compose a list of the items and requirements upon those items in an attestation *)
 Inductive RequestItem : Set :=
  | requestItem (d : Description) : (Requirement d) -> RequestItem.
  Theorem eq_dec_RequestItem : forall x y : RequestItem,
- {x = y} + {x <> y}. Proof. intros. 
+ {x = y} + {x <> y}. Proof. intros. destruct x. destruct y. destruct (eq_dec_Description d d0). subst.
+ destruct r0. (*Need function equality. Do I need equality on this? *)      
  Admitted.   
 Inductive RequestLS : Set :=
  | emptyRequestLS : RequestLS
  | ConsRequestLS : RequestItem -> RequestLS -> RequestLS.
  
+ (* Now we get into functions needed to define the getProtocol function. 
+    Due to coqs linear nature, we must define in this order, but know that
+    it's existence was only deamed necessary during the construction of getProtocol. 
+    
+    In short, the purpose of this function is to reduce the size of the list of the 
+    things we are waiting on measurements for. The option type is used to indicate
+    if the requirement posed upon the value v has failed to be met.
+    *)
 Fixpoint reduceUnresolved (d : Description) (v : measurementDenote d)
 (ls : RequestLS) : option RequestLS. refine match ls with
  | emptyRequestLS => Some emptyRequestLS
