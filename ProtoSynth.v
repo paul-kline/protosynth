@@ -358,6 +358,7 @@ intros. simpl in H0. destruct a. destruct (canSend ls pp). inversion H0. eauto.
  destruct rls. inversion H0. subst. elim H. reflexivity. destruct r. inversion H0. 
 findForExists H3. inversion H0. Qed.
 
+Add LoadPath "C:\Users\Paul\Documents\coqs\protosynth\cpdt\src".
 Require Import CpdtTactics. 
 Theorem WillSend : forall n a pp rls un ls f, (getProtocol (S n) a pp rls un ls) = Receive f -> 
 ( forall m, m <> StopMessage -> exists m2 s', (f m) = Send m2 s').
@@ -834,9 +835,9 @@ Print smallStep.
   match r with
    | requestItem d x => d
     end.
-
+(*
 Theorem goSmall :  forall n pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
   bigStep (getProtocol (n) ASend pp1 rls1 un1 ls1) (getProtocol ( n) AReceive pp2 rls2 un2 ls2) 
   = Some (Stop, Stop) -> exists p, smallStepn p ((getProtocol (n) ASend pp1 rls1 un1 ls1), (getProtocol ( n) AReceive pp2 rls2 un2 ls2)) = ((Stop,Stop),0).
   Proof. intros. induction n. simpl in H. exists 1. simpl. refl.
-    subst.   proto.      
+    subst.   proto.      *)
