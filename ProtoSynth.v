@@ -310,7 +310,17 @@ Check neverRequirement.
  (* note that the rule is removed from the privacy policy. This is to prevent measurement deadlock
  situations. Everything not expressly in the privacy policy is rejected. Therefore, you can't ask
  for the same thing twice. *)
- 
+ (*What to do when you receive a request? This controversial issue is handled here.
+    We give back a triplet. The privacy policy returned has the requested item removed from the policy 
+    (if there is no rule for a request, the request is denied) . This prevents being asked twice for the 
+    same thing. We probably don't want this. I will think about an alternative.
+    The message is the response that will be sent. We either send the measured value, send a counter request, or deny
+    the request with a response of StopMessage. The last item may seem odd, always returning a RequestItem as well.
+    This is because of the one case when we counter the request with another request. Most likely we will want to 
+    make sure the measured value we request meets certain expectations. Therefore we need to also return the requirement
+    imposed by these expectations. In the other cases (sending stop or sending the measurement) we "make up" a return value.
+    This can probably be handled better than this. 
+ *)
 Fixpoint handleRequest (pp : PrivacyPolicy) (d : Description) : 
 (PrivacyPolicy * Message * RequestItem):=
  match pp with
@@ -340,7 +350,11 @@ Definition canSend (ls : list Description) (priv : PrivacyPolicy) : option Descr
      end)
 end).
    
-(* the above is only a definition. this helps us make sure we respond "in order" *)
+(* the above is only a definition (as opposed to fixpoint). this helps us make sure we respond "in order" *)
+
+
+(* Now that we know some measurement value, can we ease any requirements stated in the privacy policy? 
+Stay tuned to find out! *)
 
 Fixpoint reducePrivacy (d : Description) (v : (measurementDenote d)) (priv : PrivacyPolicy) : PrivacyPolicy.
 refine (
@@ -359,6 +373,7 @@ match priv with
     
  end). subst. exact v. Defined.
  
+ (* main course *)
 Fixpoint getProtocol (n : nat) (a: Action) (myPriv : PrivacyPolicy) 
  (toRequest : RequestLS) (unresolved : RequestLS) (toSend : list Description): Session :=
 (match n with
