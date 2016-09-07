@@ -5,7 +5,7 @@
 
 2. The protocol generator should:
      a. Ask for all items listed in (1)a.
-     b. Never violate the privacy policy in (1)b.
+     b. Never violate the privacy policy in (1)b. (*constraint *)
      c. Never generate protocols that don't "match up."
         i.e. all protocols are valid and will execute properly.
      d. Always terminate.
@@ -379,7 +379,7 @@ Fixpoint getProtocol (n : nat) (a: Action) (myPriv : PrivacyPolicy)
 (match n with
 | O => match a with 
     | ASend => (Send StopMessage) Stop
-    | AReceive => Receive (fun m => Stop) 
+    | AReceive => Receive (fun m => Send StopMessage Stop) 
     end
 | S n' =>
 (match a with
@@ -434,7 +434,7 @@ inversion H0. subst. elim H. reflexivity. destruct r.
 findForExists H0. inversion H0. reflexivity. inversion H0.
 intros. simpl in H0. destruct a. destruct (canSend ls pp). inversion H0. eauto.
  destruct rls. inversion H0. subst. elim H. reflexivity. destruct r. inversion H0. 
-findForExists H3. inversion H0. Qed.
+findForExists H3. inversion H0. Qed. 
 
 Add LoadPath "C:\Users\Paul\Documents\coqs\protosynth\cpdt\src".
 Require Import CpdtTactics. 
@@ -728,9 +728,9 @@ inversion H. simpl in H. destruct a. destruct (canSend ls pp). inversion H. dest
 destruct r. destruct r0. inversion H. destruct r0. inversion H. destruct r0. inversion H.
 destruct r0. inversion H. inversion H. Qed.
 
-Theorem wellduh_eq_dec_Adjective :
- forall x, exists p : x =x, eq_dec_adjective  x x= left p.
- intros. case_eq (eq_dec_adjective x x). intros. exists e. reflexivity.
+Theorem wellduh_eq_dec_Attribute :
+ forall x, exists p : x =x, eq_dec_attribute  x x= left p.
+ intros. case_eq (eq_dec_attribute x x). intros. exists e. reflexivity.
  intros. assert (x = x). refl. contradiction. Qed.
  
  Theorem wellduh_eq_dec_Noun :
@@ -773,6 +773,242 @@ Theorem IsValid_inc1 : forall  pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
   proto_simpler. auto. auto.      
   destruct (handleRequest pp2 d). destruct p. reflexivity.
   Qed. 
+
+Theorem IsValid_zero : forall  pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
+  IsValid (getProtocol (0) ASend pp1 rls1 un1 ls1) (getProtocol (0) AReceive pp2 rls2 un2 ls2).
+  intros. proto_simpler. proto_simpler. auto. auto.
+  Qed. 
+   (*
+  Theorem IsValidPrivacy : forall  pp1 pp2 pp1' rls1 rls2 un1 un2 ls1 ls2 n,
+  IsValid (getProtocol (S n) ASend pp1 rls1 un1 ls1) (getProtocol (S n) AReceive pp2 rls2 un2 ls2) ->
+  IsValid (getProtocol (S n) ASend pp1' rls1 un1 ls1) (getProtocol (S n) AReceive pp2 rls2 un2 ls2).
+  Proof. intros. induction pp1.  proto_simpler.  destruct (canSend ls1 pp1'). proto_simpler. destruct (getProtocol n AReceive pp1' rls1 un1 (tl ls1)).
+  destruct (reduceUnresolved d (measure d) un2). simpl.     
+  *)
+  Axiom succValid : forall  n pp1 pp2 rls1 rls2 un1 un2 ls1 ls2 ,
+  IsValid (getProtocol (S n) ASend pp1 rls1 un1 ls1) (getProtocol (S n) AReceive pp2 rls2 un2 ls2)
+  ->
+  IsValid (getProtocol (n) ASend pp1 rls1 un1 ls1) (getProtocol (n) AReceive pp2 rls2 un2 ls2).
+   
+   Theorem sendStopAll : forall n  pp1 rls1 un1 ls1, IsValid (Send StopMessage Stop)
+  (getProtocol (n) AReceive pp1 rls1 un1 ls1).
+  intro. induction n. intros. simpl. proto_simpler. auto. auto. intros. simpl. proto_simpler. auto. auto.
+  Qed.
+             
+             (*
+  Theorem nDontMatta : forall  n pp1 rls1 un1 ls1 proto2,
+  IsValid (getProtocol (S n) ASend pp1 rls1 un1 ls1)  proto2 -> 
+  IsValid (getProtocol (n) ASend pp1 rls1 un1 ls1) proto2.
+  Proof. intro. induction n. intros. proto_simpler. simpl in H. destruct (canSend ls1 pp1). inversion H. subst. proto_simpler.    
+  proto_simpler. proto_simpler. proto_simpler.
+  apply IsValid_IsValid. apply IguessThatsOkay.   subst.   apply sendStopAll.   simpl in H. simpl.   inversion H. subst. simpl. 
+  destruct (canSend ls1 pp1). proto_simpler.        inversion H. subst. proto_simpler. destruct   inversion H. subst.   simpl.     
+  
+  Theorem IsValidSucc : forall  n pp1 pp2 rls1 rls2 un1 un2 ls1 ls2 ,
+  IsValid (getProtocol (S n) ASend pp1 rls1 un1 ls1) (getProtocol (S n) AReceive pp2 rls2 un2 ls2) -> 
+  IsValid (getProtocol (n) ASend pp1 rls1 un1 ls1) (getProtocol (n) AReceive pp2 rls2 un2 ls2).
+  Proof. intros. (* inversion H.  einduction H.  eqn: d.  n. intros. apply IsValid_zero.
+  intros. proto_simpler.  
+  destruct (canSend ls1 pp1). proto_simpler.   
+  destruct (reduceUnresolved d (measure d) un2).
+  destruct (canSend ls2 (reducePrivacy d (measure d) pp2)). 
+  proto_simpler. 
+  destruct (reduceUnresolved d0 (measure d0) un1). eapply IHn.  proto_simpler.       ap.
+  Proof. intro. induc  *)
+  Theorem IsValidAnyParams : forall  pp1 n pp2 rls1 rls2 un1 un2 ls1 ls2 ,
+  IsValid (getProtocol (n) ASend pp1 rls1 un1 ls1) (getProtocol ( n) AReceive pp2 rls2 un2 ls2) ->
+  forall pp1', 
+  IsValid (getProtocol (n) ASend pp1' rls1 un1 ls1) (getProtocol (n) AReceive pp2 rls2 un2 ls2).
+  Proof. intro. induction pp1. intros. destruct pp1'. apply H.
+      destruct n. intros. apply IsValid_zero.
+  intros. proto_simpler.      intros. apply H.    induction n. intros. apply IsValid_zero.
+  intros. 
+  apply IHn.     destruc 
+  Theorem IsValidInc : forall  n pp1 pp2 rls1 rls2 un1 un2 ls1 ls2 ,
+  IsValid (getProtocol (n) ASend pp1 rls1 un1 ls1) (getProtocol ( n) AReceive pp2 rls2 un2 ls2) -> 
+  IsValid (getProtocol (S n) ASend pp1 rls1 un1 ls1) (getProtocol (S n) AReceive pp2 rls2 un2 ls2).
+  Proof. intro. destruct n. intros. apply IsValid_inc1. intros. 
+  proto_simpler.  
+  destruct (canSend ls1 pp1). proto_simpler.   
+  destruct (reduceUnresolved d (measure d) un2).
+  destruct (canSend ls2 (reducePrivacy d (measure d) pp2)). 
+  proto_simpler. 
+  destruct (reduceUnresolved d0 (measure d0) un1). eapply IHn.  proto_simpler.       ap.
+  Proof. intro. induction n. ap
+  Theorem IsValidevverything : forall  n pp1 pp2 rls1 rls2 un1 un2 ls1 ls2 ,
+  IsValid (getProtocol (n) ASend pp1 rls1 un1 ls1) (getProtocol ( n) AReceive pp2 rls2 un2 ls2).
+  Proof. intro. induction n. apply IsValid_zero. intros. simpl.
+  destruct (canSend ls1 pp1). progress proto_simpler.
+  destruct (reduceUnresolved d (measure d) un2). apply IsValid_IsValid. apply IHn.
+  apply IsValid_IsValid. apply sendStopAll.
+  destruct (reduceUnresolved d (measure d) un2). auto. auto.
+  destruct rls1. proto_simpler. auto. auto. destruct r. proto_simpler.
+  destruct (handleRequest pp2 d). destruct p. destruct m. crush. apply IHn.        apply sendStopAll.    
+  destruct ( canSend ls2 (reducePrivacy d (measure d) pp2)).
+  proto_simpler.  
+  destruct (reduceUnresolved d0 (measure d0) un1).
+  apply succValid. apply I
+  
+  *)
+  
+  Theorem IsValidSupreme : forall  n m pp1 pp2 rls1 rls2 un1 un2 ls1 ls2 ,
+  IsValid (getProtocol ( n) ASend pp1 rls1 un1 ls1) (getProtocol (m) AReceive pp2 rls2 un2 ls2).
+  Proof. intro. induction n.
+  (* n = 0 case *)
+   intros. destruct m.
+     (* m = 0 case *)
+      apply IsValid_zero.
+      (* m = S m  case *)
+       simpl. proto_simpler. auto. auto.
+   (* n = S n' case *)
+       
+    intros. proto_simpler. destruct (canSend ls1 pp1).
+     destruct m
+     (* m = 0 case *).  proto_simpler. proto_simpler. destruct n.
+        proto_simpler. proto_simpler. auto. auto.
+        proto_simpler. proto_simpler. auto. auto. auto.
+        proto_simpler. proto_simpler. 
+        destruct (reduceUnresolved d (measure d) un2).
+        eapply IsValid_IsValid in IHn. .  in IHn.  
+        destruct rls1. proto_simpler. auto. auto.
+        destruct r. proto_simpler. destruct n.
+        proto_simpler. proto_simpler. auto. auto.
+        proto_simpler. proto_simpler. auto. auto. auto.
+        proto_simpler.
+        destruct (canSend ls1 pp1). proto_simpler. destruct n.
+        proto_simpler. destruct (reduceUnresolved d (measure d) un2).
+        destruct m. proto_simpler. proto_simpler. auto. auto. proto_simpler.
+        destruct (canSend ls2 (reducePrivacy d (measure d) pp2)).
+        proto_simpler. destruct m. proto_simpler. proto_simpler. auto. auto.
+        proto_simpler. proto_simpler. auto. auto. auto.
+        destruct rls2. proto_simpler. auto. auto.
+        destruct r0. proto_simpler. destruct m.
+        proto_simpler. proto_simpler. auto. auto.
+        proto_simpler. proto_simpler. auto. auto. auto.
+        proto_simpler. auto. auto.
+        destruct (reduceUnresolved d (measure d) un2). destruct m.
+        proto_simpler. proto_simpler. auto. auto. proto_simpler.
+        destruct (canSend ls2 (reducePrivacy d (measure d) pp2)).
+        proto_simpler. destruct (reduceUnresolved d0 (measure d0) un1).   
+        proto_simpler. 
+        assumption.         
+         eapply IHn.  
+        subst. 
+        eapply IHn0. 
+                         .   
+       
+       intros.   
+       (* n side is sending, what can we send? *) destruct ls1 eqn:ls1case. simpl.  
+       simpl. destruct rls1 eqn :rls1case.   proto_simpler. proto_simpler. auto. auto.
+  destruct r. proto_simpler. proto_simpler.
+  destruct (handleRequest pp2 d). destruct p. destruct m0.
+  proto_simpler.  auto. auto.  proto_simpler.          
+  destruct (canSend ls1 pp1). proto_simpler. destruct (reduceUnresolved d (measure d) un2).
+  destruct (canSend ls2 (reducePrivacy d (measure d) pp2)). proto_simpler.       proto_simpler.            apply IsValid_zero. intros. simpl.  simpl.
+  destruct (canSend ls1 pp1). progress proto_simpler. 
+    destruct (reduceUnresolved d (measure d) un2). apply IsValid_IsValid. apply IHn.
+    destruct n. proto_simpler. proto_simpler. auto. auto.
+    proto_simpler. proto_simpler. auto. auto. proto_simpler.
+    destruct rls1.  proto_simpler. auto. auto. destruct r.  proto_simpler.
+    destruct (handleRequest pp2 d). destruct p. destruct m.  proto_simpler.  proto_simpler.  
+    destruct n. proto_simpler. proto_simpler. auto. auto.
+    proto_simpler. proto_simpler. auto. auto. proto_simpler.
+    destruct rls1.  proto_simpler. auto. auto. destruct r.  proto_simpler.
+    destruct n.             
+    proto_simpler.    
+  destruct ( canSend ls2 (reducePrivacy d (measure d) pp2)).
+  proto_simpler.  
+  
+  
+  Theorem IsValidevverything : forall  n pp1 pp2 rls1 rls2 un1 un2 ls1 ls2 ,
+  IsValid (getProtocol ( n) ASend pp1 rls1 un1 ls1) (getProtocol (n) AReceive pp2 rls2 un2 ls2).
+  Proof. intro. induction n. intros.  apply IsValid_zero. intros. simpl.  simpl.
+  destruct (canSend ls1 pp1). progress proto_simpler. 
+    destruct (reduceUnresolved d (measure d) un2). apply IsValid_IsValid. apply IHn.
+    destruct n. proto_simpler. proto_simpler. auto. auto.
+    proto_simpler. proto_simpler. auto. auto. proto_simpler.
+    destruct rls1.  proto_simpler. auto. auto. destruct r.  proto_simpler.
+    destruct (handleRequest pp2 d). destruct p. destruct m.  proto_simpler.  proto_simpler.  
+    destruct n. proto_simpler. proto_simpler. auto. auto.
+    proto_simpler. proto_simpler. auto. auto. proto_simpler.
+    destruct rls1.  proto_simpler. auto. auto. destruct r.  proto_simpler.
+    destruct n.             
+    proto_simpler.    
+  destruct ( canSend ls2 (reducePrivacy d (measure d) pp2)).
+  proto_simpler.  
+  destruct (reduceUnresolved d0 (measure d0) un1). Print succValid. 
+  apply succValid. apply IHn.
+  apply sendStopAll. auto. 
+  destruct rls2. proto_simpler. auto. auto. 
+  destruct r0. proto_simpler. destruct (handleRequest pp1 d0). destruct p.
+  destruct m.     proto_simpler. auto  apply sendStopAll.    
+  (* Stop message *)
+  destruct n. proto_simpler. proto_simpler.  auto. auto.
+  simpl. proto_simpler. auto. auto.
+  destruct (reduceUnresolved d0 (measure d0) un1). auto. auto.  
+  destruct rls2. proto_simpler. auto. auto. destruct r0. proto_simpler. 
+  destruct (handleRequest pp1 d0). destruct p. destruct m.
+  (*Sendable measurment) *)
+  destruct n. proto_simpler. proto_simpler. apply IsValid_IsValid. apply  IguessThatsOkay.   auto.
+  simpl_eq. proto_simpler. 
+  destruct (eq_dec_Description d0 d1). simpl_eq.  
+  destruct r0. destruct ( b
+        (eq_rect d1 (fun y : Description => measurementDenote y) m d0
+           (eq_sym e))). subst.  simpl_eq. simpl_eq. simpl_JMeq. simpl_eqs. simplify_eqs.
+  simplify_IH_hyps . autounfold. simplify_eqs.
+  destruct ( b (eq_rect d1 (fun y : Description => measurementDenote y) m d0 eqH) ) .
+  subst. 
+      elim_eq_rect.  simpl_eq.    simpl_uip.  apply ProofIrrelevance.   elim_eq_rect.  simpl_eq.  
+  destruct (reduceUnresolved d0 (measure d0) un1). auto. auto.  
+  destruct rls2. proto_simpler. auto. auto. destruct r0. proto_simpler. 
+  destruct (handleRequest pp1 d0). destruct p. destruct m.
+  (*Sendable measurment) *)
+                    eauto.   proto_simpler.  assumption.   
+     eapply IHn.   proto_simpler   proto_simpler. destruct (canSend ls1 pp1). proto_simpler. destruct (reduceUnresolved d (measure d) un2).
+     
+   
+Theorem IsValid_succ : forall  pp1 pp2 rls1 rls2 un1 un2 ls1 ls2 n,
+  IsValid (getProtocol (S n) ASend pp1 rls1 un1 ls1) (getProtocol (S n) AReceive pp2 rls2 un2 ls2) -> 
+  IsValid (getProtocol n ASend pp1 rls1 un1 ls1) (getProtocol  n AReceive pp2 rls2 un2 ls2).
+  Proof. intro. intro. intro. intro. intro. intro. intro. intro. intro.
+  simpl.
+  destruct (canSend ls1 pp1). intros.  inversion H. subst. apply rl_send in H.    in H. .  .  proto_simpler.    apply proto_simpler.       intros. simpl in H. .  induction (n). apply IsValid_zero. .    
+
+Theorem IsValid_inc : forall  pp1 pp2 rls1 rls2 un1 un2 ls1 ls2 n,
+  IsValid (getProtocol (S n) ASend pp1 rls1 un1 ls1) (getProtocol (S n) AReceive pp2 rls2 un2 ls2) -> 
+  IsValid (getProtocol (S (S n)) ASend pp1 rls1 un1 ls1) (getProtocol (S (S n)) AReceive pp2 rls2 un2 ls2).
+  Proof.
+  intros. proto_simpler. 
+  destruct (canSend ls1 pp1). proto_simpler. 
+  destruct (reduceUnresolved d (measure d) un2). 
+  destruct (canSend ls2 (reducePrivacy d (measure d) pp2)).
+  proto_simpler. destruct (reduceUnresolved d0 (measure d0)).
+  simpl in H.    simpl    
+
+
+Theorem IsValid_inc : forall  pp1 pp2 rls1 rls2 un1 un2 ls1 ls2 n,
+  IsValid (getProtocol n ASend pp1 rls1 un1 ls1) (getProtocol n AReceive pp2 rls2 un2 ls2) -> 
+  IsValid (getProtocol (S n) ASend pp1 rls1 un1 ls1) (getProtocol (S n) AReceive pp2 rls2 un2 ls2).
+  intro. intro. intro. intro. intro. intro. intro. intro. intro.
+  induction n. intros. proto_simpler. destruct (canSend ls1 pp1). proto_simpler. destruct (reduceUnresolved d (measure d) un2).
+  proto_simpler. auto. auto. proto_simpler. auto. auto.
+  destruct (reduceUnresolved d (measure d) un2). auto. auto.
+  destruct rls1. proto_simpler. auto. auto.
+  destruct r. proto_simpler. destruct (handleRequest pp2 d). destruct p. destruct m.
+  proto_simpler. auto. 
+  
+  apply IguessThatsOkay.
+  
+  auto.
+  proto_simpler.
+  
+  apply IguessThatsOkay.
+  
+  auto. proto_simpler. auto. auto.           
+  destruct (handleRequest pp2 d).
+  destruct p.
+  destruct m. auto.
+  auto. auto.      
 
 Theorem IsValid_inc2 : forall  pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
   IsValid (getProtocol 2 ASend pp1 rls1 un1 ls1) (getProtocol 2 AReceive pp2 rls2 un2 ls2).
@@ -876,6 +1112,13 @@ Theorem IsValid_Pred : forall n pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
           | StopMessage => Stop
           end)) in H.  in H. simpl in H.   auto in H.  pH H. .  proto in H. .   intros.  
 *)
+Theorem IsValid_inc : forall n pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
+  IsValid (getProtocol (n) ASend pp1 rls1 un1 ls1) (getProtocol ( n) AReceive pp2 rls2 un2 ls2) ->
+  IsValid (getProtocol (S n) ASend pp1 rls1 un1 ls1) (getProtocol (S n ) AReceive pp2 rls2 un2 ls2).
+
+
+
+
 Theorem IsValid_inc : forall n pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
   IsValid (getProtocol (n) ASend pp1 rls1 un1 ls1) (getProtocol ( n) AReceive pp2 rls2 un2 ls2) ->
   IsValid (getProtocol (S n) ASend pp1 rls1 un1 ls1) (getProtocol (S n ) AReceive pp2 rls2 un2 ls2).
