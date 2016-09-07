@@ -128,12 +128,22 @@ Require Import EqNat.
 Print "<".
 
 Theorem allAcc : forall x : nat, Acc lt x.
-Proof. intros.  induction x. apply zeroAccssible. constructor.
+Proof. intros.  induction x. apply zeroAccssible.
+constructor.
 intros. destruct y. apply zeroAccssible. inversion H. subst. assumption. subst.
 destruct IHx. constructor. apply H0. auto.
 Qed.
 Print well_founded.
-
+(* 
+  1. do induction on the thing.
+  2. prove the base case.
+  3. constructor. intros.  
+  4. destruct on the thing that is less than the other thing. 
+  5. you should have the base case to prove again.
+  6. invert on H, the less than relation. subst. you should have that assumption.
+  7. subst. destruct on your inductive hypothesis.
+  8. constructor. apply your new result from inducting on hypo. auto.
+*)
 Definition mywfr : well_founded lt. constructor. apply allAcc. Qed.
 Print Fix.
 
@@ -147,6 +157,126 @@ Definition myf : nat -> nat.
             auto. Qed.
 
 Check myf. 
+Require Nat.
+
+(*
+Fixpoint divide (x y : nat) : nat :=
+  if (Nat.leb y x) then S (divide (x -y) y)
+   else 0.  
+*)
+Inductive MyStupidPair : Type :=
+ | mystupidpair : nat -> nat -> MyStupidPair. 
+
+(*
+Fixpoint divide2 (p : MyStupidPair) : nat :=
+ match p with
+  | mystupidpair _ 0 => 0
+  | mystupidpair x y => S (divide2 (mystupidpair (x -y) y))
+ end.
+ *) 
+Definition first_ltR (p1 p2 : MyStupidPair) : Prop := 
+ match (p1,p2) with
+ | (mystupidpair p1x _, mystupidpair p2x _) => lt p1x p2x
+end.
+Check first_ltR.
+
+
+Theorem helper : forall x y z, Acc first_ltR (mystupidpair x y) -> Acc first_ltR (mystupidpair x z).
+Proof. intro. induction x. intros. constructor. intros. destruct y0. inversion H0.
+intros. destruct H.   constructor. intros. apply H. destruct y0. destruct n.
+unfold first_ltR. auto.
+  
+inversion H0. subst. unfold first_ltR. auto. subst. unfold first_ltR in H0.
+unfold first_ltR. assumption. 
+Qed.
+(* 
+  1. do induction on the thing.
+  2. prove the base case.
+  3. constructor. intros.  
+  4. destruct on the thing that is less than the other thing. 
+  5. you should have the base case to prove again.
+  6. invert on H, the less than relation. subst. you should have that assumption.
+  7. subst. destruct on your inductive hypothesis.
+  8. constructor. apply your new result from inducting on hypo. auto.
+*)
+Theorem allPairs_Acc : forall p : MyStupidPair, Acc first_ltR p.
+Proof. intro. destruct p.  induction n.
+(*base case *)
+constructor. intros. unfold first_ltR in H. destruct y. inversion H.
+(* end base case *)      
+constructor. intros (* step 3 *).  
+(*step 4 *) destruct y. destruct n1.
+(*base case again *)
+constructor. intros. unfold first_ltR in H0. destruct y. inversion H0. 
+(* end base case again *)
+inversion H. subst. apply helper with (z:=n2) in IHn.  assumption (*6*).
+(*7*) subst. destruct IHn.
+(*8*) constructor. apply H0. auto.
+Qed.
+ 
+
+Theorem pairsWfr : well_founded first_ltR.
+Proof. constructor. apply allPairs_Acc  . Defined.
+  
+Definition divide : MyStupidPair -> nat.
+ refine 
+   (Fix pairsWfr (fun _ => nat)
+      (fun (p : MyStupidPair)
+        (subcall : forall  p' : MyStupidPair, first_ltR p' p -> nat) =>
+        match p with
+          | mystupidpair x 0 => 0
+          | mystupidpair x y =>  
+              if (Nat.leb y x) then S (subcall (mystupidpair (x -y) y) _ )
+                               else 0
+        end
+
+         )
+            ). (*coq too stupid to realize I can't have zero case here. *) Abort.
+            
+            (*Require Import Omega.*)
+            
+Lemma ltSucc : forall x y, x < y -> x < S y.
+intro. induction x. auto. intros. destruct y. auto. auto. Defined.
+
+Theorem natsub : forall n x, n - x < S n.
+Proof. intro. induction n. simpl. intro. auto.
+intros. simpl. destruct x. auto. eapply ltSucc in IHn. apply IHn. Qed.
+Definition divide_v2 : MyStupidPair -> nat.
+ refine 
+   (Fix pairsWfr (fun _ => nat)
+      (fun (p : MyStupidPair)
+        (subcall : forall  p' : MyStupidPair, first_ltR p' p -> nat) =>
+        _
+
+         )
+            ). destruct p. destruct n0. 
+             (*divide by zero case *)
+             exact 0.
+             (* S n0 case *)
+             destruct (Nat.leb (S n0) n) eqn :case.
+               (*we can keep dividing! *) refine  
+                (S (subcall (mystupidpair (n - (S n0)) (S n0))  _) ). 
+                unfold first_ltR. destruct n. inversion case.
+                simpl in case. simpl. apply natsub.    
+                (*omega.*)
+                 
+                (* we are done dividing, i.e. (S n0) is not less than n *) 
+                exact 0. Defined.
+Print divide_v2. 
+Definition myDivide (x y : nat) := divide_v2 (mystupidpair x y).
+   
+
+Require Import Coq.Program.Equality.
+Require Import Coq.Program.Program. 
+Require Import Omega.
+Require Import Coq.Program.Tactics. 
+Example ex0 : myDivide 0 0 = 0. lazy. auto. simpl_eq. program_simpl. 
+     native_compute.
+intuition.   vm_compute. simpl_eq. ). .  vm_compute. hnf.    lazy. hnf.   unfold myDivide. unfold divide_v2. simpl.   cbv. cbv. simpl. cbn . assumption.  simplify_eq.  solve. stepr.   auto.      esimpl. constructor.  cbv.    
+Example ex1 : myDivide 2 2 = 1. 
+Proof. cbv. unfold fix.  simpl_eq.  .  eauto.   compute. eauto.   crush. cbv.    eapply Fix_F_eq.  fix 2. .  .  100. (myDivide 2 2).  compute. fix _.  cbn.  beta.   compute.  cbn iota. destruct _ eqn:eifef.     unfold myDivide.  unfold divide_v2. simpl. cbn.  simpl. auto. simpl_eq. simplify_eqs.
+unfold Fix. unfold Fix_F. cbn. compute. simpl_eq. unfold Fix_F. cbn iota .      unfold pairsWfr.   simpl_eq. unfold Fix_F.   simpl. auto. cbn. simpl_eq.    unfold fix.   simpl.  
+simpl. intros.    clear_refl_eqs.   elim_eq_rect.  eq_refl..         
 
 (* I need well_founded myRelation. *)
 Fixpoint p2 (n : nat) : nat :=
