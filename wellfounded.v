@@ -1,49 +1,78 @@
+(** * Intro
+  So you've run into despare.. You want to define a fixpoint (recursive) function in Coq, but instead of the beautiful green line you'd expect after defining it, you get an error message like, "Cannot guess decreasing argument of fix." What is this nonsense? 
+  
+  Alas, there is hope! Coq, being aware it's a terrible guesser, allows you to provide your own proof that a fixpoint function won't loop forever.
+  
+  Alas, there is despare. There seems to be but one resource to help you on your self defining journey-- The General Recursion chapter of Certified Programming with Dependent Types (http://adam.chlipala.net/cpdt/html/GeneralRec.html), and if you're anything like me in height it will go way over your head. I will say, however, that without this chapter I would have never figured this stuff out. As complicated as it is, it is infinitely better than just looking at the Coq libraries. I was able to get just enough from it to struggle my way through over the course of.. well a long time. I could find nowhere on the internet a step by step guide or tutorial on how to define my own fixpoint function with proof of well founded-ness--something I thought surely I was not the first person to want to do. "Whence" this blog post. 
+  
+  Alas, ther is hope! Below I will go through how to define the "intuitive" definition of integer division (which is non-terminating as far as Coq can tell) as an example. Perhaps you can use this as a template to define your own more complex, non-trivial well-founded recursive functions!
+  ** Division
+  Suppose you want to define integer division in Coq--innocent enough. For the sake of simplicity, let's say dividing by zero is zero. You can prevent this of course, but for the sake of 'that's-not-what-I'm-getting-at' let's just say it's zero. You might then come up with a definition like the following:
+<<
+  Fixpoint divide (x y : nat) : nat :=
+   match (x,y) with
+    | (0, _) => 0
+    | (_, 0) => 0
+    | (_, _) => if (Nat.leb y x) 
+             then S (divide (x -y) y)
+             else 0
+   end. 
+>>
+To which Coq replies, "Error: Cannot guess decreasing argument of fix."
+        *)
+(*
+Fixpoint divide (x y : nat) : nat :=
+   match (x,y) with
+    | ( 0, _) => 0
+    | ( _, 0) => 0
+    | (_,_) => if (Nat.leb y x) 
+             then S (divide (x -y) y)
+             else 0
+   end.
+*)
+(** 
+Here's what we're going to do:
 
-
-Fixpoint p1 (n : nat) : nat :=
-match n with
- | O => O
- | S x => p1 x
+In order to define this recursive function, we need to prove that each recursive call
+is given a 'smaller' argument. Whenever you define a fixpoint and all the recursive calls are on _subterms_ of the argument, Coq can figure out the function is decreasing on its own. For example,
+*)
+Fixpoint f (n : nat) : nat :=
+ match n with
+ | O => 0
+ | S n' => f n' 
 end.
 
-(*
-Fixpoint p2 (n: nat) : nat :=
-match n with
- | O => 0
- | S x => p2 (p1 n)
-end. 
-*)
-Theorem one : forall x : nat, p1 x = O .
-intros; induction x; try reflexivity; simpl; auto. Qed.
+(** is perfectly easy to define since every recursive call to _f_ is given a subterm of the current argument. 
 
-(* Don't worry! We can fix this problem on our own. Let's look at the
+While you and I know that our definition of divide is called on "smaller and smaller" terms, Coq doesn't know this on its own. We're not recursively calling _divide_ on any subterms of x or y. 
+
+Don't worry! We can fix this problem on our own. Let's look at the
 actual Definition of Fix so we can make one ourselves. *)
 Check Fix.
-(*
+(**
+<<
 Fix
      : forall (A : Type) (R : A -> A -> Prop),
        well_founded R ->
        forall P : A -> Type,
        (forall x : A, (forall y : A, R y x -> P y) -> P x) -> forall x : A, P x
+>>
+What is this well_founded thing? What is this 'R'? What is anything? WELL, well_founded-ness is how Coq proves to itself that this function will eventually end. Thereby, making it legal in its calculus of constructive logic (no infinite regression!). It looks pretty icky because it is. Nevertheless we'll get through it piece by piece.
 
-What is this well_founded thing? What is this 'R'? WELL, well_founded-ness is how Coq 
-proves to itself that this function will eventually end. Thereby, making it legal
-in it's calculus of constructive logic (no infinite regression!).  
-Here's what we're going to do:
-In order to define this recurisive function, we need to prove that each recursive call
-to this function is given a 'smaller' argument. So the relation 'R' is going to be a
-relation that is essentially an "is less than" relation. Of course, any old relation
+  
+  The relation 'R' is a
+relation that is an "is less than" relation. Of course, any old relation
 could have the type 'A -> A -> Prop', but only one that defines this 
-monotonic decreasing behavior I speak of will be able to satisfy the 
+monotonic decreasing behavior will be able to satisfy the 
 'well_founded R' construction as required by Fix.  
-Let's now look at the definition
+
+Let's now go down the rabbit hole a little further and look at the definition
 of well_founded. 
 
 *) 
-Print Fix. 
 Print well_founded.
-Print Acc.
-(*
+
+(**
 well_founded = 
 fun (A : Type) (R : A -> A -> Prop) => forall a : A, Acc R a
      : forall A : Type, (A -> A -> Prop) -> Prop
@@ -71,7 +100,9 @@ function that takes a relation 'R' and gives us back a proof that states that fo
 every single constructable thing of type A there is an accessibility thing (Acc R a). This 
 accessibility thing has type (forall A : Type, (A -> A -> Prop). We are finally getting to
 the bottom of this! Let's look at the INDUCTIVE type Acc. 
-
+*)
+Print Acc.
+(** 
 Inductive Acc (A : Type) (R : A -> A -> Prop) (x : A) : Prop :=
     Acc_intro : (forall y : A, R y x -> Acc R y) -> Acc R x
 
@@ -188,7 +219,7 @@ unfold first_ltR. auto.
   
 inversion H0. subst. unfold first_ltR. auto. subst. unfold first_ltR in H0.
 unfold first_ltR. assumption. 
-Qed.
+Defined. 
 (* 
   1. do induction on the thing.
   2. prove the base case.
@@ -212,11 +243,11 @@ constructor. intros. unfold first_ltR in H0. destruct y. inversion H0.
 inversion H. subst. apply helper with (z:=n2) in IHn.  assumption (*6*).
 (*7*) subst. destruct IHn.
 (*8*) constructor. apply H0. auto.
-Qed.
+Defined.
  
 
 Theorem pairsWfr : well_founded first_ltR.
-Proof. constructor. apply allPairs_Acc  . Defined.
+Proof. constructor. apply allPairs_Acc. Defined. (*This must be Defined! *)
   
 Definition divide : MyStupidPair -> nat.
  refine 
@@ -240,7 +271,10 @@ intro. induction x. auto. intros. destruct y. auto. auto. Defined.
 
 Theorem natsub : forall n x, n - x < S n.
 Proof. intro. induction n. simpl. intro. auto.
-intros. simpl. destruct x. auto. eapply ltSucc in IHn. apply IHn. Qed.
+intros. simpl. destruct x. auto. eapply ltSucc in IHn. apply IHn. Defined.
+
+Require Import Omega.
+
 Definition divide_v2 : MyStupidPair -> nat.
  refine 
    (Fix pairsWfr (fun _ => nat)
@@ -257,7 +291,8 @@ Definition divide_v2 : MyStupidPair -> nat.
                (*we can keep dividing! *) refine  
                 (S (subcall (mystupidpair (n - (S n0)) (S n0))  _) ). 
                 unfold first_ltR. destruct n. inversion case.
-                simpl in case. simpl. apply natsub.    
+                simpl in case. simpl. 
+                 apply natsub. 
                 (*omega.*)
                  
                 (* we are done dividing, i.e. (S n0) is not less than n *) 
@@ -266,21 +301,11 @@ Print divide_v2.
 Definition myDivide (x y : nat) := divide_v2 (mystupidpair x y).
    
 
-Require Import Coq.Program.Equality.
-Require Import Coq.Program.Program. 
-Require Import Omega.
-Require Import Coq.Program.Tactics. 
-Example ex0 : myDivide 0 0 = 0. lazy. auto. simpl_eq. program_simpl. 
-     native_compute.
-intuition.   vm_compute. simpl_eq. ). .  vm_compute. hnf.    lazy. hnf.   unfold myDivide. unfold divide_v2. simpl.   cbv. cbv. simpl. cbn . assumption.  simplify_eq.  solve. stepr.   auto.      esimpl. constructor.  cbv.    
-Example ex1 : myDivide 2 2 = 1. 
-Proof. cbv. unfold fix.  simpl_eq.  .  eauto.   compute. eauto.   crush. cbv.    eapply Fix_F_eq.  fix 2. .  .  100. (myDivide 2 2).  compute. fix _.  cbn.  beta.   compute.  cbn iota. destruct _ eqn:eifef.     unfold myDivide.  unfold divide_v2. simpl. cbn.  simpl. auto. simpl_eq. simplify_eqs.
-unfold Fix. unfold Fix_F. cbn. compute. simpl_eq. unfold Fix_F. cbn iota .      unfold pairsWfr.   simpl_eq. unfold Fix_F.   simpl. auto. cbn. simpl_eq.    unfold fix.   simpl.  
-simpl. intros.    clear_refl_eqs.   elim_eq_rect.  eq_refl..         
+(*ANY PROOF involved in defining the function must be defined not qed. *)
+Eval compute in (myDivide 0 0).
+Eval cbn in (myDivide 3 4).
+Eval compute in (myDivide 4 2).
+Eval compute in (myDivide 5 2).
+Eval compute in (myDivide 100 7).
+Eval compute in (myDivide 3 4).
 
-(* I need well_founded myRelation. *)
-Fixpoint p2 (n : nat) : nat :=
-match n with
- | O => O
- | S x => p2 (p1 x)
-end.
