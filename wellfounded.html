@@ -39,14 +39,14 @@
   Alas, ther is hope! Below I will go through how to define the "intuitive" definition of integer division (which is non-terminating as far as Coq can tell) as an example. Perhaps you can use this as a template to define your own more complex, non-trivial well-founded recursive functions!
 <a name="lab2"></a><h2 class="section">Division</h2>
 
-  Suppose you want to define integer division in Coq--innocent enough. For the sake of simplicity, let's say dividing by zero is zero. You can prevent this of course, but for the sake of 'that's-not-what-I'm-getting-at' let's just say it's zero. You might then come up with a definition like the following:
+  Suppose you want to define integer division in Coq--innocent enough. For the sake of simplicity, let's say dividing by zero is zero. You can prevent this of course, but for the sake of 'that's-not-what-I'm-getting-at' let's just say it's zero. You might then come up with a definition like the following ('n' stands for numerator, 'd' for denominaor):
 <pre>
-  Fixpoint divide (x y : nat) : nat :=
-   match (x,y) with
+  Fixpoint divide (n d : nat) : nat :=
+   match (n,d) with
     | (0, _) =&gt; 0
     | (_, 0) =&gt; 0
-    | (_, _) =&gt; if (Nat.leb y x) 
-             then S (divide (x -y) y)
+    | (_, _) =&gt; if (Nat.leb d n) 
+             then S (divide (n - d) d)
              else 0
    end. 
 </pre>
@@ -79,7 +79,7 @@ is given a 'smaller' argument. Whenever you define a fixpoint and all the recurs
 </div>
 
 <div class="doc">
-is perfectly easy to define since every recursive call to <i>f</i> is given a subterm of the current argument. 
+is perfectly easy to define since every recursive call to <i>f</i> is given a subterm of the current argument. Thereby always getting smaller. 
 
 <div class="paragraph"> </div>
 
@@ -102,32 +102,25 @@ Fix
        forall P : A -&gt; Type,
        (forall x : A, (forall y : A, R y x -&gt; P y) -&gt; P x) -&gt; forall x : A, P x
 </pre>
-What is this well_founded thing? What is this 'R'? What is anything? WELL, well_founded-ness is how Coq proves to itself that this function will eventually end. Thereby, making it legal in its calculus of constructive logic (no infinite regression!). It looks pretty icky because it is. Nevertheless we'll get through it piece by piece.
+Well that's pretty confusing. What is this well_founded thing? What is this 'R'? What is anything? Let's ignore everything else and focus on the well_founded part. For now, just know that we need to provide this well_founded <i>thing</i> so we might as well explore that first. We'll get back to what all that other messy stuff is later.
+
+<div class="paragraph"> </div>
+
+ Well_founded-ness is how Coq proves to itself that this function will eventually end. Thereby, making it legal in its calculus of constructive logic (no infinite regression!). It looks pretty icky because it is. Nevertheless we'll get through it piece by piece.
 
 <div class="paragraph"> </div>
 
 
 <div class="paragraph"> </div>
 
-  The relation 'R' is a
-relation that is an "is less than" relation. Of course, any old relation
-could have the type 'A -&gt; A -&gt; Prop', but only one that defines this 
-monotonic decreasing behavior will be able to satisfy the 
-'well_founded R' construction as required by Fix.  
+Let's go down the rabbit hole a little further and look at the definition of well_founded. 
 
 <div class="paragraph"> </div>
 
-Let's now go down the rabbit hole a little further and look at the definition
-of well_founded. 
-
-<div class="paragraph"> </div>
-
-
+ 
 </div>
 <div class="code">
 <span class="id" title="keyword">Print</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Wf.html#well_founded"><span class="id" title="definition">well_founded</span></a>.<br/>
-
-<br/>
 </div>
 
 <div class="doc">
@@ -137,66 +130,354 @@ fun (A : Type) (R : A -&gt; A -&gt; Prop) =&gt; forall a : A, Acc R a
 
 <div class="paragraph"> </div>
 
+The definition of well_founded is much better to look at with parens like this:
+<pre>
+well_founded = 
+fun (A : Type) (R : A -&gt; A -&gt; Prop) =&gt; forall a : A, Acc R a
+     : (forall A : Type, (A -&gt; A -&gt; Prop) ) -&gt; Prop
+</pre>
 Argument A is implicit
 
 <div class="paragraph"> </div>
 
-Remember 'Argument A is implicit' means we don't actually have to provide that argument. 
-Coq is smart enough to figure it out in this case from the types provided in the R
-relation. 
+Now you can see that the big mess is just telling you what the type of 'Acc R a' must be.
 
 <div class="paragraph"> </div>
 
-Perhaps the type is better written with parens like this:
+As an aside, remember 'Argument A is implicit' means we don't actually have to provide that argument. Coq is smart enough (for once) to figure it out from the types provided in the R relation. 
+
+<div class="paragraph"> </div>
+
+Ahh, the 'R' relation; I'm glad you mentioned it. The relation 'R' is a relation that is a "less than" relation. How would you know that it has to be a "less than" relation as opposed to any other and how this "less-than-ness" enforced? You wouldn't know that yet, but I do. You will soon realize that the definition of Acc (which we'll get to soon) forces this relation into an "is less than" shape. I keep putting "less than" in quotes because that's what makes sense to me. It's really more of a "the first argument is closer to a terminating term than the second" relation. In our case with division, we terminate when y is zero, OR when x &lt; y and we can't do integer division any further. In our case we need to prove that every subcall of divide is called with an x that is less than the one handed to the current iteration.   Only a relation that defines this monotonic decreasing behavior will be able to satisfy the constructor of Acc. 
+
+<div class="paragraph"> </div>
+
+Let's get back to well_founded for a minute before we move on to Acc. <tt>
 well_founded = 
 fun (A : Type) (R : A -&gt; A -&gt; Prop) =&gt; forall a : A, Acc R a
      : (forall A : Type, (A -&gt; A -&gt; Prop) ) -&gt; Prop
+</tt>What does well_founded say in people-speak? You try first.
 
 <div class="paragraph"> </div>
 
-You'll see why this is helpful in a minute. 
-
-<div class="paragraph"> </div>
-
-Let's say what well_founded says in people-speak.
- 'well_founded' is a function that takes a relation 'R' and gives you back a proof
+ 'well_founded' is a function that takes a relation 'R' and gives you back another function. Namely this:
+ <tt>
 (  forall a : A, Acc R a
      : forall A : Type, (A -&gt; A -&gt; Prop) -&gt; Prop). 
+</tt>THIS function takes a proof of type: <tt>
+ forall a : A, Acc R a </tt> and spits out a Prop. 
+&gt;&gt;
 
 <div class="paragraph"> </div>
 
-We know this is a proof since it gives us back a Prop. So 'well_founded' is a 
-function that takes a relation 'R' and gives us back a proof that states that for
-every single constructable thing of type A there is an accessibility thing (Acc R a). This 
-accessibility thing has type (forall A : Type, (A -&gt; A -&gt; Prop). We are finally getting to
-the bottom of this! Let's look at the INDUCTIVE type Acc. 
+'Acc' stands for 'Accessibility'.
 
+<div class="paragraph"> </div>
+
+Here's a really important sentence:
+
+<div class="paragraph"> </div>
+
+Basically, a relation 'R' over the domain 'A' is well founded IF you can prove that <i>every</i> element in 'A' is Accessible (Acc R a).
+
+<div class="paragraph"> </div>
+
+Okay, let's look at Acc. 
 </div>
 <div class="code">
+
+<br/>
 <span class="id" title="keyword">Print</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Wf.html#Acc"><span class="id" title="inductive">Acc</span></a>.<br/>
+</div>
+
+<div class="doc">
+<pre>
+Inductive Acc (A : Type) (R : A -&gt; A -&gt; Prop) (x : A) : Prop :=
+    Acc_intro : (forall y : A, R y x -&gt; Acc R y) -&gt; Acc R x
+</pre>
+Holy crap it's an inductive type. Finally, we are looking at something that in its definition doesn't introduce something we haven't seen before! What does Acc say in English? Give it a go, and I will too. 
+
+<div class="paragraph"> </div>
+
+Acc is an inductive type of type Prop ( Acc .... : Prop).
+It is 'indexed' over an 'A' which has type 'Type', a relation 'R' (which we've talked about), and a particular thing (<i>x</i>) of type A. To make an Acc there is only one constructor, 'Acc_intro' which must be provided with a proof that for any element 'y' that is "less than" x (R y x), it's 
+accessible (Acc R y). If you can provide that, then x is accessible as well (Acc R x). 
+And that's it! Now that we've explored all the way to the bottom of the chain we can start building our way back up to Fix.
+So, let's start with 'R'. the 'A' type in R is the type of the argument that we must prove decreases.
+
+<div class="paragraph"> </div>
+
+Something may have been bothering you up to this point. We keep talking about "the argument" to the function being "less than" each time. What about functions that take more than one argument? Worse yet, what if you need all of those arguments to determine if you're closer to a termination term? 
+
+<div class="paragraph"> </div>
+
+There may be more solutions than this, but I just like to make a wrapper to hold everything I need. In our example, divide takes two naturals. So I make a wrapper for the 2 naturals into one type: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Inductive</span> <a name="MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a> : <span class="id" title="keyword">Type</span> :=<br/>
+&nbsp;| <a name="mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a>.<br/>
+
+<br/>
 </div>
 
 <div class="doc">
 
 <div class="paragraph"> </div>
 
-Inductive Acc (A : Type) (R : A -&gt; A -&gt; Prop) (x : A) : Prop :=
-    Acc_intro : (forall y : A, R y x -&gt; Acc R y) -&gt; Acc R x
+I may have voiced my frustration with this bookkeeping step in the naming.
 
 <div class="paragraph"> </div>
 
-Finally, we are looking at something that in its definition doesn't introduce something else we haven't
-seen before! What does Acc say in English? Acc is an inductive type of type Prop ( Acc .... : Prop).
-It is 'indexed' over an 'A' which has type 'Type', a relation 'R' (which we've talked about), and a
-particular thing of type A. To make an Acc there is only one consstructor, 'Acc_intro' which must be 
-provided with a proof that for all (any) element of type A, if y is "less than" x, y is 
-accessible (Acc R y).
-And that's it! Now that we've explored all the way to the bottom of the chain, we can start building our
-way all the way back up to Fix.
-So, let's start with 'R'. the 'A' type in R is the type of the argument that we must prove decreases.
-In this example, we are trying to prove this for a function over nats.
+'MyStupidPair' will play the role of 'A'. 
+
+<div class="paragraph"> </div>
+
+What is our "less than" relation? Well let's look at what our divide function would look like with this new wrapper thing:
+<pre>
+Fixpoint divide2 (p : MyStupidPair) : nat :=
+ match p with
+  | mystupidpair _ 0 =&gt; 0
+  | mystupidpair n d =&gt; S (divide2 (mystupidpair (n -d) d))
+ end. 
+</pre>
+All we care about is that the first number 'n' is smaller each time. In whatever function you're trying to define, your "less than" relation probably depends on all the arguments, but we only care about one of ours. So our less than relation would look something like:
+ 
 </div>
 <div class="code">
+<span class="id" title="keyword">Definition</span> <a name="first_ltR"><span class="id" title="definition">first_ltR</span></a> (<span class="id" title="var">p1</span> <span class="id" title="var">p2</span> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a>) : <span class="id" title="keyword">Prop</span> := <br/>
+&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><a class="idref" href="wellfounded.html#p1"><span class="id" title="variable">p1</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a><a class="idref" href="wellfounded.html#p2"><span class="id" title="variable">p2</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> <span class="id" title="var">n1</span> <span class="id" title="var">_</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a> <a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> <span class="id" title="var">n2</span> <span class="id" title="var">_</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a> =&gt; <span class="id" title="var">n1</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#989c98e7ddd65d5bf37c334ff2076de8"><span class="id" title="notation">&lt;</span></a> <span class="id" title="var">n2</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+<span class="id" title="keyword">Check</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a>.<br/>
+</div>
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+Looks good. Now what? Well we know for well_founded we need a proof that every element of MyStupidPair is Accessible. Let's start there.
+
+<div class="paragraph"> </div>
+
+Let's start with the base case.
+
+<div class="paragraph"> </div>
+
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Theorem</span> <a name="smallestPairAccessible"><span class="id" title="lemma">smallestPairAccessible</span></a> : <span class="id" title="keyword">forall</span> <span class="id" title="var">d</span>, <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Wf.html#Acc"><span class="id" title="inductive">Acc</span></a> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> (<a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> 0 <a class="idref" href="wellfounded.html#d"><span class="id" title="variable">d</span></a>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+<span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">unfold</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> <span class="id" title="keyword">in</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">y</span>. <span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>.<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
+</div>
+
+<div class="doc">
+Cool. Let's pretend I got that proof right away. 
+
+<div class="paragraph"> </div>
+
+I also have a very important note to share with you that isn't relevant until later, but you see it now, so I should explain it now. I said <tt>Defined</tt> and not &lt;Qed&gt;. This is an absolute must. Remember our end goal is defining a function. This proof (and any proof that uses this proof will in one way or another be passed to Fix as an argument in the well_founded proof. When you write a theorem or whatever and end it with <tt>Qed</tt> Coq forgets about how you got to the end, and just remembers that you got there legally. We are proving things for the purpose of construction. Therefore we need Coq to 'remember' how we got there. If we leave any proof as <tt>Qed</tt> instead of <tt>Defined</tt> your final function will not reduce past (Fix_F <tt>huge-mess-of-crap</tt>) (args..). Coq can't evaluate the proofs because it has forgotten how. This also unfortunately means you can't use proofs in the standard library that end in <tt>Qed</tt>.
+
+<div class="paragraph"> </div>
+
+Note: You also can't use omega anywhere. This currently causes Coqtop to "die badly" when you try to use the final function. This seems like a bug and has been reported.
+
+<div class="paragraph"> </div>
+
+Anyway, let's prove that all elements of MyStupidPair are accessible. 
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a name="allPairs_Acc_getStuck"><span class="id" title="lemma">allPairs_Acc_getStuck</span></a> : <span class="id" title="keyword">forall</span> <span class="id" title="var">p</span> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a>, <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Wf.html#Acc"><span class="id" title="inductive">Acc</span></a> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> <a class="idref" href="wellfounded.html#p"><span class="id" title="variable">p</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">intro</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">p</span>. <span class="id" title="tactic">induction</span> <span class="id" title="var">n</span>.<br/>
+<span class="id" title="tactic">apply</span> <a class="idref" href="wellfounded.html#smallestPairAccessible"><span class="id" title="lemma">smallestPairAccessible</span></a>.<br/>
+<span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">intros</span> .<br/>
+ <span class="id" title="tactic">destruct</span> <span class="id" title="var">y</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">n1</span>.<br/>
+<span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">unfold</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> <span class="id" title="keyword">in</span> <span class="id" title="var">H0</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">y</span>. <span class="id" title="tactic">inversion</span> <span class="id" title="var">H0</span>.<br/>
+<span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">subst</span>. <span class="id" title="keyword">Abort</span>.<br/>
+</div>
+
+<div class="doc">
+I got stuck here:
+<pre>
+n0, n1, n2 : nat
+IHn : Acc first_ltR (mystupidpair (S n1) n0)
+H : first_ltR (mystupidpair (S n1) n2) (mystupidpair (S (S n1)) n0)
+______________________________________(1/2)
+Acc first_ltR (mystupidpair (S n1) n2)
+</pre>
+
+<div class="paragraph"> </div>
+
+My induction hypothesis is specifically for n0, but I need it for n2! Obviously, in my relation the second number in the pair doesn't matter, but I need that proof.  
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Theorem</span> <a name="wellOfCourseThisisTrue"><span class="id" title="lemma">wellOfCourseThisisTrue</span></a> : <span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span>, <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Wf.html#Acc"><span class="id" title="inductive">Acc</span></a> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> (<a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> <a class="idref" href="wellfounded.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="wellfounded.html#y"><span class="id" title="variable">y</span></a>) <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Wf.html#Acc"><span class="id" title="inductive">Acc</span></a> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> (<a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> <a class="idref" href="wellfounded.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="wellfounded.html#z"><span class="id" title="variable">z</span></a>).<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">intro</span>. <span class="id" title="tactic">induction</span> <span class="id" title="var">x</span>. <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">y0</span>. <span class="id" title="tactic">inversion</span> <span class="id" title="var">H0</span>.<br/>
+<span class="id" title="tactic">intros</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">y0</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">n</span>.<br/>
+<span class="id" title="tactic">unfold</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a>. <span class="id" title="tactic">auto</span>.<br/>
+
+<br/>
+<span class="id" title="tactic">inversion</span> <span class="id" title="var">H0</span>. <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">unfold</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a>. <span class="id" title="tactic">auto</span>. <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">unfold</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> <span class="id" title="keyword">in</span> <span class="id" title="var">H0</span>.<br/>
+<span class="id" title="tactic">unfold</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a>. <span class="id" title="tactic">assumption</span>.<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
+</div>
+
+<div class="doc">
+Let's pretend this proof I got straight away as well. (Note <tt>Defined</tt>!)
+
+<div class="paragraph"> </div>
+
+Now let's try that again. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a name="allPairs_Acc"><span class="id" title="lemma">allPairs_Acc</span></a> : <span class="id" title="keyword">forall</span> <span class="id" title="var">p</span> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a>, <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Wf.html#Acc"><span class="id" title="inductive">Acc</span></a> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> <a class="idref" href="wellfounded.html#p"><span class="id" title="variable">p</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">intro</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">p</span>. <span class="id" title="tactic">induction</span> <span class="id" title="var">n</span>.<br/>
+<span class="id" title="tactic">apply</span> <a class="idref" href="wellfounded.html#smallestPairAccessible"><span class="id" title="lemma">smallestPairAccessible</span></a>.<br/>
+<span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">intros</span> .<br/>
+ <span class="id" title="tactic">destruct</span> <span class="id" title="var">y</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">n1</span>.<br/>
+<span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">unfold</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> <span class="id" title="keyword">in</span> <span class="id" title="var">H0</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">y</span>. <span class="id" title="tactic">inversion</span> <span class="id" title="var">H0</span>.<br/>
+<span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">apply</span> <a class="idref" href="wellfounded.html#wellOfCourseThisisTrue"><span class="id" title="lemma">wellOfCourseThisisTrue</span></a> <span class="id" title="keyword">with</span> (<span class="id" title="var">z</span>:=<span class="id" title="var">n2</span>) <span class="id" title="keyword">in</span> <span class="id" title="var">IHn</span>. <span class="id" title="tactic">assumption</span> .<br/>
+ <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">IHn</span>.<br/>
+ <span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">H0</span>. <span class="id" title="tactic">auto</span>.<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+As always, let's pretend I got this proof straight away. 
+A word of caution however: While proving the accessibility of all elements in your domain, it is <i>really</i> easy to find yourself with an impossible proof goal. In fact, proving this all Accessible theorem is why I was stuck on well_founded-ness for so long. I eventually figured it out and have created these steps to follow to stay on the path of righteousness. Feel free to ignore them at first and try to prove your all accessible theorem on your own. You may very well succeed, but I always got tempted to apply something that led me to an impossible proof goal and applied it. 
+<pre>
+  1. do induction on the thing you're proving is accessible.
+  2. prove the base case.
+  3. constructor. intros.  
+  4. destruct on the thing that is less than the other thing. 
+  5. you should have the base case to prove again or something very close to it.
+  6. invert on H, the less than relation. subst. you should have that assumption.
+  7. subst. destruct on your inductive hypothesis.
+  8. constructor. apply your new result from inducting on hypo. auto.
+</pre>
+
+<div class="paragraph"> </div>
+
+We pretty much have well_founded-ness for our relation now. We can start crawling out of the rabbit hole.
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a name="pairsWfr"><span class="id" title="lemma">pairsWfr</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Wf.html#well_founded"><span class="id" title="definition">well_founded</span></a> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">apply</span> <a class="idref" href="wellfounded.html#allPairs_Acc"><span class="id" title="lemma">allPairs_Acc</span></a>. <span class="id" title="keyword">Defined</span>.<br/>
+</div>
+
+<div class="doc">
+
+<div class="paragraph"> </div>
+
+  That was nice. Now we've got what we need. But let's look <tt>Fix</tt> again.
+  
+</div>
+<div class="code">
+<span class="id" title="keyword">Print</span> <span class="id" title="keyword">Fix</span>.<br/>
+</div>
+
+<div class="doc">
+<pre>
+Fix = 
+fun (A : Type) (R : A -&gt; A -&gt; Prop) (Rwf : well_founded R) (P : A -&gt; Type)
+  (F : forall x : A, (forall y : A, R y x -&gt; P y) -&gt; P x) (x : A) =&gt; 
+Fix_F P F (Rwf x)
+     : forall (A : Type) (R : A -&gt; A -&gt; Prop),
+       well_founded R -&gt;
+       forall P : A -&gt; Type,
+       (forall x : A, (forall y : A, R y x -&gt; P y) -&gt; P x) -&gt; forall x : A, P x
+
+Arguments A, R are implicit
+</pre>
+Cool. A and R are implicit, we also might as well look at this for our specific example as well:<tt>
+
+Fix = 
+fun (Rwf : well_founded first_ltR) (P : A -&gt; Type)
+  (F : forall x : A, (forall y : A, R y x -&gt; P y) -&gt; P x) (x : A) =&gt; 
+Fix_F P F (Rwf x) : well_founded first_ltR -&gt;
+       forall P : A -&gt; Type,
+       (forall x : A, (forall y : A, R y x -&gt; P y) -&gt; P x) -&gt; forall x : A, P x
+</tt>That helps a little I guess, but heck, it's still pretty confusing. 
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a name="divide"><span class="id" title="definition">divide</span></a> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>.<br/>
+&nbsp;<span class="id" title="tactic">refine</span> <br/>
+&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">Fix</span> <a class="idref" href="wellfounded.html#pairsWfr"><span class="id" title="lemma">pairsWfr</span></a> (<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> (<span class="id" title="var">p</span> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">subcall</span> : <span class="id" title="keyword">forall</span>  <span class="id" title="var">p'</span> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a>, <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> <a class="idref" href="wellfounded.html#p'"><span class="id" title="variable">p'</span></a> <a class="idref" href="wellfounded.html#p"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="wellfounded.html#p"><span class="id" title="variable">p</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> <span class="id" title="var">x</span> 0 =&gt; 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> <span class="id" title="var">x</span> <span class="id" title="var">y</span> =&gt;  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Nat.html#leb"><span class="id" title="definition">Nat.leb</span></a> <span class="id" title="var">y</span> <span class="id" title="var">x</span>) <span class="id" title="keyword">then</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> (<a class="idref" href="wellfounded.html#subcall"><span class="id" title="variable">subcall</span></a> (<a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> (<span class="id" title="var">x</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#9482aae3d3b06e249765c1225dbb8cbb"><span class="id" title="notation">-</span></a><span class="id" title="var">y</span>) <span class="id" title="var">y</span>) <span class="id" title="var">_</span> )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;). </div>
+
+<div class="doc">
+coq too stupid to realize I can't have zero case here. 
+</div>
+<div class="code">
+ <span class="id" title="keyword">Abort</span>.<br/>
+
+<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="ltSucc"><span class="id" title="lemma">ltSucc</span></a> : <span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="wellfounded.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#989c98e7ddd65d5bf37c334ff2076de8"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="wellfounded.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="wellfounded.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#989c98e7ddd65d5bf37c334ff2076de8"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <a class="idref" href="wellfounded.html#y"><span class="id" title="variable">y</span></a>.<br/>
+<span class="id" title="tactic">intro</span>. <span class="id" title="tactic">induction</span> <span class="id" title="var">x</span>. <span class="id" title="tactic">auto</span>. <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">y</span>. <span class="id" title="tactic">auto</span>. <span class="id" title="tactic">auto</span>. <span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a name="natsub"><span class="id" title="lemma">natsub</span></a> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">x</span>, <a class="idref" href="wellfounded.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#9482aae3d3b06e249765c1225dbb8cbb"><span class="id" title="notation">-</span></a> <a class="idref" href="wellfounded.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#989c98e7ddd65d5bf37c334ff2076de8"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <a class="idref" href="wellfounded.html#n"><span class="id" title="variable">n</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">intro</span>. <span class="id" title="tactic">induction</span> <span class="id" title="var">n</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">intro</span>. <span class="id" title="tactic">auto</span>.<br/>
+<span class="id" title="tactic">intros</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">x</span>. <span class="id" title="tactic">auto</span>. <span class="id" title="tactic">eapply</span> <a class="idref" href="wellfounded.html#ltSucc"><span class="id" title="lemma">ltSucc</span></a> <span class="id" title="keyword">in</span> <span class="id" title="var">IHn</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">IHn</span>. <span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.omega.Omega.html#"><span class="id" title="library">Omega</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="divide_v2"><span class="id" title="definition">divide_v2</span></a> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>.<br/>
+&nbsp;<span class="id" title="tactic">refine</span> <br/>
+&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">Fix</span> <a class="idref" href="wellfounded.html#pairsWfr"><span class="id" title="lemma">pairsWfr</span></a> (<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> (<span class="id" title="var">p</span> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">subcall</span> : <span class="id" title="keyword">forall</span>  <span class="id" title="var">p'</span> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a>, <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> <a class="idref" href="wellfounded.html#p'"><span class="id" title="variable">p'</span></a> <a class="idref" href="wellfounded.html#p"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">_</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;). <span class="id" title="tactic">destruct</span> <span class="id" title="var">p</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">n0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exact</span> 0.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Arith.PeanoNat.html#Nat.leb"><span class="id" title="definition">Nat.leb</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <span class="id" title="var">n0</span>) <span class="id" title="var">n</span>) <span class="id" title="var">eqn</span> :<span class="id" title="tactic">case</span>.<br/>
+ <span class="id" title="tactic">refine</span>  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> (<span class="id" title="var">subcall</span> (<a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> (<span class="id" title="var">n</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#9482aae3d3b06e249765c1225dbb8cbb"><span class="id" title="notation">-</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#9482aae3d3b06e249765c1225dbb8cbb"><span class="id" title="notation">(</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <span class="id" title="var">n0</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#9482aae3d3b06e249765c1225dbb8cbb"><span class="id" title="notation">)</span></a>) (<a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <span class="id" title="var">n0</span>))  <span class="id" title="var">_</span>) ).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">n</span>. <span class="id" title="tactic">inversion</span> <span class="id" title="tactic">case</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span> <span class="id" title="keyword">in</span> <span class="id" title="tactic">case</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <a class="idref" href="wellfounded.html#natsub"><span class="id" title="lemma">natsub</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exact</span> 0. <span class="id" title="keyword">Defined</span>.<br/>
+<span class="id" title="keyword">Print</span> <a class="idref" href="wellfounded.html#divide_v2"><span class="id" title="definition">divide_v2</span></a>.<br/>
+<span class="id" title="keyword">Definition</span> <a name="myDivide"><span class="id" title="definition">myDivide</span></a> (<span class="id" title="var">x</span> <span class="id" title="var">y</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) := <a class="idref" href="wellfounded.html#divide_v2"><span class="id" title="definition">divide_v2</span></a> (<a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> <a class="idref" href="wellfounded.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="wellfounded.html#y"><span class="id" title="variable">y</span></a>).<br/>
+
+<br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="tactic">compute</span> <span class="id" title="keyword">in</span> (<a class="idref" href="wellfounded.html#myDivide"><span class="id" title="definition">myDivide</span></a> 0 0).<br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="var">cbn</span> <span class="id" title="keyword">in</span> (<a class="idref" href="wellfounded.html#myDivide"><span class="id" title="definition">myDivide</span></a> 3 4).<br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="tactic">compute</span> <span class="id" title="keyword">in</span> (<a class="idref" href="wellfounded.html#myDivide"><span class="id" title="definition">myDivide</span></a> 4 2).<br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="tactic">compute</span> <span class="id" title="keyword">in</span> (<a class="idref" href="wellfounded.html#myDivide"><span class="id" title="definition">myDivide</span></a> 5 2).<br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="tactic">compute</span> <span class="id" title="keyword">in</span> (<a class="idref" href="wellfounded.html#myDivide"><span class="id" title="definition">myDivide</span></a> 100 7).<br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="tactic">compute</span> <span class="id" title="keyword">in</span> (<a class="idref" href="wellfounded.html#myDivide"><span class="id" title="definition">myDivide</span></a> 3 4).<br/>
 
 <br/>
 <span class="id" title="keyword">Definition</span> <a name="myR"><span class="id" title="definition">myR</span></a> (<span class="id" title="var">n1</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) (<span class="id" title="var">n2</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) : <span class="id" title="keyword">Prop</span> := <a class="idref" href="wellfounded.html#n1"><span class="id" title="variable">n1</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#989c98e7ddd65d5bf37c334ff2076de8"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="wellfounded.html#n2"><span class="id" title="variable">n2</span></a>.<br/>
@@ -256,102 +537,6 @@ In this example, we are trying to prove this for a function over nats.
 <br/>
 <span class="id" title="keyword">Check</span> <a class="idref" href="wellfounded.html#myf"><span class="id" title="definition">myf</span></a>.<br/>
 <span class="id" title="keyword">Require</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Nat.html#"><span class="id" title="library">Nat</span></a>.<br/>
-
-<br/>
-<span class="id" title="keyword">Inductive</span> <a name="MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a> : <span class="id" title="keyword">Type</span> :=<br/>
-&nbsp;| <a name="mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a>.<br/>
-
-<br/>
-<span class="id" title="keyword">Definition</span> <a name="first_ltR"><span class="id" title="definition">first_ltR</span></a> (<span class="id" title="var">p1</span> <span class="id" title="var">p2</span> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a>) : <span class="id" title="keyword">Prop</span> := <br/>
-&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><a class="idref" href="wellfounded.html#p1"><span class="id" title="variable">p1</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a><a class="idref" href="wellfounded.html#p2"><span class="id" title="variable">p2</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a> <span class="id" title="keyword">with</span><br/>
-&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> <span class="id" title="var">p1x</span> <span class="id" title="var">_</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a> <a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> <span class="id" title="var">p2x</span> <span class="id" title="var">_</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#lt"><span class="id" title="definition">lt</span></a> <span class="id" title="var">p1x</span> <span class="id" title="var">p2x</span><br/>
-<span class="id" title="keyword">end</span>.<br/>
-<span class="id" title="keyword">Check</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a>.<br/>
-
-<br/>
-<span class="id" title="keyword">Theorem</span> <a name="helper"><span class="id" title="lemma">helper</span></a> : <span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span>, <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Wf.html#Acc"><span class="id" title="inductive">Acc</span></a> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> (<a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> <a class="idref" href="wellfounded.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="wellfounded.html#y"><span class="id" title="variable">y</span></a>) <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Wf.html#Acc"><span class="id" title="inductive">Acc</span></a> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> (<a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> <a class="idref" href="wellfounded.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="wellfounded.html#z"><span class="id" title="variable">z</span></a>).<br/>
-<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">intro</span>. <span class="id" title="tactic">induction</span> <span class="id" title="var">x</span>. <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">y0</span>. <span class="id" title="tactic">inversion</span> <span class="id" title="var">H0</span>.<br/>
-<span class="id" title="tactic">intros</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">y0</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">n</span>.<br/>
-<span class="id" title="tactic">unfold</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a>. <span class="id" title="tactic">auto</span>.<br/>
-
-<br/>
-<span class="id" title="tactic">inversion</span> <span class="id" title="var">H0</span>. <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">unfold</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a>. <span class="id" title="tactic">auto</span>. <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">unfold</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> <span class="id" title="keyword">in</span> <span class="id" title="var">H0</span>.<br/>
-<span class="id" title="tactic">unfold</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a>. <span class="id" title="tactic">assumption</span>.<br/>
-<span class="id" title="keyword">Defined</span>.<br/>
-<span class="id" title="keyword">Theorem</span> <a name="allPairs_Acc"><span class="id" title="lemma">allPairs_Acc</span></a> : <span class="id" title="keyword">forall</span> <span class="id" title="var">p</span> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a>, <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Wf.html#Acc"><span class="id" title="inductive">Acc</span></a> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> <a class="idref" href="wellfounded.html#p"><span class="id" title="variable">p</span></a>.<br/>
-<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">intro</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">p</span>. <span class="id" title="tactic">induction</span> <span class="id" title="var">n</span>.<br/>
-<span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">unfold</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> <span class="id" title="keyword">in</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">y</span>. <span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>.<br/>
-<span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">intros</span> .<br/>
- <span class="id" title="tactic">destruct</span> <span class="id" title="var">y</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">n1</span>.<br/>
-<span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">unfold</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> <span class="id" title="keyword">in</span> <span class="id" title="var">H0</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">y</span>. <span class="id" title="tactic">inversion</span> <span class="id" title="var">H0</span>.<br/>
-<span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">apply</span> <a class="idref" href="wellfounded.html#helper"><span class="id" title="lemma">helper</span></a> <span class="id" title="keyword">with</span> (<span class="id" title="var">z</span>:=<span class="id" title="var">n2</span>) <span class="id" title="keyword">in</span> <span class="id" title="var">IHn</span>. <span class="id" title="tactic">assumption</span> .<br/>
- <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">IHn</span>.<br/>
- <span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">H0</span>. <span class="id" title="tactic">auto</span>.<br/>
-<span class="id" title="keyword">Defined</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Theorem</span> <a name="pairsWfr"><span class="id" title="lemma">pairsWfr</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Wf.html#well_founded"><span class="id" title="definition">well_founded</span></a> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a>.<br/>
-<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">constructor</span>. <span class="id" title="tactic">apply</span> <a class="idref" href="wellfounded.html#allPairs_Acc"><span class="id" title="lemma">allPairs_Acc</span></a>. <span class="id" title="keyword">Defined</span>. 
-<br/>
-<span class="id" title="keyword">Definition</span> <a name="divide"><span class="id" title="definition">divide</span></a> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>.<br/>
-&nbsp;<span class="id" title="tactic">refine</span> <br/>
-&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">Fix</span> <a class="idref" href="wellfounded.html#pairsWfr"><span class="id" title="lemma">pairsWfr</span></a> (<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> (<span class="id" title="var">p</span> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">subcall</span> : <span class="id" title="keyword">forall</span>  <span class="id" title="var">p'</span> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a>, <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> <a class="idref" href="wellfounded.html#p'"><span class="id" title="variable">p'</span></a> <a class="idref" href="wellfounded.html#p"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) =&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="wellfounded.html#p"><span class="id" title="variable">p</span></a> <span class="id" title="keyword">with</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> <span class="id" title="var">x</span> 0 =&gt; 0<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> <span class="id" title="var">x</span> <span class="id" title="var">y</span> =&gt;  <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Nat.html#leb"><span class="id" title="definition">Nat.leb</span></a> <span class="id" title="var">y</span> <span class="id" title="var">x</span>) <span class="id" title="keyword">then</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> (<a class="idref" href="wellfounded.html#subcall"><span class="id" title="variable">subcall</span></a> (<a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> (<span class="id" title="var">x</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#9482aae3d3b06e249765c1225dbb8cbb"><span class="id" title="notation">-</span></a><span class="id" title="var">y</span>) <span class="id" title="var">y</span>) <span class="id" title="var">_</span> )<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> 0<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
-<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;).  <span class="id" title="keyword">Abort</span>.<br/>
-
-<br/>
-
-<br/>
-<span class="id" title="keyword">Lemma</span> <a name="ltSucc"><span class="id" title="lemma">ltSucc</span></a> : <span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <a class="idref" href="wellfounded.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#989c98e7ddd65d5bf37c334ff2076de8"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="wellfounded.html#y"><span class="id" title="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="wellfounded.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#989c98e7ddd65d5bf37c334ff2076de8"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <a class="idref" href="wellfounded.html#y"><span class="id" title="variable">y</span></a>.<br/>
-<span class="id" title="tactic">intro</span>. <span class="id" title="tactic">induction</span> <span class="id" title="var">x</span>. <span class="id" title="tactic">auto</span>. <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">y</span>. <span class="id" title="tactic">auto</span>. <span class="id" title="tactic">auto</span>. <span class="id" title="keyword">Defined</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Theorem</span> <a name="natsub"><span class="id" title="lemma">natsub</span></a> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">x</span>, <a class="idref" href="wellfounded.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#9482aae3d3b06e249765c1225dbb8cbb"><span class="id" title="notation">-</span></a> <a class="idref" href="wellfounded.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#989c98e7ddd65d5bf37c334ff2076de8"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <a class="idref" href="wellfounded.html#n"><span class="id" title="variable">n</span></a>.<br/>
-<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">intro</span>. <span class="id" title="tactic">induction</span> <span class="id" title="var">n</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">intro</span>. <span class="id" title="tactic">auto</span>.<br/>
-<span class="id" title="tactic">intros</span>. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">x</span>. <span class="id" title="tactic">auto</span>. <span class="id" title="tactic">eapply</span> <a class="idref" href="wellfounded.html#ltSucc"><span class="id" title="lemma">ltSucc</span></a> <span class="id" title="keyword">in</span> <span class="id" title="var">IHn</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">IHn</span>. <span class="id" title="keyword">Defined</span>.<br/>
-
-<br/>
-<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.omega.Omega.html#"><span class="id" title="library">Omega</span></a>.<br/>
-
-<br/>
-<span class="id" title="keyword">Definition</span> <a name="divide_v2"><span class="id" title="definition">divide_v2</span></a> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>.<br/>
-&nbsp;<span class="id" title="tactic">refine</span> <br/>
-&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">Fix</span> <a class="idref" href="wellfounded.html#pairsWfr"><span class="id" title="lemma">pairsWfr</span></a> (<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> (<span class="id" title="var">p</span> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">subcall</span> : <span class="id" title="keyword">forall</span>  <span class="id" title="var">p'</span> : <a class="idref" href="wellfounded.html#MyStupidPair"><span class="id" title="inductive">MyStupidPair</span></a>, <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a> <a class="idref" href="wellfounded.html#p'"><span class="id" title="variable">p'</span></a> <a class="idref" href="wellfounded.html#p"><span class="id" title="variable">p</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) =&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">_</span><br/>
-<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;). <span class="id" title="tactic">destruct</span> <span class="id" title="var">p</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">n0</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exact</span> 0.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Arith.PeanoNat.html#Nat.leb"><span class="id" title="definition">Nat.leb</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <span class="id" title="var">n0</span>) <span class="id" title="var">n</span>) <span class="id" title="var">eqn</span> :<span class="id" title="tactic">case</span>.<br/>
- <span class="id" title="tactic">refine</span>  <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> (<span class="id" title="var">subcall</span> (<a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> (<span class="id" title="var">n</span> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#9482aae3d3b06e249765c1225dbb8cbb"><span class="id" title="notation">-</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#9482aae3d3b06e249765c1225dbb8cbb"><span class="id" title="notation">(</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <span class="id" title="var">n0</span><a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Peano.html#9482aae3d3b06e249765c1225dbb8cbb"><span class="id" title="notation">)</span></a>) (<a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <span class="id" title="var">n0</span>))  <span class="id" title="var">_</span>) ).<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <a class="idref" href="wellfounded.html#first_ltR"><span class="id" title="definition">first_ltR</span></a>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">n</span>. <span class="id" title="tactic">inversion</span> <span class="id" title="tactic">case</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span> <span class="id" title="keyword">in</span> <span class="id" title="tactic">case</span>. <span class="id" title="tactic">simpl</span>.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <a class="idref" href="wellfounded.html#natsub"><span class="id" title="lemma">natsub</span></a>.<br/>
-
-<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exact</span> 0. <span class="id" title="keyword">Defined</span>.<br/>
-<span class="id" title="keyword">Print</span> <a class="idref" href="wellfounded.html#divide_v2"><span class="id" title="definition">divide_v2</span></a>.<br/>
-<span class="id" title="keyword">Definition</span> <a name="myDivide"><span class="id" title="definition">myDivide</span></a> (<span class="id" title="var">x</span> <span class="id" title="var">y</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.5pl2/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) := <a class="idref" href="wellfounded.html#divide_v2"><span class="id" title="definition">divide_v2</span></a> (<a class="idref" href="wellfounded.html#mystupidpair"><span class="id" title="constructor">mystupidpair</span></a> <a class="idref" href="wellfounded.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="wellfounded.html#y"><span class="id" title="variable">y</span></a>).<br/>
-
-<br/>
-<span class="id" title="keyword">Eval</span> <span class="id" title="tactic">compute</span> <span class="id" title="keyword">in</span> (<a class="idref" href="wellfounded.html#myDivide"><span class="id" title="definition">myDivide</span></a> 0 0).<br/>
-<span class="id" title="keyword">Eval</span> <span class="id" title="var">cbn</span> <span class="id" title="keyword">in</span> (<a class="idref" href="wellfounded.html#myDivide"><span class="id" title="definition">myDivide</span></a> 3 4).<br/>
-<span class="id" title="keyword">Eval</span> <span class="id" title="tactic">compute</span> <span class="id" title="keyword">in</span> (<a class="idref" href="wellfounded.html#myDivide"><span class="id" title="definition">myDivide</span></a> 4 2).<br/>
-<span class="id" title="keyword">Eval</span> <span class="id" title="tactic">compute</span> <span class="id" title="keyword">in</span> (<a class="idref" href="wellfounded.html#myDivide"><span class="id" title="definition">myDivide</span></a> 5 2).<br/>
-<span class="id" title="keyword">Eval</span> <span class="id" title="tactic">compute</span> <span class="id" title="keyword">in</span> (<a class="idref" href="wellfounded.html#myDivide"><span class="id" title="definition">myDivide</span></a> 100 7).<br/>
-<span class="id" title="keyword">Eval</span> <span class="id" title="tactic">compute</span> <span class="id" title="keyword">in</span> (<a class="idref" href="wellfounded.html#myDivide"><span class="id" title="definition">myDivide</span></a> 3 4).<br/>
 
 <br/>
 </div>
