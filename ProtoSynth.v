@@ -23,7 +23,7 @@ Proof. intros.   destruct n1, n2;
   try (left;reflexivity); right; unfold not; intros H; inversion H.
 Defined.
 
-Hint Resolve eq_dec_noun : eq_dec_db.
+Hint Resolve eq_dec_noun (*: eq_dec_db.*).
  
 (*Require Import String.*) 
 Require Import Coq.Relations.Relation_Definitions.
@@ -74,7 +74,8 @@ x = y.
 Proof. intros;
 induction x; dependent induction y;
 ( reflexivity).
-Defined. 
+Defined.
+Hint Resolve eq_dec_DescriptionR1. 
 
 (* This 'extra step' is done simply so that comparison between descriptors
 is 'easy.'It is much more involved to be able to compare indexed types. *)
@@ -94,8 +95,8 @@ intros. subst. reflexivity.
 right. unfold not. intros. inversion H. contradiction.
 right. unfold not. intros. inversion H. contradiction.
 Defined. 
-Hint Resolve eq_dec_Description : eq_dec_db.
-Hint Resolve eq_dec_DescriptionR1 : eq_dec_db.  
+Hint Resolve eq_dec_Description . (*: eq_dec_db.
+Hint Resolve eq_dec_DescriptionR1 : eq_dec_db.  *)
 
 Add LoadPath "/users/paulkline/Documents/coqs/dependent-crypto".
 Add LoadPath "/users/paulkline/Documents/coqs/cpdt/src".
@@ -136,7 +137,8 @@ Inductive Message : Set :=
 Theorem eq_dec_bool : forall b c : bool, 
 {b = c} + {b <> c}.
 decide equality.
-Defined. 
+Defined.
+Hint Resolve  eq_dec_bool.  
 
 
 Require Import Coq.Program.Equality.
@@ -150,12 +152,14 @@ forall d : Description, forall n n1 : (measurementDenote d),
 Proof. intros.
 inversion H. apply inj_pair2_eq_dec. apply eq_dec_Description. Print existT.   apply H1.
 Qed.
+Hint Resolve  sendable_measurment_inversion. 
 
 
 
 Theorem lemma1 : forall d : Description, forall m1 m2 : (measurementDenote d), {m1 = m2} + {m1 <> m2}.
 Proof. intros. destruct d. destruct d; simpl in m1; simpl in m2; (apply nat_eq_eqdec) || (apply bool_eqdec).
 Qed.
+Hint Resolve  lemma1. 
 (*
 Theorem eq_dec_Message : forall x y : Message,
   { x = y} + {x <> y}. Proof. intros. *)
@@ -169,7 +173,8 @@ left. refl. right. not_eq. not_eq. not_eq. not_eq.
 destruct y. not_eq.
 destruct (eq_dec_Description d d0). subst. left. refl.
 not_eq. not_eq. destruct y. not_eq. not_eq. left; refl.
-Defined. 
+Defined.
+Hint Resolve  eq_dec_Message.  
 
 
 (* Here we begin specificiation of requirements. So not only do I want a particular measurment,
@@ -245,6 +250,7 @@ Inductive Action : Set :=
  Theorem eq_dec_Action : forall x y : Action,
  {x = y} + {x <>y }.
  Proof. decide equality. Defined.
+ Hint Resolve  eq_dec_Action. 
  
  Require Import Coq.Lists.List.
  
@@ -298,6 +304,7 @@ Inductive Role : Set :=
  | Attester. 
 Theorem eq_dec_Role: forall x y : Role, {x = y} + {x <> y}. 
 Proof. decide equality. Defined.
+Hint Resolve eq_dec_Role. 
 
 Definition freeRequirement (d : Description): Requirement d:= 
  requirement d (fun _ => true).
@@ -436,6 +443,8 @@ intros. simpl in H0. destruct a. destruct (canSend ls pp). inversion H0. eauto.
 findForExists H3. inversion H0. Qed. 
 
 Add LoadPath "C:\Users\Paul\Documents\coqs\protosynth\cpdt\src".
+Add LoadPath "/nfs/users/paulkline/Documents/coqs/protosynth/cpdt/src".
+
 Require Import CpdtTactics. 
 Theorem WillSend : forall n a pp rls un ls f, (getProtocol (S n) a pp rls un ls) = Receive f -> 
 ( forall m, m <> StopMessage -> exists m2 s', (f m) = Send m2 s').
@@ -448,6 +457,7 @@ destruct (reduceUnresolved d m un). destruct (canSend ls (reducePrivacy d m pp))
 eauto. destruct rls. eauto. destruct r0. eauto. eauto. inversion H. destruct (handleRequest pp d). destruct p.
 destruct m. eauto. eauto. eauto. elim H0. reflexivity.
 Qed.
+Hint Resolve  WillSend. 
 
 Check (Receive _). 
 Inductive IsValid : Session -> Session -> Prop :=
@@ -544,8 +554,8 @@ end.
 
 Theorem subValid : forall m x f, IsValid (Send m x) (Receive f) -> IsValid x (f m).
 Proof. intros. inversion H. subst. exact H3.
-Qed. 
-Hint Resolve subValid.
+Qed.
+Hint Resolve  subValid.
 Theorem subValid2 : forall m x f, IsValid (Receive f) (Send m x) -> IsValid (f m) x.
 Proof. intros. inversion H. subst.
 subst. exact H3.
@@ -559,6 +569,7 @@ reflexivity.
 intros. simpl. simpl in H. apply @lr_send with (f m). inversion H. subst. exact H3.
 reflexivity.           
  Qed.
+ Hint Resolve  reducingIsOkay. 
 
 Theorem reducingIsOkay2 : forall f m x, IsValid (Receive f) (Send m x) <-> 
   IsValid (reduce m (Receive f)) (Send m x) .
@@ -567,6 +578,7 @@ reflexivity.
 intros. simpl. simpl in H. apply @rl_send with (f m). inversion H. subst. exact H3. 
 reflexivity.
  Qed.
+ Hint Resolve reducingIsOkay2. 
 
 Definition getNext (m : Message) (sess : Session) : Session :=
 match sess with
@@ -614,16 +626,19 @@ Example eijeifjfij : (bigStep appraiserProto1 attesterproto1) = Some (Stop,Stop)
 Proof. unfold appraiserProto1. unfold attesterproto1. cbn. unblock_goal. simpl. cbn.
 cbn. eauto. simpl_eq. reflexivity.
 Qed.
+Hint Resolve  eijeifjfij. 
 (*
 Eval compute in smallStep (smallStep (smallStep (appraiserProto2, attesterproto2))).  *)
 Example eefffees2 : (bigStep appraiserProto2 attesterproto2) = Some (Stop,Stop).
 Proof.  unfold appraiserProto2. unfold attesterproto2. simpl.
-reflexivity. Qed. 
+reflexivity. Qed.
+Hint Resolve  eefffees2.  
 
 
 Theorem IsValid_IsValid : forall x y, IsValid x y -> IsValid y x.
 Proof. intros. induction H; auto || eauto.
-Qed. 
+Qed.
+Hint Resolve IsValid_IsValid.  
 
 Theorem bigStep_implies_IsValid : forall x y : Session, (bigStep x y) = Some (Stop,Stop) -> 
  IsValid x y. Proof. intro. induction x. simpl. destruct y eqn:what. simpl.
@@ -631,18 +646,18 @@ Theorem bigStep_implies_IsValid : forall x y : Session, (bigStep x y) = Some (St
  inversion H.
  intros. apply IHx in H. eauto.
  intros. inversion H.
- intros. inversion H.
+ intros. inversion H0.
  intros. eauto.
     destruct y. eauto.
     inversion H0.
-    inversion H0.
-    simpl in H0. inversion H0.
+    inversion H0. intros. 
+    simpl in H. inversion H.
     intros. simpl in H. inversion H.
     intros. simpl in H.
     destruct y; (try inversion H).
     auto.
     Qed.
-    
+    Hint Resolve bigStep_implies_IsValid. 
 Example example5 : IsValid appraiserProto1 attesterproto1.
 Proof. intros. apply bigStep_implies_IsValid.
   cbn. unblock_goal. simpl_eq. reflexivity.
@@ -694,27 +709,25 @@ Ltac proto_simpler := match goal with
 
   
   
-Theorem WillStop_Receive : forall n a pp rls un f ls, (getProtocol n a pp rls un ls) = Receive f ->
+Theorem WillStop_Receive : forall n a pp rls un f ls, (getProtocol (S n) a pp rls un ls) = Receive f ->
   f StopMessage = Stop. 
-Proof. intros.  destruct n. simpl in H. inversion H.
-simpl in H. destruct a. destruct (canSend ls pp).  inversion H.
-destruct rls.  inversion H.
-destruct r. inversion H. inversion H. reflexivity.
-simpl in H. destruct a. destruct (canSend ls pp). inversion H. destruct rls.
-inversion H. destruct r. inversion H. inversion H. reflexivity.          
-Qed.
-
+Proof. intros.  destruct a. simpl in H. destruct (canSend ls pp).  inversion H.
+destruct rls. inversion H. destruct r. inversion H. simpl in H. inversion H.
+auto. Qed.
+Hint Resolve  WillStop_Receive. 
 Theorem willReceive : forall n pp rls un ls, exists f, (getProtocol (S n) AReceive pp rls un ls) = Receive f. 
 Proof. intros. destruct n. simpl. eauto. simpl. eauto.
 Qed.
 
 Theorem IsValid_WillStoprl : 
  forall n pp rls un ls, IsValid (getProtocol (S n) AReceive pp rls un ls) (Send StopMessage Stop).
- intros. (proto_simpler).  proto_simpler. proto_simpler. auto. auto. Qed.
+ intros. (proto_simpler).  proto_simpler. proto_simpler. auto. Qed.
+ Hint Resolve IsValid_WillStoprl.
  
 Theorem IsValid_WillStoplr : 
  forall n pp rls un ls, IsValid (Send StopMessage Stop) (getProtocol (S n) AReceive pp rls un ls).
   intros. proto_simpler. proto_simpler. auto. auto. Qed.
+  Hint Resolve IsValid_WillStoplr.
 
 Theorem WillStop_Send : forall n a pp rls un r ls, (getProtocol n a pp rls un ls) = Send StopMessage r ->
   r = Stop. 
@@ -724,22 +737,26 @@ destruct rls. inversion H. reflexivity.
 destruct r0. inversion H. inversion H. refl. inversion H. refl.
 inversion H. simpl in H. destruct a. destruct (canSend ls pp). inversion H. destruct rls. inversion H. refl.
 destruct r. destruct r0. inversion H. destruct r0. inversion H. destruct r0. inversion H.
-destruct r0. inversion H. inversion H. Qed.
+ inversion H. Qed.
 
+Hint Resolve WillStop_Send. 
 Theorem wellduh_eq_dec_Attribute :
  forall x, exists p : x =x, eq_dec_attribute  x x= left p.
  intros. case_eq (eq_dec_attribute x x). intros. exists e. reflexivity.
  intros. assert (x = x). refl. contradiction. Qed.
+ Hint Resolve wellduh_eq_dec_Attribute. 
  
  Theorem wellduh_eq_dec_Noun :
 forall x, exists p : x =x, eq_dec_noun  x x= left p.
  intros. case_eq (eq_dec_noun x x). intros. exists e. reflexivity.
  intros. assert (x = x). refl. contradiction. Qed.
+ Hint Resolve wellduh_eq_dec_Noun. 
  
 Theorem wellduh_eq_dec_Description : 
 forall x, exists p : x = x, eq_dec_Description x x = left p.
  intros. case_eq (eq_dec_Description x x). intros. exists e. reflexivity.
  intros. assert (x = x). refl. contradiction. Qed.
+ Hint Resolve  wellduh_eq_dec_Description. 
  
  
 Theorem IguessThatsOkay :
@@ -756,7 +773,9 @@ Ltac elim_let := match goal with
   (*
   Add LoadPath "C:\Users\Paul\Documents\coq\cpdt".
 Require Import CpdtTactics.  *)
-Theorem IsValid_inc1 : forall  pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
+
+Ltac protosimpler := repeat (simpl; proto_simpler). 
+Theorem IsValid_1_1 : forall  pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
   IsValid (getProtocol (1) ASend pp1 rls1 un1 ls1) (getProtocol (1) AReceive pp2 rls2 un2 ls2).
   Proof. intros. simpl. destruct rls1. destruct (canSend ls1 pp1). proto_simpler.
   destruct (reduceUnresolved d (measure d) un2).  auto. auto.
@@ -766,16 +785,17 @@ Theorem IsValid_inc1 : forall  pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
   destruct (reduceUnresolved d (measure d) un2). eauto. eauto. 
   destruct (reduceUnresolved d (measure d) un2). auto. auto.        
   destruct r. proto_simpler. destruct (handleRequest pp2 d). destruct p. destruct m.
-  proto_simpler.   eauto. apply IguessThatsOkay. auto.
-  proto_simpler. apply IguessThatsOkay. auto.
-  proto_simpler. auto. auto.      
-  destruct (handleRequest pp2 d). destruct p. reflexivity.
-  Qed. 
+  proto_simpler.   eauto. auto. protosimpler.  protosimpler.
+  destruct (handleRequest pp2 d). destruct p. destruct m. auto. auto.
+  auto. Qed.
+  
+  Hint Resolve  IsValid_1_1. 
 
-Theorem IsValid_zero : forall  pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
+Theorem IsValid_0_0 : forall  pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
   IsValid (getProtocol (0) ASend pp1 rls1 un1 ls1) (getProtocol (0) AReceive pp2 rls2 un2 ls2).
   intros. proto_simpler. proto_simpler. auto. auto.
-  Qed. 
+  Qed.
+  Hint Resolve  IsValid_0_0.  
    (*
   Theorem IsValidPrivacy : forall  pp1 pp2 pp1' rls1 rls2 un1 un2 ls1 ls2 n,
   IsValid (getProtocol (S n) ASend pp1 rls1 un1 ls1) (getProtocol (S n) AReceive pp2 rls2 un2 ls2) ->
@@ -792,6 +812,7 @@ Theorem IsValid_zero : forall  pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
   (getProtocol (n) AReceive pp1 rls1 un1 ls1).
   intro. induction n. intros. simpl. proto_simpler. auto. auto. intros. simpl. proto_simpler. auto. auto.
   Qed.
+  Hint Resolve sendStopAll. 
   
   Ltac sendstop := match goal with
     | [ |- IsValid (getProtocol _ AReceive _ _ _ _) (Send StopMessage Stop)] =>
@@ -855,7 +876,7 @@ Theorem IsValid_zero : forall  pp1 pp2 rls1 rls2 un1 un2 ls1 ls2,
   apply succValid. apply I
   
   *)
-  Ltac protosimpler := repeat proto_simpler. 
+
   
   Check getProtocol. 
   Inductive Parms :=
@@ -886,7 +907,7 @@ Definition getAction (p : Parms) : Action :=
  | parmsc x a x1 x2 x3 x4 => a
  | _ => ASend
 end.
-
+(*
   Definition whatsthatmessage (pars : Parms) (_ : getAction pars = ASend) :
    (Message * Parms). intros. destruct (getprotocol pars) eqn:P. destruct pars. destruct n.
   simpl in H. unfold getprotocol in P. rewrite H in P.  simpl in P . inversion P. subst.
@@ -942,7 +963,131 @@ destruct (reduceUnresolved d m0 un2). proto     induction H.
   apply H.    induction H.  induction n.
   
   
+*)   
   *)
+  Theorem gimmeNOT : forall (T : Type), forall a : T, a <> a -> False.
+  intros. unfold not in H. apply H. reflexivity. Qed. 
+  
+  Hint Resolve gimmeNOT.      
+
+  Ltac not := match goal with
+   | [ H : ?x <> ?x |- _ ] => exfalso; apply gimmeNOT in H; assumption
+   end. 
+  Theorem IsValid_0_all : forall   m a1 a2 pp1 pp2 rls1 rls2 un1 un2 ls1 ls2  ,
+  a1 <> a2 ->
+  IsValid (getProtocol ( 0) a1 pp1 rls1 un1 ls1) (getProtocol (m) a2 pp2 rls2 un2 ls2).
+  
+  Proof.  intros. simpl. destruct a1, a2. not.   auto.
+  destruct m. simpl. protosimpler. simpl.
+  destruct (canSend ls2 pp2). protosimpler. destruct rls2. protosimpler.
+  destruct r. protosimpler. not. Qed.
+  Hint Resolve IsValid_0_all.
+  
+  
+  Ltac destr := match goal with
+   | [ |- context[ match ?x with 
+            | Sendable_Measurement d x => _
+            | RequestS x => _
+            | StopMessage => _
+            end]
+                  ] => destruct x
+   | [ |- context[(match ?x with 
+            | Some _=> _
+            | None => _
+            end
+                )  ]] => destruct x
+   | [ |- context[(match ?x with 
+            | emptyRequestLS =>_
+            | ConsRequestLS _ _ => _
+                      end
+                )  ]] => destruct x
+   | [ |- context[(match ?x with 
+            | requestItem _ _ => _ end
+                )  ]] => destruct x
+   | [ |- context[(let (_, _) := handleRequest ?xg ?yg in _) ] ]=> destruct (handleRequest xg yg)
+   | [ |- context[(let (_, _) := ?gh in _) ] ]=> destruct gh
+                             
+   end. 
+  Theorem IsValid_1_all : forall   m a1 a2 pp1 pp2 rls1 rls2 un1 un2 ls1 ls2  ,
+  a1 <> a2 ->
+  IsValid (getProtocol ( 1) a1 pp1 rls1 un1 ls1) (getProtocol (m) a2 pp2 rls2 un2 ls2).
+  
+  Proof.  intros. destruct a1, a2. not.  
+  simpl. destr.  
+  destruct m. simpl. protosimpler. simpl.
+  protosimpler. destr. destruct m. simpl.
+  protosimpler. simpl. destr. protosimpler.
+  destr. protosimpler. destr. protosimpler. protosimpler.
+  destr. auto. destr. destruct m. simpl. protosimpler.
+  simpl. protosimpler. destr. destr. destr. protosimpler. protosimpler.
+  protosimpler.
+  simpl. destruct m. simpl. auto. simpl. destr. protosimpler.
+  destr. destruct m. protosimpler. protosimpler. destruct m. auto. auto.
+  destr. auto. destr. protosimpler. destr. destr. destr. destruct m. simpl. protosimpler.
+  simpl. protosimpler. destr. destruct m. protosimpler. simpl. destr. protosimpler.
+  destr. protosimpler. destr. protosimpler. protosimpler.
+  destruct m. protosimpler. protosimpler. destr. destr. destr. protosimpler.
+  protosimpler. protosimpler. auto. not. Qed.
+  Hint Resolve IsValid_1_all.
+  
+  Theorem IsValid_2_all : forall   m a1 a2 pp1 pp2 rls1 rls2 un1 un2 ls1 ls2  ,
+  a1 <> a2 ->
+  IsValid (getProtocol ( 2) a1 pp1 rls1 un1 ls1) (getProtocol (m) a2 pp2 rls2 un2 ls2).
+  
+  Proof.  intros. destruct a1, a2. not.
+  induction m. auto.
+  simpl. destr. protosimpler.
+  destr. destruct m. auto.
+  simpl. destr. protosimpler. destr. auto. auto.
+  destr. auto. destr. protosimpler. destr. destr. destr. destruct m.
+  simpl. protosimpler. protosimpler. destr. destruct m. protosimpler. simpl.
+  protosimpler. destr. protosimpler. destr. protosimpler. destr.
+  protosimpler. protosimpler. destruct m. protosimpler. protosimpler. destr. destr.
+  destr. protosimpler. protosimpler. protosimpler. protosimpler. auto.
+  destr. auto. destr. protosimpler. destr. destr. destr. protosimpler. destr. auto. auto.
+  protosimpler. destr. destr. destr. destruct m. protosimpler. protosimpler. destr. destruct m.
+  protosimpler. simpl. destr. protosimpler. protosimpler. protosimpler.
+  destruct m. protosimpler. protosimpler. destr. destr. destr. protosimpler. protosimpler.
+  protosimpler. auto.
+  auto.
+  destruct m. auto.
+  simpl. protosimpler. destr. protosimpler. destr. destr. destruct m.
+  auto. protosimpler. protosimpler. destr. destruct m. protosimpler.
+  simpl. destr. protosimpler. destr. protosimpler. destr. protosimpler.
+  protosimpler. destr. auto. destr. destruct m. protosimpler.
+  protosimpler. destr. destr. destr. protosimpler. protosimpler. protosimpler.
+  protosimpler. destr.  destr. auto.
+   destr.  protosimpler. destr. destr. destr. destr. protosimpler. destruct m.
+   protosimpler. protosimpler. destr. destruct m. protosimpler. simpl.
+   destr. protosimpler. destr. protosimpler. protosimpler.
+   destr. auto. destr. protosimpler. destr. destr. destr. destruct m. protosimpler. protosimpler.
+   destr. destruct m. protosimpler. simpl. destr. protosimpler. destr.     protosimpler.
+   destr. protosimpler. protosimpler. destruct m. protosimpler. protosimpler.
+   destr. destr. destr. protosimpler. protosimpler. protosimpler. protosimpler.
+   auto. destruct m. protosimpler. protosimpler. destr. destr. destr. protosimpler.
+   destr. auto. auto. protosimpler. destr. destr. destr. destruct m. protosimpler.
+   protosimpler. destr. destruct m. protosimpler. simpl. destr.    protosimpler. 
+   protosimpler. protosimpler. destruct m. protosimpler. protosimpler.
+   destr. destr. destr. protosimpler. protosimpler. protosimpler. protosimpler.
+   auto. auto. destr. auto. destr. destr. protosimpler. destr. destr. destr.
+   destr. destruct m. protosimpler. protosimpler. destr. destruct m. protosimpler.
+   simpl. destr. protosimpler. destr. protosimpler. protosimpler.
+   destr. auto. destr. protosimpler. destr. destr. destr.
+   destruct m. protosimpler. protosimpler. destr. destruct m.
+   protosimpler. simpl. destr. protosimpler. destr. protosimpler.
+   destr. protosimpler. protosimpler. destruct m. protosimpler. protosimpler.
+   destr. destr. destr. protosimpler. protosimpler. protosimpler. protosimpler. protosimpler.
+   destruct m. protosimpler.   protosimpler. destr. destr. destr. protosimpler.
+   destr. auto. auto. protosimpler. destr. destr. destr. destruct m.
+   protosimpler. protosimpler. destr. destruct m. protosimpler. simpl.
+   destr. protosimpler. protosimpler.    protosimpler. destruct m.
+   protosimpler. protosimpler. destr. destr. destr. protosimpler.
+   protosimpler. protosimpler. protosimpler.
+   auto. auto.
+   not.
+   Qed.  
+  
+  Hint Resolve IsValid_2_all.
    
   Theorem IsValidSupreme : forall  n m a1 a2 pp1 pp2 rls1 rls2 un1 un2 ls1 ls2  ,
   a1 <> a2 ->

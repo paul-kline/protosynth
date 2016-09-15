@@ -374,9 +374,8 @@ n - n0 < S n
 
 You may be tempted to use some theorems from the standard library for this. Don't give in. Remember your function won't simplify if you use anything declared with <<Qed>> instead of <<Defined>>.  
 
-NOTE: omega will solve this goal, but as of 8.5pl2 will cause Coqtop to "die badly" whenever you try to reduce your function.
-
-We can solve this goal with some helpers easily enough. *)
+NOTE: omega will solve this goal, but uses lemmas defined with Qed. Which we can't use here.  *)
+Require Import Omega. 
     Lemma natsub : forall n x, n - x < S n.
     Proof. intro.  induction n. auto.
     intros. simpl. destruct x. auto.  
@@ -385,9 +384,9 @@ We can solve this goal with some helpers easily enough. *)
         Defined.
     eapply ltSucc in IHn. apply IHn. 
     Defined.
- 
-                apply natsub.
-                idtac "we are done dividing, i.e. (S n0) is not less than n". 
+ omega.
+ (*              apply natsub.*)
+                idtac "we are done dividing, i.e.S n0 is not less than n". 
                 exact 0. Defined.
 
 (** WE DID IT *)
@@ -410,7 +409,7 @@ Eval compute in (myDivide 0 0).
 Eval cbn in (myDivide 3 4).
 Eval compute in (myDivide 4 2).
 Eval compute in (myDivide 5 2).
-Eval compute in (myDivide 100 7).
+Eval compute in (myDivide 1000 7).
 Eval compute in (myDivide 3 4).
 
 (** The end *)
