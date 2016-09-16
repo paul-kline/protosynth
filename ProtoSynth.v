@@ -444,7 +444,7 @@ findForExists H3. inversion H0. Qed.
 
 Add LoadPath "C:\Users\Paul\Documents\coqs\protosynth\cpdt\src".
 Add LoadPath "/nfs/users/paulkline/Documents/coqs/protosynth/cpdt/src".
-
+Add LoadPath "C:\Users\Paul\Documents\coqStuff\protosynth\cpdt\src".
 Require Import CpdtTactics. 
 Theorem WillSend : forall n a pp rls un ls f, (getProtocol (S n) a pp rls un ls) = Receive f -> 
 ( forall m, m <> StopMessage -> exists m2 s', (f m) = Send m2 s').
@@ -665,6 +665,19 @@ Proof. intros. apply bigStep_implies_IsValid.
   
   Check getProtocol.
   
+Ltac proto' := match goal with
+ |  [ H : IsValid (Send ?M ?X) (Receive ?F) |- _ ] => 
+           apply @lr_send with (F M)
+           end. (* 
+  | IsValid (Receive ?F) (Send ?M ?X) => 
+           apply @rl_send with (F M)
+  | IsValid Stop Stop  => 
+           apply  both_stop
+  | IsValid Stop  (Send StopMessage Stop) => 
+           apply lr_stop
+  | IsValid (Send StopMessage Stop) Stop => 
+           apply rl_stop
+  end.*)
 Ltac proto := match goal with 
   | [  |- IsValid (Send ?M ?X) (Receive ?F)] => 
            apply @lr_send with (F M)
@@ -699,6 +712,10 @@ proto. simpl_eq. proto. simpl_eq. proto. auto. auto.
 simpl_eq. refl. simpl_eq. auto. simpl_eq. reflexivity.
 Qed.
 
+Ltac proto_simpler' iden := match iden with
+ | IsValid ?X ?Y => progress (simpl_eq || proto' iden || auto)
+  | ?X = ?Y => auto
+  end.
 Ltac proto_simpler := match goal with
   | [ |- IsValid ?X ?Y] => progress (simpl_eq || proto || auto)
   | [ |- ?X = ?Y] => auto
@@ -1086,15 +1103,179 @@ destruct (reduceUnresolved d m0 un2). proto     induction H.
    auto. auto.
    not.
    Qed.  
+   
   
   Hint Resolve IsValid_2_all.
+  
+  
+  Ltac search_prem tac :=
+  let rec search P :=
+    tac
+    || (simpl; tac)
+    || match P with
+         | ?P1 /\ ?P2 =>
+           (simpl; search P1)
+           || (simpl; search P2)
+       end
+  in match goal with
+       | [ |- ?P /\ _ -> _ ] => search P
+       | [ |- _ /\ ?P -> _ ] => simpl; search P
+       | [ |- _ -> _ ] => progress (tac || (simpl; tac))
+     end.
+   Ltac doesSomething tac := progress (repeat tac).
+    
+   Ltac myCrush' := match goal with _ => 
+   (progress (repeat 
+              (progress
+                 (doesSomething simpl || 
+                  doesSomething not || 
+                  doesSomething protosimpler || 
+                  doesSomething auto || 
+                  doesSomething destr
+                      )
+              ) 
+            )) || (repeat destr) end . 
+   Ltac myCrush := (progress myCrush') || match goal with 
+      | [m : nat |- IsValid _ _ ] => (destruct m)
+      end.  
+   Theorem IsValid_3_all : forall   m a1 a2 pp1 pp2 rls1 rls2 un1 un2 ls1 ls2  ,
+  a1 <> a2 ->
+  IsValid (getProtocol ( 3) a1 pp1 rls1 un1 ls1) (getProtocol (m) a2 pp2 rls2 un2 ls2).
+  
+  Proof.  intros. destruct a1, a2. myCrush.
+  induction m; [myCrush | myCrush]. myCrush. myCrush. myCrush.
+  myCrush. myCrush. myCrush.
+  myCrush. myCrush. myCrush.
+  destruct m; [myCrush | myCrush].
+  myCrush; myCrush; myCrush; myCrush; myCrush; myCrush; myCrush; myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush. myCrush.
+Qed.
+
+ Theorem IsValid_4_all : forall   m a1 a2 pp1 pp2 rls1 rls2 un1 un2 ls1 ls2  ,
+  a1 <> a2 ->
+  IsValid (getProtocol ( 4) a1 pp1 rls1 un1 ls1) (getProtocol (m) a2 pp2 rls2 un2 ls2).
+  
+  Proof.  intros. destruct a1, a2; repeat myCrush. 
+  Qed.
+  
+ Theorem IsValid_5_all : forall   m a1 a2 pp1 pp2 rls1 rls2 un1 un2 ls1 ls2  ,
+  a1 <> a2 ->
+  IsValid (getProtocol ( 5) a1 pp1 rls1 un1 ls1) (getProtocol (m) a2 pp2 rls2 un2 ls2).
+  
+  Proof.  intros. destruct a1, a2; repeat myCrush. 
+  Qed.
+  
+  
+  
+  Theorem IsValid_6_all : forall   m a1 a2 pp1 pp2 rls1 rls2 un1 un2 ls1 ls2  ,
+  a1 <> a2 ->
+  IsValid (getProtocol ( 6) a1 pp1 rls1 un1 ls1) (getProtocol (m) a2 pp2 rls2 un2 ls2).
+  
+  Proof.  intros. destruct a1, a2; repeat myCrush. 
+  Qed.
    
-  Theorem IsValidSupreme : forall  n m a1 a2 pp1 pp2 rls1 rls2 un1 un2 ls1 ls2  ,
+   
+   Ltac ph := match goal with
+ |  [ H : IsValid (Send ?M ?X) (Receive ?F) |- _ ] => 
+           apply @lr_send with (F M) in H
+ | _ => idtac "fail"          end. (* 
+  | IsValid (Receive ?F) (Send ?M ?X) => 
+           apply @rl_send with (F M)
+  | IsValid Stop Stop  => 
+           apply  both_stop
+  | IsValid Stop  (Send StopMessage Stop) => 
+           apply lr_stop
+  | IsValid (Send StopMessage Stop) Stop => 
+           apply rl_stop
+  end.*)
+   Theorem IsValid_pred_All : forall  n m a1 a2 pp1 pp2 rls1 rls2 un1 un2 ls1 ls2  ,
+  a1 <> a2 ->
+  IsValid (getProtocol (S n ) a1 pp1 rls1 un1 ls1) (getProtocol (m) a2 pp2 rls2 un2 ls2)
+  -> IsValid (getProtocol (n ) a1 pp1 rls1 un1 ls1) (getProtocol (m) a2 pp2 rls2 un2 ls2).
+  Proof. intro. destruct n. intros. apply IsValid_0_all. assumption.
+  
+  intros. destruct a1,a2; myCrush.  inversion H0. myCrush. inversion H2. auto.
+  inversion H2. destr. myCrush. simpl in H3. inversion H3. simpl in H3. inversion H3.
+  destruct m; (inversion H3). destruct m. simpl in H3. inversion H3. simpl in H3.
+  inversion H3. destr. protosimpler. destruct m. simpl in H2. inversion H2. 
+  auto. simpl in H2. inversion H2.       inversion H2. subst.              myCrush.   auto.      myCrush. myCrush. myCrush. myCrush. dest destr.  myCrush.    eqn:eifje. auto.  
+  destruct a1,a2. not. simpl in H0.   destruct (canSend ls1 pp1). destruct m.
+  apply IsValid_IsValid.
+  apply IsValid_0_all. auto.
+  
+  Check @lr_send. simpl in H0.
+  destruct H0. 
+  match H0 with 
+  | (IsValid (Send ?M ?X) (Receive ?F)) => 
+           apply @lr_send with (F M) in H
+  | _ => idtac "fail"
+  end. 
+  ph. 
+   proto' H0.   
+  apply @lr_send with (m:= (Sendable_Measurement d (measure d)))(f := (
+             (fun m : Message =>
+              match m with
+              | Sendable_Measurement d v =>
+                  match reduceUnresolved d v un1 with
+                  | Some newUnresolvedState => getProtocol n ASend (reducePrivacy d v pp1) rls1 newUnresolvedState (tl ls1)
+                  | None => Send StopMessage Stop
+                  end
+              | RequestS d =>
+                  let (p, reqItem) := handleRequest pp1 d in
+                  let (newpp, mess) := p in
+                  match mess with
+                  | Sendable_Measurement _ _ => Send mess (getProtocol n AReceive newpp emptyRequestLS (ConsRequestLS reqItem un1) (tl ls1))
+                  | RequestS _ => Send mess (getProtocol n AReceive newpp emptyRequestLS (ConsRequestLS reqItem un1) (tl ls1))
+                  | StopMessage => Send StopMessage Stop
+                  end
+              | StopMessage => Stop
+              end))) in H0. 
+  simpl in H0.      
+  simpl in H0. 
+  eapply IHn.     myCrush.    destruct a1, a2. not. destruct n,m. myCrush.
+  myCrush.
+  apply IsValid_IsValid. apply IsValid_0_all. auto.
+  myCrush. myCrush. myCrush. myCrush.   
+  simpl.   
+  simpl. 
+  myCrush.       inversion H0. destruct n. myCrush.  inversion H2.  inversion H2.
+  destruct (canSend ls1 pp 
+ Theorem IsValid_succ_all : forall  n m a1 a2 pp1 pp2 rls1 rls2 un1 un2 ls1 ls2  ,
+  a1 <> a2 ->
+  IsValid (getProtocol ( n ) a1 pp1 rls1 un1 ls1) (getProtocol (m) a2 pp2 rls2 un2 ls2)
+  -> IsValid (getProtocol (S n ) a1 pp1 rls1 un1 ls1) (getProtocol (m) a2 pp2 rls2 un2 ls2).
+  Proof. intros. destruct a1, a2. not.   inversion H0. destruct n. inversion H2.  inversion H2.
+  destruct (canSend ls1 pp1). inversion H4. destruct rls1. inversion H4.
+  destruct r. inversion H4. destruct m. inversion H3. inversion H3.
+  destruct n. inversion H2. inversion H2. destruct (canSend ls1 pp1).
+  inversion H4. destruct rls1. inversion H4. destruct r. inversion H4.
+  subst. simpl. Abort.
+  
+   Theorem pony : forall (n m : nat) (a1 a2 : Action) (pp1 pp2 : PrivacyPolicy) (rls1 rls2 un1 un2 : RequestLS)
+        (ls1 ls2 : list Description),
+      a1 <> a2 -> IsValid (getProtocol n a1 pp1 rls1 un1 ls1) (getProtocol (S m) a2 pp2 rls2 un2 ls2) -> exists  a1' a2' pp1' pp2' rls1' rls2' un1' un2' ls1' ls2' mess, 
+       IsValid (getProtocol n a1' pp1' rls1' un1' ls1') (Send mess (getProtocol m a2' pp2' rls2' un2' ls2')).
+   Proof. intros. destruct a1,a2. not. simpl in H0.
+    Abort.
+    
+    Theorem IsValidSupreme : forall  n m a1 a2 pp1 pp2 rls1 rls2 un1 un2 ls1 ls2  ,
   a1 <> a2 ->
   IsValid (getProtocol ( n) a1 pp1 rls1 un1 ls1) (getProtocol (m) a2 pp2 rls2 un2 ls2).
   Proof.  intro. induction n.
   (* n = 0 case *)
-   intros. destruct m.
+   intros. auto. intros.
+   simpl. destruct a1,a2; myCrush. myCrush.      myCrush. myCrush. myCrush.
+   apply IHn. auto.
+   auto. auto.
+   myCrush. myCrush. myCrush. myCrush.
+   destruct n. myCrush. myCrush.
+   repeat destr. simpl in IHn.
+     apply IHn.   .   
+   
+   myCrush.
+    muCrush.        
+   destr.  
+   repeat destr. 
+   myCrush.     destruct m.
      (* m = 0 case *)
       destruct a1,a2. elim H; trivial.
       apply IsValid_zero.
