@@ -387,14 +387,25 @@ match priv with
   | toSendMESSAGE : VarID
   | variden : nat -> VarID
   . 
+  Theorem eq_dec_VarID : forall x y : VarID, {x = y} + {x <> y}.
+  Proof. intros. destruct x,y; try (left; reflexivity).
+  right; unfold not;intros;inversion H.
+  right; unfold not;intros;inversion H.
+  right; unfold not;intros;inversion H.
+  right; unfold not;intros;inversion H.
+  right; unfold not;intros;inversion H.
+  right; unfold not;intros;inversion H.
+  decide equality. rec_eq. Defined.
   
   Inductive Const :=
    | constAction : Action -> Const
-   | constMessage : Message -> Const. 
+   | constValue (d: Description) : (measurementDenote d) -> Const 
+   | constRequest : Description -> Const
+   | constStop : Const.
+   
 Inductive Term :=
  | variable : VarID -> Term
  | const : Const -> Term
- | getMsgToSnd : Term
  .
 Inductive Condition :=
  | CanSend :  Condition
@@ -414,14 +425,163 @@ Inductive Statement :=
  | Choose : Condition -> Statement -> Statement -> Statement
  | Chain : Statement -> Statement -> Statement
  | StopStatement : Statement
+ | Skip : Statement
 .
 
 Notation "'IFS' x 'THEN' y 'ELSE' z" := (Choose x y z)(at level 80, right associativity). 
 Notation "x '>>' y" := (Chain x y)  (at level 60, right associativity).
 (*Notation "(x >> .. >> y)" := (Chain x .. (Chain y StopMessage) ..).*)
+
+Inductive VarState :=
+ | varState : list (VarID*Const) -> VarState. 
+Inductive ProState :=
+ | proState : Action -> PrivacyPolicy -> RequestLS -> RequestLS -> list Description
+      -> ProState.
 Inductive State :=
- | state : Action -> PrivacyPolicy -> RequestLS -> RequestLS -> list Description
-      -> State.
+ state : VarState -> ProState -> State.       
+
+Fixpoint varSubst'' (t : Term) (ls : (list (VarID*Const))) : option Const :=
+match t with
+ | variable vid => match ls with
+                     | nil => None
+                     | cons pr ls' => if (eq_dec_VarID (fst pr) vid) then 
+                           Some (snd pr)
+                          else 
+                           varSubst'' t ls'
+                   end
+ | const x => Some ( x)
+end. 
+Definition varSubst' (t: Term) (vst : VarState) : option Const :=
+ match vst with
+    | varState ls => varSubst'' t ls
+ end. 
+Definition varSubst (t : Term) (st : State ) : option Const :=
+match st with
+ | state varst _ => varSubst' t varst
+end.
+
+Inductive Participant :=
+ |  ATTESTER
+ |  APPRAISER. 
+ Theorem eq_dec_Participant : forall x y : Participant, {x = y} + {x <> y}.
+ Proof. decide equality. Defined.
+    
+Inductive NetworkMessage :=
+ networkMessage : Participant -> Participant -> Const -> NetworkMessage. 
+Definition Network := list NetworkMessage.
+
+(* When we send a message, it gets appended to the end of the list. This makes receiving
+in the correct order easier. *)
+Fixpoint sendOnNetwork (from : Participant) (to : Participant) (m : Const) (n : Network) : Network :=
+ match n with
+ | nil => cons (networkMessage from to m) nil
+ | cons n1 nls => cons n1 (sendOnNetwork from to m nls) 
+end. 
+
+Fixpoint receiveOnNetwork (from : Participant) (me : Participant) (n : Network) : option Const :=
+ match n with
+ | nil => None
+ | cons msg n' => match msg with
+                   | networkMessage nfrom nto x1 => match 
+                      ((eq_dec_Participant nfrom from),(eq_dec_Participant nto me)) with 
+                      | (left _, left _) => Some x1
+                      | (_,_) => receiveOnNetwork from me n'
+                      end
+                  end
+end.
+  
+Definition net_isEmpty ( n : Network) : bool :=
+ match n with
+ | nil => true
+ | cons x x0 => false
+end.
+
+Definition reduceStateWithMeasurement (v : Const) (st : State) : option State := 
+ match v with
+ | constAction _ => Some st
+ | constRequest _ => Some st
+ | constStop => Some st
+ | constValue d denotedVal => (match st with
+                                | state varst  prost=> (match prost with
+                                    | proState a pp toReq myUnresolved tosend => 
+                                       (match (reduceUnresolved d denotedVal myUnresolved) with
+                                         | Some newUnresolvedState => Some ( 
+                                            state varst 
+                                              (proState a (reducePrivacy d denotedVal pp) toReq     
+                                                        newUnresolvedState tosend))
+                                         | None => None
+                                       end)
+                                    end)
+                              end)
+ end.  
+
+Fixpoint handleRequest' (pp : PrivacyPolicy) (d : Description) : 
+(PrivacyPolicy * Const * RequestItem):=
+ match pp with
+ | EmptyPolicy => (EmptyPolicy, StopMessage, requestItem d (neverRequirement d))  (*by default, do not give away*)
+ | @ConsPolicy dp rule_d pp' => if (eq_dec_Description dp d) 
+    then
+      match rule_d with
+       | @rule _ your reqrment => (pp', CReRequestS your, requestItem your reqrment)
+       | free _ => (pp', Sendable_Measurement d (measure d), requestItem d (freeRequirement d) )
+       | never _ => (pp', StopMessage, requestItem d (neverRequirement d)) (*don't matter *)
+       | multiReqAnd _ rule1 morerules => (pp', StopMessage, requestItem d (neverRequirement d)) (* TODO *)
+       | multiReqOr _ rule1 morerules => (pp', StopMessage, requestItem d (neverRequirement d)) (* TODO *)
+      end
+    else
+     match handleRequest pp' d with
+       | (ppres,messres,reqRes) => (@ConsPolicy dp rule_d ppres,messres,reqRes)
+     end
+ end. 
+ 
+Definition canSend (ls : list Description) (priv : PrivacyPolicy) : option Description :=
+(match ls with
+ | nil => None
+ | cons d ds => 
+   (match (handleRequest priv d) with 
+     | (_, Sendable_Measurement d _,_) => Some d  
+     | _ => None
+     end)
+end).
+
+
+Fixpoint evalUntilReceive (me : Participant) (to: Participant) (statement : Statement) (st : State) (n : Network) : 
+  (Statement * State * Network) :=
+match statement with
+ | SendStatement x => match (varSubst x) with 
+                       | None => (VariableSubstError, st, n)
+                       | Some c => (Skip, st, (sendOnNetwork from to))
+ | ReceiveStatement x => (ReceiveStatement x,st,n)
+ | ReduceStatewithMeasurement x => match (varSubst x) with 
+                                    | None => (VariableSubstError, st, n)                                    
+                                    | Some v => (match (reduceStateWithMeasurement v st) with 
+                                                  | None => (MeasurementRequirementNotMet,st, n)
+                                                  | Some newst => 
+                                                     (Skip, newst, n)
+                                                 end)
+ | HandleRequest x => _
+ | Assignment x x0 => _
+ | Choose x x0 x1 => _
+ | Chain x x0 => _
+ | StopStatement => _
+end
+
+
+
+
+Fixpoint DualEval (leftSide rightSide : Statement) (leftState rightState : State) (n : Network) :=
+ match leftSide with
+ | SendStatement t => match (varSubst t leftState) with 
+                         | None => (VariableSubstError 
+ | ReceiveStatement x => _
+ | ReduceStatewithMeasurement x => _
+ | HandleRequest x => _
+ | Assignment x x0 => _
+ | Choose x x0 x1 => _
+ | Chain x x0 => _
+ | StopStatement => _
+end
+ 
 
   
 Definition OneProtocolStep : Statement :=
@@ -454,10 +614,11 @@ Definition OneProtocolStep : Statement :=
 Check OneProtocolStep.
 Print OneProtocolStep.
 
-
+   
 Inductive IsDual : Statement ->  Statement -> Prop:=
  | sendtoleft {s} {r} : IsDual (SendStatement s) (ReceiveStatement r)
- | sendtoright {s} {r} : IsDual (ReceiveStatement r) (SendStatement s) 
+ | sendVsChain {x} {y} {z} : forall m, IsNotSend m -> IsNotChain m -> IsDual (SendStatement x) (
+ | flipIsDual {x} {y} : IsDual x y -> IsDual y x 
  | chaindual {l1} {l2}: (Chain l1 l2)
  | sendtoleft  (ReceiveStatement r) (SendStatement s) : IsDual (SendStatement s) (ReceiveStatement r) .
  | ReceiveStatement x => _

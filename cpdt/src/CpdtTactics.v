@@ -221,7 +221,6 @@ Ltac clear_all :=
            | [ H : _ |- _ ] => clear H
          end.
 
-
 (** Instantiate a quantifier in a hypothesis [H] with value [v], or, if [v] doesn't have the right type, with a new unification variable.
    * Also prove the lefthand sides of any implications that this exposes, simplifying [H] to leave out those implications. *)
 Ltac guess v H :=
