@@ -496,6 +496,7 @@ Definition net_isEmpty ( n : Network) : bool :=
  | cons x x0 => false
 end.
 
+(* the option indicates that a condition failed to be met *)
 Definition reduceStateWithMeasurement (v : Const) (st : State) : option State := 
  match v with
  | constAction _ => Some st
@@ -515,35 +516,59 @@ Definition reduceStateWithMeasurement (v : Const) (st : State) : option State :=
                               end)
  end.  
 
+(* Answered the question: "Can I comply with this request? "
+ 
+ We need the Priv Pol back because in has been modified. we remove the 
+ requested item from the privacy policy. This is a quick and dirty way 
+ of ensuring measurement deadlock never occurs because subsequent 
+ requests for the item will be denied (because no privacy policy found for item) 
+ 
+ The const in the middle is the message we should send back which can be:
+  1. The requested measurement-- you approve (constValue _ _)
+  2. absolutely not! (aka, constStop)
+  3. Or perhaps I will give this measurment away if you give me something I want first. 
+ 
+ This leads us into the third argument we receive back. Perhaps this isn't the best way of 
+ defining this, but the third argument is the requirement that must be met by the measurment
+ in the third case from above. ie, "I need to see some credentials." what exactly msut be met.
+ 
+*)
 Fixpoint handleRequest' (pp : PrivacyPolicy) (d : Description) : 
 (PrivacyPolicy * Const * RequestItem):=
  match pp with
- | EmptyPolicy => (EmptyPolicy, StopMessage, requestItem d (neverRequirement d))  (*by default, do not give away*)
+ | EmptyPolicy => (EmptyPolicy, constStop, requestItem d (neverRequirement d))  (*by default, do not give away*)
  | @ConsPolicy dp rule_d pp' => if (eq_dec_Description dp d) 
     then
       match rule_d with
-       | @rule _ your reqrment => (pp', CReRequestS your, requestItem your reqrment)
-       | free _ => (pp', Sendable_Measurement d (measure d), requestItem d (freeRequirement d) )
-       | never _ => (pp', StopMessage, requestItem d (neverRequirement d)) (*don't matter *)
-       | multiReqAnd _ rule1 morerules => (pp', StopMessage, requestItem d (neverRequirement d)) (* TODO *)
-       | multiReqOr _ rule1 morerules => (pp', StopMessage, requestItem d (neverRequirement d)) (* TODO *)
+       | @rule _ your reqrment => (pp', constRequest your, requestItem your reqrment)
+       | free _ => (pp', constValue d (measure d), requestItem d (freeRequirement d) )
+       | never _ => (pp', constStop, requestItem d (neverRequirement d)) (*don't matter *)
+       | multiReqAnd _ rule1 morerules => (pp', constStop, requestItem d (neverRequirement d)) (* TODO *)
+       | multiReqOr _ rule1 morerules => (pp', constStop, requestItem d (neverRequirement d)) (* TODO *)
       end
     else
-     match handleRequest pp' d with
+     match handleRequest' pp' d with
        | (ppres,messres,reqRes) => (@ConsPolicy dp rule_d ppres,messres,reqRes)
      end
  end. 
  
-Definition canSend (ls : list Description) (priv : PrivacyPolicy) : option Description :=
+ (* ls is the list of things requested from me. This function is used when it is
+ your turn to send something, and tells whether or not you can. You may not be
+ able to because you have nothing left to request. (nil). 
+ Your privacy policy allows for you to send the requested measurement.
+  Possible reasons for failure:
+ 1.   The request is an unsatifiable object from the privacy policy. 
+ *)
+Definition canSend' (ls : list Description) (priv : PrivacyPolicy) : option Description :=
 (match ls with
  | nil => None
  | cons d ds => 
-   (match (handleRequest priv d) with 
-     | (_, Sendable_Measurement d _,_) => Some d  
+   (match (handleRequest' priv d) with 
+     | (_, constValue d _,_) => Some d  
      | _ => None
      end)
 end).
-
+*)
 
 Fixpoint evalUntilReceive (me : Participant) (to: Participant) (statement : Statement) (st : State) (n : Network) : 
   (Statement * State * Network) :=
