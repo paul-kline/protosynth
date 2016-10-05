@@ -426,35 +426,34 @@ Inductive Statement :=
  | Chain : Statement -> Statement -> Statement
  | StopStatement : Statement
  | Skip : Statement
+ | VariableSubstError
+ | MeasurementRequirementNotMet
+ | VariableAssignmentError
 .
 
 Notation "'IFS' x 'THEN' y 'ELSE' z" := (Choose x y z)(at level 80, right associativity). 
 Notation "x '>>' y" := (Chain x y)  (at level 60, right associativity).
 (*Notation "(x >> .. >> y)" := (Chain x .. (Chain y StopMessage) ..).*)
 
-Inductive VarState :=
- | varState : list (VarID*Const) -> VarState. 
+Definition VarState := list (VarID*Const).
 Inductive ProState :=
  | proState : Action -> PrivacyPolicy -> RequestLS -> RequestLS -> list Description
       -> ProState.
 Inductive State :=
  state : VarState -> ProState -> State.       
 
-Fixpoint varSubst'' (t : Term) (ls : (list (VarID*Const))) : option Const :=
+Fixpoint varSubst' (t : Term) (ls : VarState) : option Const :=
 match t with
  | variable vid => match ls with
                      | nil => None
                      | cons pr ls' => if (eq_dec_VarID (fst pr) vid) then 
                            Some (snd pr)
                           else 
-                           varSubst'' t ls'
+                           varSubst' t ls'
                    end
  | const x => Some ( x)
-end. 
-Definition varSubst' (t: Term) (vst : VarState) : option Const :=
- match vst with
-    | varState ls => varSubst'' t ls
- end. 
+end.
+ 
 Definition varSubst (t : Term) (st : State ) : option Const :=
 match st with
  | state varst _ => varSubst' t varst
@@ -552,6 +551,15 @@ Fixpoint handleRequest' (pp : PrivacyPolicy) (d : Description) :
      end
  end. 
  
+Definition handleRequestST (st: State) (d: Description) := match st with
+ | state vars prostate => match prostate with
+     | proState a pp b unres dls => match(handleRequest' pp d) with 
+                                | (pp',c,ri) => state ((toSendMESSAGE,c)::vars) (proState a pp' b (ConsRequestLS ri unres) dls)
+                                                  
+                              end
+end
+end. 
+
  (* ls is the list of things requested from me. This function is used when it is
  your turn to send something, and tells whether or not you can. You may not be
  able to because you have nothing left to request. (nil). 
@@ -568,28 +576,48 @@ Definition canSend' (ls : list Description) (priv : PrivacyPolicy) : option Desc
      | _ => None
      end)
 end).
-*)
+
+
+Definition assign (var : VarID) (val : Const) (st : State) :=
+  match st with
+ | state varls prostate => state ((var,val)::varls) prostate
+end. 
+
 
 Fixpoint evalUntilReceive (me : Participant) (to: Participant) (statement : Statement) (st : State) (n : Network) : 
   (Statement * State * Network) :=
 match statement with
- | SendStatement x => match (varSubst x) with 
+ | SendStatement x => (match (varSubst x st) with 
                        | None => (VariableSubstError, st, n)
-                       | Some c => (Skip, st, (sendOnNetwork from to))
+                       | Some c => (Skip, st, (sendOnNetwork me to c n))
+                       end)
  | ReceiveStatement x => (ReceiveStatement x,st,n)
- | ReduceStatewithMeasurement x => match (varSubst x) with 
+ | ReduceStatewithMeasurement x => (match (varSubst x st) with 
                                     | None => (VariableSubstError, st, n)                                    
                                     | Some v => (match (reduceStateWithMeasurement v st) with 
                                                   | None => (MeasurementRequirementNotMet,st, n)
                                                   | Some newst => 
                                                      (Skip, newst, n)
                                                  end)
- | HandleRequest x => _
- | Assignment x x0 => _
- | Choose x x0 x1 => _
- | Chain x x0 => _
- | StopStatement => _
+                                    end)
+ | HandleRequest d => (match (varSubst d st) with 
+        | Some (constRequest d) => (Skip, handleRequestST st d, n)
+        | _ => (VariableSubstError, st, n)
+        end)
+ | Assignment var val => (match (var, varSubst val st) with 
+                                    | (variable varid, Some v) =>  (Skip, assign varid v st, n)
+                                    | (_,  _) => (VariableAssignmentError, st, n)
+                          end)
+ | Choose x x0 x1 => (Skip, st, n)
+ | Chain x x0 => (Skip, st, n)
+ | StopStatement => (Skip, st, n)
+ | Skip => (Skip, st, n)
+ | VariableSubstError => (Skip, st, n)
+ | MeasurementRequirementNotMet => (Skip, st, n)
+ | VariableAssignmentError => (Skip,st,n)
 end
+
+.
 
 
 
