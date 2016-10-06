@@ -416,11 +416,15 @@ Inductive Condition :=
 .
 
 
+Inductive Computation := 
+ | compHandleRequest 
+ | copmGetMessageToSend
+ . 
 Inductive Statement :=
  | SendStatement : Term -> Statement
  | ReceiveStatement : Term -> Statement
  | ReduceStatewithMeasurement : Term -> Statement
- | HandleRequest : Term -> Statement
+ | Compute : Term -> Computation -> Statement
  | Assignment : Term -> Term -> Statement
  | Choose : Condition -> Statement -> Statement -> Statement
  | Chain : Statement -> Statement -> Statement
@@ -583,67 +587,178 @@ Definition assign (var : VarID) (val : Const) (st : State) :=
  | state varls prostate => state ((var,val)::varls) prostate
 end. 
 
+Fixpoint evalChoose (cond : Condition) (st: State) : bool :=
+ (match st with
+ | state varst prostate => (match prostate with
+      | proState act pp toReq unres ls => (match cond with
+               | CanSend => (match (canSend' ls pp) with 
+                     | None => false
+                     | Some _ => true
+                     end)
+               | IsSend => (match act with
+                   | ASend => true
+                   | AReceive => false
+                   end)
 
-Fixpoint evalUntilReceive (me : Participant) (to: Participant) (statement : Statement) (st : State) (n : Network) : 
-  (Statement * State * Network) :=
+               | IsMeasurement term => (match (varSubst term st) with
+                    | None => false
+                    | Some (constValue _ _) => true
+                    | _ => false
+                    end)
+               | IsRequest term => (match (varSubst term st) with
+                    | None => false
+                    | Some (constRequest _) => true
+                    | _ => false
+                    end)
+               | IsStop term => (match (varSubst term st) with
+                    | None => false
+                    | Some constStop => true
+                    | _ => false
+                    end)
+               end) 
+      end)
+
+end)
+.
+ 
+ 
+Definition fst3 {A B C : Type} (tripl : (A * B * C)) : A := match tripl with 
+  (a,_,_) => a
+  end.
+Fixpoint stmHead (stm : Statement) : Statement :=
+ match stm with 
+  | (Chain stm1 _) => stmHead stm1
+  | x => x
+ end.  
+    
+Inductive isError : Statement -> Prop :=
+ | isvarsubsterr : isError VariableSubstError
+ | isMeasurmentReqNotMet : isError MeasurementRequirementNotMet
+ | isVarAssErr : isError VariableAssignmentError
+ .
+Hint Constructors isError.
+Print  reduceUnresolved. 
+Fixpoint evalUntilReceive (me : Participant) (to: Participant) (statement : Statement) (st : State) (n : Network)  : 
+  { tripl : (Statement * State * Network) | ((fst3 tripl) = Skip) \/ 
+                                            (exists j, (stmHead (fst3 tripl)) = (ReceiveStatement j)) \/
+                                            (isError (fst3 tripl)) }.
+refine (
 match statement with
  | SendStatement x => (match (varSubst x st) with 
-                       | None => (VariableSubstError, st, n)
-                       | Some c => (Skip, st, (sendOnNetwork me to c n))
+                       | None => exist _ (VariableSubstError, st, n) _
+                       | Some c =>  (exist _ (Skip, st, (sendOnNetwork me to c n)) _)
                        end)
- | ReceiveStatement x => (ReceiveStatement x,st,n)
+ | ReceiveStatement x => exist _ (ReceiveStatement x,st,n) _
  | ReduceStatewithMeasurement x => (match (varSubst x st) with 
-                                    | None => (VariableSubstError, st, n)                                    
+                                    | None => exist _ (VariableSubstError, st, n) _                                    
                                     | Some v => (match (reduceStateWithMeasurement v st) with 
-                                                  | None => (MeasurementRequirementNotMet,st, n)
+                                                  | None => exist _ (MeasurementRequirementNotMet,st, n) _
                                                   | Some newst => 
-                                                     (Skip, newst, n)
+                                                     exist _ (Skip, newst, n) _
                                                  end)
                                     end)
- | HandleRequest d => (match (varSubst d st) with 
-        | Some (constRequest d) => (Skip, handleRequestST st d, n)
-        | _ => (VariableSubstError, st, n)
+ | Compute comp => (match comp with
+         | compHandleRequest => _
+         | copmGetMessageToSend => _
+end)
+ HandleRequest d => (match (varSubst d st) with 
+        | Some (constRequest d) => exist _ (Skip, handleRequestST st d, n) _
+        | _ => exist _ (VariableSubstError, st, n) _
         end)
  | Assignment var val => (match (var, varSubst val st) with 
-                                    | (variable varid, Some v) =>  (Skip, assign varid v st, n)
-                                    | (_,  _) => (VariableAssignmentError, st, n)
+                                    | (variable varid, Some v) =>  exist _ (Skip, assign varid v st, n) _
+                                    | (_,  _) => exist _ (VariableAssignmentError, st, n) _
                           end)
- | Choose x x0 x1 => (Skip, st, n)
- | Chain x x0 => (Skip, st, n)
- | StopStatement => (Skip, st, n)
- | Skip => (Skip, st, n)
- | VariableSubstError => (Skip, st, n)
- | MeasurementRequirementNotMet => (Skip, st, n)
- | VariableAssignmentError => (Skip,st,n)
-end
+ | Choose cond pathtrue pathfalse => (match evalChoose cond st with
+                      | true => evalUntilReceive me to pathtrue st n
+                      | false => evalUntilReceive me to pathfalse st n 
+                      end)
+ | Chain stm1 stm2 => (match (evalUntilReceive me to stm1 st n) with 
+                        | exist _ (Chain (ReceiveStatement x) stm1',st',n') _  =>
+                              exist _ ((ReceiveStatement x) >> stm1' >> stm2 , st',n') _
+                        | exist _ (ReceiveStatement x, st', n') p =>
+                            exist _ ( (ReceiveStatement x) >> stm2, st', n') _
+                        | exist _ impossibletriplet impossibleproof => 
+                            exist _  _ _ (*This should be an impossible branch*) 
+                      end)
+ | StopStatement => exist _ (Skip, st, n) _
+ | Skip =>exist _  (Skip, st, n) _
+ | VariableSubstError =>exist _  (Skip, st, n) _
+ | MeasurementRequirementNotMet => exist _ (Skip, st, n) _
+ | VariableAssignmentError => exist _  (Skip,st,n) _
+end); (right; left; exists x; reflexivity) || (exact impossibleproof) ||  (simpl; auto).
+Qed.
 
-.
+Fixpoint removeSkips (st:Statement) : Statement := 
+match st with
+ | Choose c stm1 stm2 => Choose c (removeSkips stm1) (removeSkips stm2)
+ | Chain Skip x0 => removeSkips (x0)
+ | Chain stm1 stm2 => match (removeSkips stm1) with 
+                        | Skip => (removeSkips stm2)
+                        | notaskip => match (removeSkips stm2) with 
+                                | Skip => notaskip
+                                | alsonotaskip => notaskip >> notaskip
+                                end 
+                      end
+ | x => x
+ end. 
+
+Definition isStateSend (st : State) : bool :=
+match st with
+ | state _ prostate => match prostate with
+ | proState act _ _ _ _ => match act with
+                           | ASend => true
+                           | AReceive => false
+                           end
+
+                       end
+
+end. 
+
+Definition isTerminal (stm : Statement) : bool :=
+match stm with
+ | StopStatement => true
+ | Skip => true
+ | VariableSubstError => true
+ | MeasurementRequirementNotMet => true
+ | VariableAssignmentError => true
+ | _ => false
+end. 
 
 
+Inductive WorkOn := LEFT | RIGHT. 
 
-
-Fixpoint DualEval (leftSide rightSide : Statement) (leftState rightState : State) (n : Network) :=
- match leftSide with
- | SendStatement t => match (varSubst t leftState) with 
-                         | None => (VariableSubstError 
- | ReceiveStatement x => _
- | ReduceStatewithMeasurement x => _
- | HandleRequest x => _
- | Assignment x x0 => _
- | Choose x x0 x1 => _
- | Chain x x0 => _
- | StopStatement => _
-end
+Fixpoint DualEval (na : nat) (s : WorkOn) (pair: (Statement*Statement)) (leftState rightState : State) (n : Network) {struct na} : (Statement * Statement).
+refine (
+ (match na with 
+  | O => (pair)
+  | S na' => 
+ let leftSide := fst pair in 
+  let rightSide := snd pair in
+ (match orb (isTerminal leftSide)  (isTerminal rightSide) with 
+   | true =>  (leftSide,rightSide)
+   | false =>
+ (match s with
+  | LEFT => match (evalUntilReceive APPRAISER ATTESTER leftSide leftState n) with 
+                | exist _ (leftstm',leftst', n') leftp => DualEval na' RIGHT (leftstm', rightSide) leftst' rightState n'
+            end                   
+  | RIGHT => match (evalUntilReceive ATTESTER APPRAISER rightSide rightState n) with 
+                | exist _ (stm',st', n') p => DualEval na' LEFT (leftSide, stm') leftState st' n'
+             end
+ end)
+ end)
+ end)
+ ).
+ Qed.
  
 
-  
 Definition OneProtocolStep : Statement :=
   (* first step is to find out if we're sending or receiving. *)
   IFS IsSend
    THEN
     IFS CanSend
       THEN 
-        ((Assignment (variable toSendMESSAGE) getMsgToSnd) >>
+        ((Compute (variable toSendMESSAGE) MessageToSend ) >>
          SendStatement (variable toSendMESSAGE) >>
          StopStatement
         )
