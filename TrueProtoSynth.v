@@ -509,11 +509,11 @@ Definition reduceStateWithMeasurement (v : Const) (st : State) : option State :=
  | constStop => Some st
  | constValue d denotedVal => (match st with
                                 | state varst  prost=> (match prost with
-                                    | proState a pp toReq myUnresolved tosend => 
+                                    | proState a p pp toReq myUnresolved tosend => 
                                        (match (reduceUnresolved d denotedVal myUnresolved) with
                                          | Some newUnresolvedState => Some ( 
                                             state varst 
-                                              (proState a (reducePrivacy d denotedVal pp) toReq     
+                                              (proState a p (reducePrivacy d denotedVal pp) toReq     
                                                         newUnresolvedState tosend))
                                          | None => None
                                        end)
@@ -559,8 +559,8 @@ Fixpoint handleRequest' (pp : PrivacyPolicy) (d : Description) :
  
 Definition handleRequestST (st: State) (d: Description) := match st with
  | state vars prostate => match prostate with
-     | proState a pp b unres dls => match(handleRequest' pp d) with 
-                                | (pp',c,ri) => state ((toSendMESSAGE,c)::vars) (proState a pp' b (ConsRequestLS ri unres) dls)
+     | proState a p pp b unres dls => match(handleRequest' pp d) with 
+                                | (pp',c,ri) => state ((toSendMESSAGE,c)::vars) (proState a p pp' b (ConsRequestLS ri unres) dls)
                                                   
                               end
 end
@@ -592,7 +592,7 @@ end.
 Fixpoint evalChoose (cond : Condition) (st: State) : bool :=
  (match st with
  | state varst prostate => (match prostate with
-      | proState act pp toReq unres ls => (match cond with
+      | proState act p pp toReq unres ls => (match cond with
                | CanSend => (match (canSend' ls pp) with 
                      | None => false
                      | Some _ => true
@@ -622,8 +622,21 @@ Fixpoint evalChoose (cond : Condition) (st: State) : bool :=
 
 end)
 .
-Fixpoint receiveN : 
- 
+Fixpoint receiveN (n : Network) (p : Participant) : option (Const*Network) :=
+ match n with
+ | nil => None
+ | cons m ls =>match m with
+                | networkMessage from to c => if (eq_dec_Participant p to) 
+                   then Some (c,ls)
+                   else match (receiveN ls p) with 
+                     | Some (c',ls') => Some (c', m::ls')
+                     | None => None
+                     end
+                   
+end
+
+end.
+
 Definition fst3 {A B C : Type} (tripl : (A * B * C)) : A := match tripl with 
   (a,_,_) => a
   end.
@@ -658,14 +671,31 @@ Reserved Notation " x '⇓'  x'"
  | MeasurementRequirementNotMet
  | VariableAssignmentError
  | Done
-.*)
-Print Term. 
+.*) 
+
+Definition getMe (st: State) : Participant :=
+ match st with
+ | state _ prostate => match prostate with
+                        | proState _ p _ _ _ _ => p
+end
+
+end.
+
 Inductive stmEval : (Statement * State * Network) -> (Statement * State * Network) -> Prop :=
    | E_Send : forall st n term f t v, (varSubst term st) = Some v ->  (SendStatement term f t, st, n) ⇓
       (Skip, st, (sendOnNetwork f t v n))
-   | E_Receive : forall st n term vid, term = variable vid -> (ReceiveStatement term, st,n) ⇓ 
+   | E_Receive : forall st n n' term vid mess, 
+        term = variable vid -> 
+        receiveN n (getMe st) = Some (mess,n')  ->
+        (ReceiveStatement term, st,n) ⇓ (Skip, assign vid mess st, n')
+   | E_ReduceStateWithMeasurment : forall term st n c st', 
+        varSubst term st = Some c ->
+        reduceStateWithMeasurement c st = Some st' ->  
+        (ReduceStatewithMeasurement term,st,n) ⇓ (Skip, st', n)
+   | ECompute 
    | E_Skip : forall st n, (Skip, st, n)  ⇓ (Done, st, n )
    where "x '⇓' x' " := (stmEval x x').
+
 Fixpoint evalUntilReceive (statement : Statement) (st : State) (n : Network)  : 
   { tripl : (Statement * State * Network) | ((fst3 tripl) = Skip) \/ 
                                             (exists j, (stmHead (fst3 tripl)) = (ReceiveStatement j)) \/

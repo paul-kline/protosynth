@@ -606,7 +606,7 @@ Fixpoint smallStepn (n : nat) (x : (Session*Session)): ((Session*Session) *nat) 
             end
   end.
 
-(*
+
 Definition x := Eval cbn in  smallStep (smallStep (smallStep (appraiserProto1, attesterproto1))).
 Print x .
 *)
@@ -1172,7 +1172,12 @@ Qed.
   
   Proof.  intros. destruct a1, a2; repeat myCrush. 
   Qed.
-   
+    Theorem IsValid_7_all : forall   m a1 a2 pp1 pp2 rls1 rls2 un1 un2 ls1 ls2  ,
+  a1 <> a2 ->
+  IsValid (getProtocol ( 7) a1 pp1 rls1 un1 ls1) (getProtocol (m) a2 pp2 rls2 un2 ls2).
+  
+  Proof.  intros. destruct a1, a2; repeat myCrush. 
+  Qed.
    
    Ltac ph := match goal with
  |  [ H : IsValid (Send ?M ?X) (Receive ?F) |- _ ] => 
@@ -1197,7 +1202,11 @@ Qed.
   inversion H2. destr. myCrush. simpl in H3. inversion H3. simpl in H3. inversion H3.
   destruct m; (inversion H3). destruct m. simpl in H3. inversion H3. simpl in H3.
   inversion H3. destr. protosimpler. destruct m. simpl in H2. inversion H2. 
-  auto. simpl in H2. inversion H2.       inversion H2. subst.              myCrush.   auto.      myCrush. myCrush. myCrush. myCrush. dest destr.  myCrush.    eqn:eifje. auto.  
+  auto. simpl in H2. inversion H2.       inversion H2. subst.              myCrush.   auto.      myCrush. myCrush. myCrush. myCrush.
+  
+  
+  (*create thesis repo start on introduction.
+    summarize from beginning to end what I've done. *) dest destr.  myCrush.    eqn:eifje. auto.  
   destruct a1,a2. not. simpl in H0.   destruct (canSend ls1 pp1). destruct m.
   apply IsValid_IsValid.
   apply IsValid_0_all. auto.
