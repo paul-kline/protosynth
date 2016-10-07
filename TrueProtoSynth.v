@@ -540,7 +540,7 @@ Definition reduceStateWithMeasurement (v : Const) (st : State) : option State :=
  
  This leads us into the third argument we receive back. Perhaps this isn't the best way of 
  defining this, but the third argument is the requirement that must be met by the measurment
- in the third case from above. ie, "I need to see some credentials." what exactly msut be met.
+ in the third case from above. ie, "I need to see some credentials." what exactly must be met.
  
 *)
 Fixpoint handleRequest' (pp : PrivacyPolicy) (d : Description) : 
@@ -577,10 +577,10 @@ end.
   Possible reasons for failure:
  1.   The request is an unsatifiable object from the privacy policy. 
  *)
-Definition canSendST (st : State) (priv : PrivacyPolicy) : option Description :=
+Definition canSendST (st : State) : option Description :=
 match st with
  | state vars prostate => match prostate with
-                           | proState _ _ _ _ _ ls =>  canSend ls priv
+                           | proState _ _ pp _ _ ls =>  canSend ls pp
                           end
 end.
 
@@ -693,10 +693,14 @@ match e with
                                            | _ => None
                                            end
 end.
+Check measure. 
 Definition handleCompute (comp : Computation) (st : State) : option Const :=
  match comp with
-  | compGetMessageToSend => canSend
- end
+  | compGetMessageToSend => match (canSendST st) with 
+                              | Some d => Some (constValue d (measure d))
+                              | None => None
+                            end
+ end. 
 
 
  
@@ -710,8 +714,9 @@ Inductive stmEval : (Statement * State * Network) -> (Statement * State * Networ
    | E_Effect : forall st n effect st',
         handleEffect effect st = Some st' ->  
         (EffectStatement effect, st, n) ⇓ (Skip, st',n)
-   | ECompute : forall st n term vid compTerm,
-        varSubst term st = variable vid  -> 
+   | ECompute : forall st n term vid compTerm c,
+        term = variable vid  -> 
+        handleCompute compTerm st = Some c -> 
         (Compute term compTerm, st, n) ⇓
         (Skip, assign vid (handleCompute compTerm st), n)
         
