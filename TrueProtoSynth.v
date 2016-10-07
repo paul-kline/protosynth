@@ -420,8 +420,13 @@ Inductive Computation :=
  | compHandleRequest 
  | copmGetMessageToSend
  . 
+ Inductive Participant :=
+ |  ATTESTER
+ |  APPRAISER. 
+ Theorem eq_dec_Participant : forall x y : Participant, {x = y} + {x <> y}.
+ Proof. decide equality. Defined.
 Inductive Statement :=
- | SendStatement : Term -> Statement
+ | SendStatement : Term -> Participant -> Participant -> Statement (*for now/simplicity, Participant not a variable*)
  | ReceiveStatement : Term -> Statement
  | ReduceStatewithMeasurement : Term -> Statement
  | Compute : Term -> Computation -> Statement
@@ -433,6 +438,7 @@ Inductive Statement :=
  | VariableSubstError
  | MeasurementRequirementNotMet
  | VariableAssignmentError
+ | Done
 .
 
 Notation "'IFS' x 'THEN' y 'ELSE' z" := (Choose x y z)(at level 80, right associativity). 
@@ -441,7 +447,7 @@ Notation "x '>>' y" := (Chain x y)  (at level 60, right associativity).
 
 Definition VarState := list (VarID*Const).
 Inductive ProState :=
- | proState : Action -> PrivacyPolicy -> RequestLS -> RequestLS -> list Description
+ | proState : Action -> Participant ->  PrivacyPolicy -> RequestLS -> RequestLS -> list Description
       -> ProState.
 Inductive State :=
  state : VarState -> ProState -> State.       
@@ -463,11 +469,7 @@ match st with
  | state varst _ => varSubst' t varst
 end.
 
-Inductive Participant :=
- |  ATTESTER
- |  APPRAISER. 
- Theorem eq_dec_Participant : forall x y : Participant, {x = y} + {x <> y}.
- Proof. decide equality. Defined.
+
     
 Inductive NetworkMessage :=
  networkMessage : Participant -> Participant -> Const -> NetworkMessage. 
@@ -620,7 +622,7 @@ Fixpoint evalChoose (cond : Condition) (st: State) : bool :=
 
 end)
 .
- 
+Fixpoint receiveN : 
  
 Definition fst3 {A B C : Type} (tripl : (A * B * C)) : A := match tripl with 
   (a,_,_) => a
@@ -638,7 +640,33 @@ Inductive isError : Statement -> Prop :=
  .
 Hint Constructors isError.
 Print  reduceUnresolved. 
-Fixpoint evalUntilReceive (me : Participant) (to: Participant) (statement : Statement) (st : State) (n : Network)  : 
+
+Reserved Notation " x '⇓'  x'"
+                  (at level 40).
+
+(*Inductive Statement :=
+ | SendStatement : Term -> Participant -> Participant -> Statement (*for now/simplicity, Participant not a variable*)
+ | ReceiveStatement : Term -> Statement
+ | ReduceStatewithMeasurement : Term -> Statement
+ | Compute : Term -> Computation -> Statement
+ | Assignment : Term -> Term -> Statement
+ | Choose : Condition -> Statement -> Statement -> Statement
+ | Chain : Statement -> Statement -> Statement
+ | StopStatement : Statement
+ | Skip : Statement
+ | VariableSubstError
+ | MeasurementRequirementNotMet
+ | VariableAssignmentError
+ | Done
+.*)
+Print Term. 
+Inductive stmEval : (Statement * State * Network) -> (Statement * State * Network) -> Prop :=
+   | E_Send : forall st n term f t v, (varSubst term st) = Some v ->  (SendStatement term f t, st, n) ⇓
+      (Skip, st, (sendOnNetwork f t v n))
+   | E_Receive : forall st n term vid, term = variable vid -> (ReceiveStatement term, st,n) ⇓ 
+   | E_Skip : forall st n, (Skip, st, n)  ⇓ (Done, st, n )
+   where "x '⇓' x' " := (stmEval x x').
+Fixpoint evalUntilReceive (statement : Statement) (st : State) (n : Network)  : 
   { tripl : (Statement * State * Network) | ((fst3 tripl) = Skip) \/ 
                                             (exists j, (stmHead (fst3 tripl)) = (ReceiveStatement j)) \/
                                             (isError (fst3 tripl)) }.
