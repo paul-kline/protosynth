@@ -417,18 +417,23 @@ Inductive Condition :=
 
 
 Inductive Computation := 
- | compHandleRequest 
- | copmGetMessageToSend
+ | compGetMessageToSend
  . 
+ Inductive Effect :=
+ | effect_HandleRequest : Term -> Effect
+ | effect_ReduceStatewithMeasurement : Term -> Effect
+ .  
  Inductive Participant :=
  |  ATTESTER
  |  APPRAISER. 
  Theorem eq_dec_Participant : forall x y : Participant, {x = y} + {x <> y}.
  Proof. decide equality. Defined.
+ 
 Inductive Statement :=
  | SendStatement : Term -> Participant -> Participant -> Statement (*for now/simplicity, Participant not a variable*)
  | ReceiveStatement : Term -> Statement
- | ReduceStatewithMeasurement : Term -> Statement
+ | EffectStatement : Effect -> Statement
+(* | ReduceStatewithMeasurement : Term -> Statement*)
  | Compute : Term -> Computation -> Statement
  | Assignment : Term -> Term -> Statement
  | Choose : Condition -> Statement -> Statement -> Statement
@@ -566,22 +571,18 @@ Definition handleRequestST (st: State) (d: Description) := match st with
 end
 end. 
 
- (* ls is the list of things requested from me. This function is used when it is
- your turn to send something, and tells whether or not you can. You may not be
- able to because you have nothing left to request. (nil). 
+ (* ls is the list of DESCRIPTIONS requested from me. This function is used when it is
+ your turn to send something, and tells whether or not you can send the measurement of the request. You may not be able to because you have nothing left to request. (nil). 
  Your privacy policy allows for you to send the requested measurement.
   Possible reasons for failure:
  1.   The request is an unsatifiable object from the privacy policy. 
  *)
-Definition canSend' (ls : list Description) (priv : PrivacyPolicy) : option Description :=
-(match ls with
- | nil => None
- | cons d ds => 
-   (match (handleRequest' priv d) with 
-     | (_, constValue d _,_) => Some d  
-     | _ => None
-     end)
-end).
+Definition canSendST (st : State) (priv : PrivacyPolicy) : option Description :=
+match st with
+ | state vars prostate => match prostate with
+                           | proState _ _ _ _ _ ls =>  canSend ls priv
+                          end
+end.
 
 
 Definition assign (var : VarID) (val : Const) (st : State) :=
@@ -593,7 +594,7 @@ Fixpoint evalChoose (cond : Condition) (st: State) : bool :=
  (match st with
  | state varst prostate => (match prostate with
       | proState act p pp toReq unres ls => (match cond with
-               | CanSend => (match (canSend' ls pp) with 
+               | CanSend => (match (canSend ls pp) with 
                      | None => false
                      | Some _ => true
                      end)
@@ -681,6 +682,24 @@ end
 
 end.
 
+Definition handleEffect (e : Effect) (st : State) : option State :=
+match e with
+ | effect_HandleRequest t => match (varSubst t st) with 
+                              | Some (constRequest d) => Some (handleRequestST st d)
+                              | _ => None
+                              end 
+ | effect_ReduceStatewithMeasurement t => match (varSubst t st) with 
+                                           | Some c => (reduceStateWithMeasurement c st)
+                                           | _ => None
+                                           end
+end.
+Definition handleCompute (comp : Computation) (st : State) : option Const :=
+ match comp with
+  | compGetMessageToSend => canSend
+ end
+
+
+ 
 Inductive stmEval : (Statement * State * Network) -> (Statement * State * Network) -> Prop :=
    | E_Send : forall st n term f t v, (varSubst term st) = Some v ->  (SendStatement term f t, st, n) ⇓
       (Skip, st, (sendOnNetwork f t v n))
@@ -688,11 +707,14 @@ Inductive stmEval : (Statement * State * Network) -> (Statement * State * Networ
         term = variable vid -> 
         receiveN n (getMe st) = Some (mess,n')  ->
         (ReceiveStatement term, st,n) ⇓ (Skip, assign vid mess st, n')
-   | E_ReduceStateWithMeasurment : forall term st n c st', 
-        varSubst term st = Some c ->
-        reduceStateWithMeasurement c st = Some st' ->  
-        (ReduceStatewithMeasurement term,st,n) ⇓ (Skip, st', n)
-   | ECompute 
+   | E_Effect : forall st n effect st',
+        handleEffect effect st = Some st' ->  
+        (EffectStatement effect, st, n) ⇓ (Skip, st',n)
+   | ECompute : forall st n term vid compTerm,
+        varSubst term st = variable vid  -> 
+        (Compute term compTerm, st, n) ⇓
+        (Skip, assign vid (handleCompute compTerm st), n)
+        
    | E_Skip : forall st n, (Skip, st, n)  ⇓ (Done, st, n )
    where "x '⇓' x' " := (stmEval x x').
 
@@ -720,7 +742,7 @@ match statement with
          | copmGetMessageToSend => _
 end)
  HandleRequest d => (match (varSubst d st) with 
-        | Some (constRequest d) => exist _ (Skip, handleRequestST st d, n) _
+        | Some (constRequest d) => exist _ (Skip,   st d, n) _
         | _ => exist _ (VariableSubstError, st, n) _
         end)
  | Assignment var val => (match (var, varSubst val st) with 
