@@ -431,15 +431,16 @@ Inductive Computation :=
  
 Inductive Statement :=
  | SendStatement : Term -> Participant -> Participant -> Statement (*for now/simplicity, Participant not a variable*)
- | ReceiveStatement : Term -> Statement
+ | ReceiveStatement : VarID -> Statement
  | EffectStatement : Effect -> Statement
 (* | ReduceStatewithMeasurement : Term -> Statement*)
- | Compute : Term -> Computation -> Statement
- | Assignment : Term -> Term -> Statement
+ | Compute : VarID -> Computation -> Statement
+ | Assignment : VarID -> Term -> Statement
  | Choose : Condition -> Statement -> Statement -> Statement
  | Chain : Statement -> Statement -> Statement
  | StopStatement : Statement
  | Skip : Statement
+ | Wait : Statement
  | VariableSubstError
  | MeasurementRequirementNotMet
  | VariableAssignmentError
@@ -658,21 +659,7 @@ Print  reduceUnresolved.
 Reserved Notation " x '⇓'  x'"
                   (at level 40).
 
-(*Inductive Statement :=
- | SendStatement : Term -> Participant -> Participant -> Statement (*for now/simplicity, Participant not a variable*)
- | ReceiveStatement : Term -> Statement
- | ReduceStatewithMeasurement : Term -> Statement
- | Compute : Term -> Computation -> Statement
- | Assignment : Term -> Term -> Statement
- | Choose : Condition -> Statement -> Statement -> Statement
- | Chain : Statement -> Statement -> Statement
- | StopStatement : Statement
- | Skip : Statement
- | VariableSubstError
- | MeasurementRequirementNotMet
- | VariableAssignmentError
- | Done
-.*) 
+
 
 Definition getMe (st: State) : Participant :=
  match st with
@@ -701,28 +688,127 @@ Definition handleCompute (comp : Computation) (st : State) : option Const :=
                               | None => None
                             end
  end. 
-
+(*Inductive Statement :=
+ | SendStatement : Term -> Participant -> Participant -> Statement (*for now/simplicity, Participant not a variable*)
+ | ReceiveStatement : VarID -> Statement
+ | EffectStatement : Effect -> Statement
+(* | ReduceStatewithMeasurement : Term -> Statement*)
+ | Compute : VarID -> Computation -> Statement
+ | Assignment : VarID -> Term -> Statement
+ | Choose : Condition -> Statement -> Statement -> Statement
+ | Chain : Statement -> Statement -> Statement
+ | StopStatement : Statement
+ | Skip : Statement
+ | Wait : Statement
+ | VariableSubstError
+ | MeasurementRequirementNotMet
+ | VariableAssignmentError
+ | Done
+.
+*)
 
  
 Inductive stmEval : (Statement * State * Network) -> (Statement * State * Network) -> Prop :=
    | E_Send : forall st n term f t v, (varSubst term st) = Some v ->  (SendStatement term f t, st, n) ⇓
       (Skip, st, (sendOnNetwork f t v n))
-   | E_Receive : forall st n n' term vid mess, 
-        term = variable vid -> 
+      
+   | E_ReceiveStop : forall st n n' vid,
+        receiveN n (getMe st) = Some (constStop,n')  ->
+        (ReceiveStatement vid, st,n) ⇓ (StopStatement, assign vid constStop st, n')
+   | E_ReceiveWait : forall st n vid,
+        receiveN n (getMe st) = None -> 
+        (ReceiveStatement vid, st, n) ⇓ (Wait >> (ReceiveStatement vid) ,st ,n)
+   | E_Wait : forall st n happy,
+        receiveN n (getMe st) = Some happy ->
+        (Wait, st, n) ⇓ (Skip, st, n)
+   | E_Receive : forall st n n' vid mess,
+        mess <> constStop ->
         receiveN n (getMe st) = Some (mess,n')  ->
-        (ReceiveStatement term, st,n) ⇓ (Skip, assign vid mess st, n')
+        (ReceiveStatement vid, st,n) ⇓ (Skip, assign vid mess st, n')
    | E_Effect : forall st n effect st',
         handleEffect effect st = Some st' ->  
         (EffectStatement effect, st, n) ⇓ (Skip, st',n)
-   | ECompute : forall st n term vid compTerm c,
-        term = variable vid  -> 
+   | E_Compute : forall st n vid compTerm c, 
         handleCompute compTerm st = Some c -> 
-        (Compute term compTerm, st, n) ⇓
-        (Skip, assign vid (handleCompute compTerm st), n)
-        
-   | E_Skip : forall st n, (Skip, st, n)  ⇓ (Done, st, n )
+        (Compute vid compTerm, st, n) ⇓
+        (Skip, assign vid c st, n)
+   | E_Assign : forall st n vid term2 c, 
+       (varSubst term2 st) = Some c -> 
+       (Assignment vid term2, st, n) ⇓ (Skip, assign vid c st, n)
+   | E_ChooseTrue : forall st n cond stmTrue stmFalse,
+      (evalChoose cond st) = true -> 
+      (Choose cond stmTrue stmFalse, st, n) ⇓ (stmTrue, st, n)
+   | E_ChooseFalse : forall st n cond stmTrue stmFalse,
+      (evalChoose cond st) = false -> 
+      (Choose cond stmTrue stmFalse, st, n) ⇓ (stmFalse, st, n)
+   | E_Chain : forall st n st' n' stm1 stm2, 
+       (stm1,st,n) ⇓ (Skip,st',n') -> 
+       (Chain stm1 stm2, st, n) ⇓ (stm2,st',n')
+   | E_Skip : forall st n, (Skip, st, n)  ⇓ (Skip, st, n )
    where "x '⇓' x' " := (stmEval x x').
 
+
+Definition OneProtocolStep (me to : Participant) : Statement :=
+  (* first step is to find out if we're sending or receiving. *)
+  IFS IsSend
+   THEN
+    IFS CanSend
+      THEN 
+        ((Compute toSendMESSAGE compGetMessageToSend ) >>
+         SendStatement (variable toSendMESSAGE) me to >>
+         StopStatement
+        )
+      ELSE 
+         SendStatement (const constStop) me to>>
+         StopStatement
+   ELSE 
+    ReceiveStatement (receivedMESSAGE) >>
+    IFS (IsMeasurement (variable (receivedMESSAGE)))
+      THEN 
+        EffectStatement (effect_ReduceStatewithMeasurement (variable (receivedMESSAGE)) )
+      ELSE
+       (IFS (IsRequest (variable (receivedMESSAGE)))
+         THEN 
+           EffectStatement (effect_HandleRequest (variable (receivedMESSAGE)))
+         ELSE (*we must have received a stop *)
+           StopStatement
+        
+       ).  
+
+Check OneProtocolStep.
+Print OneProtocolStep .
+
+Inductive dualEval : (Statement * State) * (Statement * State) * Network -> (Statement * State) * (Statement * State) * Network -> Prop :=
+ | dual_leftSideEval : forall stmLeft stmLeft' stmRight leftState leftState' rightState n n', 
+  stmEval (stmLeft, leftState, n) (stmLeft', leftState', n') ->
+  dualEval ((stmLeft, leftState), (stmRight, rightState), n)
+           ((stmLeft',leftState'), (stmRight, rightState), n')
+ | dual_rightSideEval : forall stmLeft stmRight stmRight' leftState rightState rightState' n n', 
+  stmEval (stmRight, rightState, n) (stmRight', rightState', n') ->
+  dualEval ((stmLeft, leftState), (stmRight, rightState), n)
+           ((stmLeft,leftState), (stmRight', rightState'), n')
+.
+Definition emptyNetwork := nil : Network.
+ 
+ Definition getAction (st : State) : Action := 
+   match st with
+ | state _ s => match s with
+ | proState a _ _ _ _ _ => a
+end
+end.
+
+Theorem truthBrother : forall leftST rightST,
+  getAction leftST = ASend -> 
+  getAction rightST = AReceive ->  exists idcLST idcRST idcNet,
+  dualEval
+      (((OneProtocolStep APPRAISER ATTESTER),leftST),
+      ((OneProtocolStep ATTESTER APPRAISER), rightST), emptyNetwork)
+      ( (Skip,idcLST),(Skip,idcRST),idcNet).  Proof.
+intros. eexists. eexists. eexists. unfold OneProtocolStep.
+  simpl.  eapply dual_leftSideEval. 
+Fixpoint tryMyDarndest (stm : Statement) (st : State) (n : Network) : stmEval (stm,st,n).  (Statement*State*Network)
+Fixpoint Duality (leftStatement rightStatement : Statement)
+ (leftState rightState : State) (n : Network) : (Statement* Statement* Network). 
 Fixpoint evalUntilReceive (statement : Statement) (st : State) (n : Network)  : 
   { tripl : (Statement * State * Network) | ((fst3 tripl) = Skip) \/ 
                                             (exists j, (stmHead (fst3 tripl)) = (ReceiveStatement j)) \/
@@ -836,37 +922,6 @@ refine (
  ).
  Qed.
  
-
-Definition OneProtocolStep : Statement :=
-  (* first step is to find out if we're sending or receiving. *)
-  IFS IsSend
-   THEN
-    IFS CanSend
-      THEN 
-        ((Compute (variable toSendMESSAGE) MessageToSend ) >>
-         SendStatement (variable toSendMESSAGE) >>
-         StopStatement
-        )
-      ELSE 
-         SendStatement (const (constMessage StopMessage)) >>
-         StopStatement
-   ELSE 
-    ReceiveStatement (variable (receivedMESSAGE)) >>
-    IFS (IsMeasurement (variable (receivedMESSAGE)))
-      THEN 
-       ReduceStatewithMeasurement (variable (receivedMESSAGE))
-      ELSE
-       (IFS (IsRequest (variable (receivedMESSAGE)))
-         THEN 
-           HandleRequest (variable (receivedMESSAGE))
-         ELSE (*we must have received a stop *)
-           StopStatement
-        
-       ).  
-
-Check OneProtocolStep.
-Print OneProtocolStep.
-
    
 Inductive IsDual : Statement ->  Statement -> Prop:=
  | sendtoleft {s} {r} : IsDual (SendStatement s) (ReceiveStatement r)
