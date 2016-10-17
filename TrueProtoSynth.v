@@ -98,10 +98,10 @@ Defined.
 Hint Resolve eq_dec_Description . (*: eq_dec_db.
 Hint Resolve eq_dec_DescriptionR1 : eq_dec_db.  *)
 
-Add LoadPath "/users/paulkline/Documents/coqs/dependent-crypto".
+(*Add LoadPath "/users/paulkline/Documents/coqs/dependent-crypto".
 Add LoadPath "/users/paulkline/Documents/coqs/cpdt/src".
 Add LoadPath "C:\Users\Paul\Documents\coqs\dependent-crypto".
-Add LoadPath "C:\Users\Paul\Documents\coqs\cpdt\src". 
+Add LoadPath "C:\Users\Paul\Documents\coqs\cpdt\src". *)
 Require Import MyShortHand.
 
 (*This defines what the type of measuring these things should be. *)
@@ -710,96 +710,47 @@ destruct (eq_dec_Participant p p1). subst. inversion H; subst. omega.
    simpl.  rewrite IHn. auto. auto.
 Qed. 
 Hint Resolve receivingShrinks'.
+
+
+ 
+
 Lemma receivemess_receiveWhole : forall c n p, receiveMess n p = Some c <-> receiveN n p = Some (c, rmMess n p).
 Proof. split. intros. 
 destruct n,p. inversion H. inversion H.
 unfold receiveN. rewrite H. auto.
 unfold receiveN. rewrite H. auto.
 
-intros. unfold receiveN in H. .  destruct c, (rmMess n p). inversion H. 
- simpl in H.    
-unfold receiveN in H.
-induction n,p. inversion H. inversion H. eauto. 
-simpl in H.    auto.   
-inversion H. 
-generalize dependent c.
-generalize dependent p.
-induction n.
-intros. inversion H.
-intros.
-destruct a. simpl. simpl in H.  destruct (eq_dec_Participant p p1). inv H. reflexivity.
- destruct n. inversion H.
-simpl in H. destruct n. simpl. destruct (eq_dec_Participant p p3). inversion H. auto.
-apply IHn.
-
-assumption.    simpl.    
-
-
-apply IHn. 
-destruct a,p. simpl.  simpl.        
-destruct (receiveMess n p); destruct n,p. inversion H.
-inversion H.
-destruct n; destruct p, p0; simpl in H.  inv H. subst.  invH.   
- simpl in H. 
-inversion H.     eqn:ef.
-simpl. 
- rewrite ef in H.  subst.  
- 
-
-unfold receiveN in H. 
- destruct (receiveMess n p) eqn:ef. rewrite ef in H.  subst.  
- induction n. inversion H.
- destruct a. simpl. simpl in H.  destruct (eq_dec_Participant p p1). inversion H. reflexivity.
- apply IHn. 
- destruct n,p.
- inversion H. inversion H.
- simpl. auto.     simpl.  
- 
-  eauto.  
- 
-    simpl in H.      
- destruct n,p;(inversion H); destruct n. simpl.   simpl in H.   simpl.  
- inversion H.  
- unfold receiveN in H.
- induction n. inversion H.
- simpl in H. destruct a. simpl.    
- destruct (eq_dec_Participant p p1). inversion H. auto.
- destruct n,p; auto. inversion H. inversion H.
- simpl in H. destruct n. simpl in H.   
- simpl in IHn. 
- simpl. 
- apply IHn. rewrite  H.  simpl.  eassumption.     
- apply IHn.       
- destruct n,p. inversion H. inversion H. 
- destruct n. simpl in H.  destruct p0.
- simpl. inversion H. auto.
- simpl. induction n0. simpl in H. inversion H.
- simpl in H. destruct a. destruct p1.
- simpl. inversion H. auto.
- 
- simpl. destruct n0. simpl in H. inversion H.
- simpl in H. destruct n. destruct p2.
- simpl. inversion H. auto.
- 
- 
- simpl. destruct n0. simpl in H. inversion H.
- simpl in H. destruct n. destruct p3.
- simpl. inversion H. auto.
- 
- 
-     simpl in H.   simpl in H.       
- simpl in H.    
-  simpl . eauto.  
- simpl in H. 
- unfold receiveMess.  
- destruct (receiveMess n p) eqn:ehf.
-  eauto.   inversion H.    destruct n, p. inversion H. inversion H. 
-unfold receiveMess.    
-Qed.
+Admitted.
 Hint Resolve receivemess_receiveWhole.
      
+Lemma recX : forall n part val n', receiveN n part = Some (val, n') -> n' = rmMess n part.
+Proof. intro. induction n. intros. 
+inversion H.
+intros. destruct n'. simpl. inversion H.  simpl in H.   unfold receiveN in H. destruct a. simpl. simpl in H.
+destruct (eq_dec_Participant part p0).
+inv H. auto.
+rewrite <- IHn. 
+simpl.         destruct part. destruct a. destruct p0. simpl. simpl in H.
+inversion H; subst. auto.
+simpl in H. destruct n. simpl in H. inversion H.
+simpl  in H.        
+
+  simpl.  
+destruct a. simpl.  
+destruct H. 
+simpl. 
+
+
+  simpl. destruct a. simpl in H. destruct (eq_dec_Participant part p0).
+inversion H. subst. simpl.   
+simpl. 
+   simpl.       
 Theorem receivingShrinks : forall part n val n', receiveN n part = Some (val, n') -> length n' + 1 = length n.
-intros. unfold receiveN in H. .  destruct n. inversion H.
+Proof. intros. destruc  
+intros. unfold receiveN in H. 
+induction n . inversion H.
+simpl.  
+  destruct n. inversion H.
 unfold receiveN in H. 
 simpl in H.   simpl.   unfold receiveN in H.
 rewrite <- receivingShrinks'. 
