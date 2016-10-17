@@ -661,20 +661,234 @@ Fixpoint evalChoose (cond : Condition) (st: State) : bool :=
 
 end)
 .
-Fixpoint receiveN (n : Network) (p : Participant) : option (Const*Network) :=
- match n with
- | nil => None
- | cons m ls =>match m with
-                | networkMessage from to c => if (eq_dec_Participant p to) 
-                   then Some (c,ls)
-                   else match (receiveN ls p) with 
-                     | Some (c',ls') => Some (c', m::ls')
-                     | None => None
-                     end
-                   
-end
 
+Fixpoint receiveMess (n : Network) (p : Participant) : option Const :=
+match n with 
+ | nil => None
+ | cons m ls => match m with 
+                | networkMessage from to c => match eq_dec_Participant p to with 
+                    | left _ => Some c
+                    | right _ =>  receiveMess ls p
+                    end 
+                end
 end.
+
+Fixpoint rmMess (n : Network) (p : Participant) : Network :=
+ match n with 
+ | nil => nil
+ | cons m ls => match m with 
+                | networkMessage from to c => match eq_dec_Participant p to with 
+                    | left _ =>  ls
+                    | right _ =>  m :: (rmMess ls p)
+                    end 
+                end
+end.
+ 
+Fixpoint receiveN (n : Network) (p : Participant) : option (Const*Network) :=
+match (receiveMess n p) with 
+ | None => None
+ | Some c => Some (c,rmMess n p)
+end. 
+
+Fixpoint mylength {A:Type} (ls : list A) : nat :=
+match ls with
+ | nil => 0
+ | cons e es => S (mylength es)
+end.
+ 
+ 
+
+Require Import Omega. 
+Theorem receivingShrinks' : forall c n p, receiveMess n p = Some c -> 
+length n = length (rmMess n p) + 1.
+Proof. intros.
+induction n. inversion H.
+simpl in H.
+destruct a.
+simpl. simpl in H.
+destruct (eq_dec_Participant p p1). subst. inversion H; subst. omega.
+   simpl.  rewrite IHn. auto. auto.
+Qed. 
+Hint Resolve receivingShrinks'.
+Lemma receivemess_receiveWhole : forall c n p, receiveMess n p = Some c <-> receiveN n p = Some (c, rmMess n p).
+Proof. split. intros. 
+destruct n,p. inversion H. inversion H.
+unfold receiveN. rewrite H. auto.
+unfold receiveN. rewrite H. auto.
+
+intros. unfold receiveN in H. .  destruct c, (rmMess n p). inversion H. 
+ simpl in H.    
+unfold receiveN in H.
+induction n,p. inversion H. inversion H. eauto. 
+simpl in H.    auto.   
+inversion H. 
+generalize dependent c.
+generalize dependent p.
+induction n.
+intros. inversion H.
+intros.
+destruct a. simpl. simpl in H.  destruct (eq_dec_Participant p p1). inv H. reflexivity.
+ destruct n. inversion H.
+simpl in H. destruct n. simpl. destruct (eq_dec_Participant p p3). inversion H. auto.
+apply IHn.
+
+assumption.    simpl.    
+
+
+apply IHn. 
+destruct a,p. simpl.  simpl.        
+destruct (receiveMess n p); destruct n,p. inversion H.
+inversion H.
+destruct n; destruct p, p0; simpl in H.  inv H. subst.  invH.   
+ simpl in H. 
+inversion H.     eqn:ef.
+simpl. 
+ rewrite ef in H.  subst.  
+ 
+
+unfold receiveN in H. 
+ destruct (receiveMess n p) eqn:ef. rewrite ef in H.  subst.  
+ induction n. inversion H.
+ destruct a. simpl. simpl in H.  destruct (eq_dec_Participant p p1). inversion H. reflexivity.
+ apply IHn. 
+ destruct n,p.
+ inversion H. inversion H.
+ simpl. auto.     simpl.  
+ 
+  eauto.  
+ 
+    simpl in H.      
+ destruct n,p;(inversion H); destruct n. simpl.   simpl in H.   simpl.  
+ inversion H.  
+ unfold receiveN in H.
+ induction n. inversion H.
+ simpl in H. destruct a. simpl.    
+ destruct (eq_dec_Participant p p1). inversion H. auto.
+ destruct n,p; auto. inversion H. inversion H.
+ simpl in H. destruct n. simpl in H.   
+ simpl in IHn. 
+ simpl. 
+ apply IHn. rewrite  H.  simpl.  eassumption.     
+ apply IHn.       
+ destruct n,p. inversion H. inversion H. 
+ destruct n. simpl in H.  destruct p0.
+ simpl. inversion H. auto.
+ simpl. induction n0. simpl in H. inversion H.
+ simpl in H. destruct a. destruct p1.
+ simpl. inversion H. auto.
+ 
+ simpl. destruct n0. simpl in H. inversion H.
+ simpl in H. destruct n. destruct p2.
+ simpl. inversion H. auto.
+ 
+ 
+ simpl. destruct n0. simpl in H. inversion H.
+ simpl in H. destruct n. destruct p3.
+ simpl. inversion H. auto.
+ 
+ 
+     simpl in H.   simpl in H.       
+ simpl in H.    
+  simpl . eauto.  
+ simpl in H. 
+ unfold receiveMess.  
+ destruct (receiveMess n p) eqn:ehf.
+  eauto.   inversion H.    destruct n, p. inversion H. inversion H. 
+unfold receiveMess.    
+Qed.
+Hint Resolve receivemess_receiveWhole.
+     
+Theorem receivingShrinks : forall part n val n', receiveN n part = Some (val, n') -> length n' + 1 = length n.
+intros. unfold receiveN in H. .  destruct n. inversion H.
+unfold receiveN in H. 
+simpl in H.   simpl.   unfold receiveN in H.
+rewrite <- receivingShrinks'. 
+eauto.   simpl in H.   
+
+ 
+Eval compute in (length net1).
+Eval compute in (receiveN net1 ATTESTER). 
+Eval compute in (
+match (receiveN net1 ATTESTER) with 
+   | None => 999
+   | Some x => length (snd x)
+   end).
+Defined. 
+Print ijfe.   
+Eval compute in (receiveN  net1 APPRAISER).  
+Example rec1 : length net1 = length n + 1 with 
+Require Import Omega. 
+Theorem ifReceive_networkSmaller : forall part n val n', receiveN n part = Some (val, n') -> length n' + 1 = length n.
+Proof. intro. induction part.
+intros. 
+ 
+induction n. inversion H.
+simpl. rewrite IHn. 
+simpl in H.
+destruct n.  
+ simpl in H. induction n.
+destruct (eq_dec_Participant part p0) eqn :dd.
+inversion H; subst. omega.
+  
+simpl in dd. 
+
+
+  a   
+induction n. inversion H.
+induction a.
+simpl.  
+simpl in H.   
+inversion H; subst. omega.
+
+induction n. simpl in H. inversion H.
+SearchAbout length. 
+apply IHn0. 
+simpl in H.
+destruct n.     , part. simpl.   subst.     
+
+induction (receiveN n part).
+inversion H; subst. 
+ induction n. intros. inversion H.
+intros. intros.
+simpl in H. destruct a. destruct (eq_dec_Participant part p0).
+inversion H; subst.
+simpl. omega.
+simpl.          
+destruct (receiveN n part ).
+destruct p1.
+inversion H. subst.
+simpl.  
+Print remove.
+  
+destruct (c',ls'). 
+inversion H.  
+intros. simpl.  
+  
+
+ induction n,part. inversion H. inversion H.
+simpl.  
+
+
+simpl. simpl in H. destruct a. destruct (eq_dec_Participant part p0).
+inversion H. subst.  omega.
+simpl in H.
+
+destruct n.  
+
+destruct (receiveN n part).
+
+ eqn:eifje.  
+simpl.
+destruct n. simpl in H. inversion H.
+simpl in H.
+destruct n.    
+destruct (eq_dec_Participant part p2) eqn:ummshouldbefalse.
+exfalso. apply n0.  
+contradiction.  
+   auto.      
+
+      induction n . intros.  simpl. simpl in H. inversion H.
+
 
 Definition fst3 {A B C : Type} (tripl : (A * B * C)) : A := match tripl with 
   (a,_,_) => a
@@ -715,6 +929,8 @@ match st with
                   end) 
             end
 end.
+
+
 Definition handleEffect (e : Effect) (st : State) : option State :=
 match e with
  | effect_HandleRequest t => match (varSubst t st) with 
@@ -1051,7 +1267,7 @@ Proof. intros. unfold OneProtocolStep.
 eapply bigstep_stm_step. cca.
 unfold proto_handleIsMyTurnToSend.
 eapply bigstep_stm_step. cca.
-unfold proto_handleCanSend. 
+unfold proto_handleCanSend.
 eapply bigstep_stm_step. constructor. apply E_ChooseFalse. assumption.
 eapply bigstep_stm_step. constructor. constructor. constructor. auto.
 constructor. 
@@ -1206,7 +1422,26 @@ eexists. eexists.
  
 auto.
 Qed.
- 
+
+Tactic Notation "nono" := let nm := fresh "Hno" in unfold not; intro nm; inversion nm. 
+Tactic Notation "nono" ident(h) := let nm := fresh "Hno" in unfold not in h; exfalso; apply h; (reflexivity || (progress auto)).  
+
+
+Lemma varSubstConst' : forall vst c, varSubst' (const c) vst = Some c.
+intros. simpl. destruct vst.
+simpl. auto. simpl. auto.
+Qed.
+Hint Resolve varSubstConst'. 
+Lemma handleEffectVarConstHelper : forall  v d x vars prost, 
+handleEffect (effect_ReduceStatewithMeasurement (variable v)) (assign v  (constValue d x) (state vars prost)) = handleEffect (effect_ReduceStatewithMeasurement (const (constValue d x))) (assign v (constValue d x) (state vars prost)) .
+Proof. intros.
+simpl.  
+ destruct (eq_dec_VarID v v).
+ simpl. auto.
+ nono n.
+ Qed.
+Hint Resolve handleEffectVarConstHelper. 
+
 Theorem ReceiveWillReceiveOrWait : forall v p n,evalChoose IsMyTurntoSend (state v p) = false -> exists  st' n', 
 (OneProtocolStep (state v p) , (state v p), n) ⇓⇓(EndStatement, st', n') /\  length n' + 1 = length n
 \/  
@@ -1215,8 +1450,68 @@ Theorem ReceiveWillReceiveOrWait : forall v p n,evalChoose IsMyTurntoSend (state
 Proof. intros.
 
 destruct (receiveN n (getMe (state v p))) eqn:netRec.
+
+destruct p0.
+destruct c. 
+destruct (handleEffect (effect_ReduceStatewithMeasurement (const (constValue d m))) (assign receivedMESSAGE (constValue d m) (state v p) )) eqn:canReduce.
+
 eexists. eexists.
-left. split.
+right. left.  split.
+
+eapply bigstep_stm_step.
+constructor. 
+apply E_ChooseFalse. auto.
+
+eapply bigstep_stm_step. 
+constructor. constructor.
+apply E_Receive. eauto.
+nono.
+
+eapply bigstep_stm_step.
+constructor.
+apply E_ChooseTrue. simpl. destruct p. auto.
+eapply bigstep_stm_step.
+constructor.
+constructor.
+eapply E_Effect. eauto.
+constructor. constructor.
+
+intros. 
+
+simpl.
+destruct a. 
+SearchAbout "+". destruct a. simpl. simpl in H.   ; auto 
+simpl. 
+ simpl in H.  
+eauto. omega.        
+  
+rewrite handleEffectVarConstHelper. rewrite canReduce.  eauto.  
+specialize handleEffectVarConstHelper with (v:=receivedMESSAGE) (d:=d) (x:=m) (vars:=v) (prost:=p).
+auto. 
+tauto. 
+eexact v.  
+intros.
+ 
+exact v in H0.
+apply H0 in v. . 
+ exist v.  in H0. 
+destruct H0.
+rewrite H0.
+eapply canReduce. 
+eauto.   
+eauto. 
+eapply H0. 
+rewrite H0. 
+apply H0. 
+  simpl.  eapply canReduce.  eassumption.  
+     simpl.  auto.    destruct v0.   simpl. simpl.   eauto.  inversion e.    
+simpl. destruct p.
+simpl.   
+eapply canReduce. 
+assumption.  
+ eauto.        
+eauto.       
+eauto. 
 
  auto. 
  destruct p0. destruct c eqn:mess.
