@@ -690,13 +690,6 @@ match (receiveMess n p) with
  | Some c => Some (c,rmMess n p)
 end. 
 
-Fixpoint mylength {A:Type} (ls : list A) : nat :=
-match ls with
- | nil => 0
- | cons e es => S (mylength es)
-end.
- 
- 
 
 Require Import Omega. 
 Theorem receivingShrinks' : forall c n p, receiveMess n p = Some c -> 
@@ -712,133 +705,7 @@ Qed.
 Hint Resolve receivingShrinks'.
 
 
- 
-
-Lemma receivemess_receiveWhole : forall c n p, receiveMess n p = Some c <-> receiveN n p = Some (c, rmMess n p).
-Proof. split. intros. 
-destruct n,p. inversion H. inversion H.
-unfold receiveN. rewrite H. auto.
-unfold receiveN. rewrite H. auto.
-
-Admitted.
-Hint Resolve receivemess_receiveWhole.
-     
-Lemma recX : forall n part val n', receiveN n part = Some (val, n') -> n' = rmMess n part.
-Proof. intro. induction n. intros. 
-inversion H.
-intros. destruct n'. simpl. inversion H.  simpl in H.   unfold receiveN in H. destruct a. simpl. simpl in H.
-destruct (eq_dec_Participant part p0).
-inv H. auto.
-rewrite <- IHn. 
-simpl.         destruct part. destruct a. destruct p0. simpl. simpl in H.
-inversion H; subst. auto.
-simpl in H. destruct n. simpl in H. inversion H.
-simpl  in H.        
-
-  simpl.  
-destruct a. simpl.  
-destruct H. 
-simpl. 
-
-
-  simpl. destruct a. simpl in H. destruct (eq_dec_Participant part p0).
-inversion H. subst. simpl.   
-simpl. 
-   simpl.       
-Theorem receivingShrinks : forall part n val n', receiveN n part = Some (val, n') -> length n' + 1 = length n.
-Proof. intros. destruc  
-intros. unfold receiveN in H. 
-induction n . inversion H.
-simpl.  
-  destruct n. inversion H.
-unfold receiveN in H. 
-simpl in H.   simpl.   unfold receiveN in H.
-rewrite <- receivingShrinks'. 
-eauto.   simpl in H.   
-
- 
-Eval compute in (length net1).
-Eval compute in (receiveN net1 ATTESTER). 
-Eval compute in (
-match (receiveN net1 ATTESTER) with 
-   | None => 999
-   | Some x => length (snd x)
-   end).
-Defined. 
-Print ijfe.   
-Eval compute in (receiveN  net1 APPRAISER).  
-Example rec1 : length net1 = length n + 1 with 
 Require Import Omega. 
-Theorem ifReceive_networkSmaller : forall part n val n', receiveN n part = Some (val, n') -> length n' + 1 = length n.
-Proof. intro. induction part.
-intros. 
- 
-induction n. inversion H.
-simpl. rewrite IHn. 
-simpl in H.
-destruct n.  
- simpl in H. induction n.
-destruct (eq_dec_Participant part p0) eqn :dd.
-inversion H; subst. omega.
-  
-simpl in dd. 
-
-
-  a   
-induction n. inversion H.
-induction a.
-simpl.  
-simpl in H.   
-inversion H; subst. omega.
-
-induction n. simpl in H. inversion H.
-SearchAbout length. 
-apply IHn0. 
-simpl in H.
-destruct n.     , part. simpl.   subst.     
-
-induction (receiveN n part).
-inversion H; subst. 
- induction n. intros. inversion H.
-intros. intros.
-simpl in H. destruct a. destruct (eq_dec_Participant part p0).
-inversion H; subst.
-simpl. omega.
-simpl.          
-destruct (receiveN n part ).
-destruct p1.
-inversion H. subst.
-simpl.  
-Print remove.
-  
-destruct (c',ls'). 
-inversion H.  
-intros. simpl.  
-  
-
- induction n,part. inversion H. inversion H.
-simpl.  
-
-
-simpl. simpl in H. destruct a. destruct (eq_dec_Participant part p0).
-inversion H. subst.  omega.
-simpl in H.
-
-destruct n.  
-
-destruct (receiveN n part).
-
- eqn:eifje.  
-simpl.
-destruct n. simpl in H. inversion H.
-simpl in H.
-destruct n.    
-destruct (eq_dec_Participant part p2) eqn:ummshouldbefalse.
-exfalso. apply n0.  
-contradiction.  
-   auto.      
-
-      induction n . intros.  simpl. simpl in H. inversion H.
 
 
 Definition fst3 {A B C : Type} (tripl : (A * B * C)) : A := match tripl with 
@@ -1281,7 +1148,7 @@ eexists. intros.
 eapply bigstep_stm_step. cca.
 eapply bigstep_stm_step. autounfold. constructor. constructor. Print E_Receive.  constructor.  apply H0.  unfold not. intros. inv H2.
 eapply bigstep_stm_step. constructor. constructor. simpl. destruct p. auto.
-eapply bigstep_stm_step.    constructor. constructor. constructor.   unfold handleEffect. rewrite <- H1.  reflexivity. auto.
+eapply bigstep_stm_step.    constructor. constructor. constructor. unfold handleEffect. rewrite <- H1.  reflexivity. auto.
 Qed.
 
 Theorem eval6 : forall v p n r, 
@@ -1327,6 +1194,7 @@ simpl. auto.
 Qed.
 Hint Resolve sendOnNetworkAppends.         
 Require Import Omega. 
+
 Theorem sendWillSend : forall v p n,evalChoose IsMyTurntoSend (state v p) = true -> exists  st' n', 
 ((OneProtocolStep (state v p) , (state v p), n) ⇓⇓(EndStatement, st', n') 
 \/  
@@ -1373,9 +1241,85 @@ eexists. eexists.
  
 auto.
 Qed.
+Fixpoint lastMessage (n:Network) : option NetworkMessage :=
+match n with
+ | nil => None
+ | cons x nil => Some x
+ | cons _ xs => lastMessage xs
+end.
+
+Theorem gargle : forall v p n st' n' d m ,evalChoose IsMyTurntoSend (state v p) = true -> 
+lastMessage n' = Some (networkMessage (getMe (state v p)) (notMe (getMe (state v p)))  (constValue d m)) -> 
+(OneProtocolStep (state v p) , (state v p), n) ⇓⇓(EndStatement, st', n')  -> 
+(OneProtocolStep (state v p) , (state v p), n) ⇓⇓ (proto_handleCanSend (state v p), st', n').
+Proof. intros.
+
+
+eapply bigstep_stm_step. constructor. constructor. assumption.
+    
+eapply bigstep_stm_step. constructor. constructor. assumption.
+
+
+
+inv H0. inv H3.
+
+inv H9. inv H3.
+inv H3.
+inv H4.
+inv H7.
+inv H14.
+inv H7.
+inv H9.
+inv H11.
+
+inv H3.  eauto.       
+inv H5.
+inv H5.
+inv H0.  
+inv H4. 
+inv H 
+  
+inv H4. inv H3.
+inv H3.  
+
+inv H4. 
+
+inv H0. inv H6.  
+inv H4.
+inv H6.  
+inv H3. 
+inv H4.   
+eapply bigstep_stm_simpl in H0.  
+eapply E_ChooseTrue in H4.   
+eapply bigstep_stm_step in H4.
+
+ Focus 2.    
+
+eapply bigstep_stm_step.
+constructor. constructor. assumption.
+eapply bigstep_stm_step.
+inv H0. inv H3.
+inv H4. 
+constructor. constructor.   
+
+
+eapply bigstep_stm_step in H0. 
+constructor. constructor.  
+constructor. constructor.      
+
+inv H0.
+inv H3.   
+
+  intros.  eexists. eexists.
+intros.    
+
+  
+\/  
+(OneProtocolStep (state v p) , (state v p), n) ⇓⇓ (StopStatement, st', n')  
 
 Tactic Notation "nono" := let nm := fresh "Hno" in unfold not; intro nm; inversion nm. 
 Tactic Notation "nono" ident(h) := let nm := fresh "Hno" in unfold not in h; exfalso; apply h; (reflexivity || (progress auto)).  
+
 
 
 Lemma varSubstConst' : forall vst c, varSubst' (const c) vst = Some c.
@@ -1393,11 +1337,14 @@ simpl.
  Qed.
 Hint Resolve handleEffectVarConstHelper. 
 
+
+
 Theorem ReceiveWillReceiveOrWait : forall v p n,evalChoose IsMyTurntoSend (state v p) = false -> exists  st' n', 
-(OneProtocolStep (state v p) , (state v p), n) ⇓⇓(EndStatement, st', n') /\  length n' + 1 = length n
+(OneProtocolStep (state v p) , (state v p), n) ⇓⇓(EndStatement, st', n')
 \/  
-(OneProtocolStep (state v p) , (state v p), n) ⇓⇓ (StopStatement, st', n')  /\  length n' + 1 = length n
-\/ exists stm' , (OneProtocolStep (state v p) , (state v p), n) ⇓⇓ (Wait >> stm', st', n).
+(OneProtocolStep (state v p) , (state v p), n) ⇓⇓ (StopStatement, st', n')
+\/
+exists stm' , (OneProtocolStep (state v p) , (state v p), n) ⇓⇓ (Wait >> stm', st', n).
 Proof. intros.
 
 destruct (receiveN n (getMe (state v p))) eqn:netRec.
