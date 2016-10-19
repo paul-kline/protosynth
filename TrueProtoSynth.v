@@ -326,6 +326,8 @@ Check neverRequirement.
     imposed by these expectations. In the other cases (sending stop or sending the measurement) we "make up" a return value.
     This can probably be handled better than this. 
  *)
+
+
 Fixpoint handleRequest (pp : PrivacyPolicy) (d : Description) : 
 (PrivacyPolicy * Message * RequestItem):=
  match pp with
@@ -379,8 +381,7 @@ match priv with
  end). subst. exact v. Defined.
  
  (* main course *)
- 
- 
+
  Inductive VarID :=
   | receivedMESSAGE : VarID
   | toSendMESSAGE : VarID
@@ -546,6 +547,86 @@ Definition reduceStateWithMeasurement (v : Const) (st : State) : option State :=
  in the third case from above. ie, "I need to see some credentials." what exactly must be met.
  
 *)
+
+Fixpoint findandMeasureItem (pp : PrivacyPolicy) (d : Description) : option (Const*RequestItem) :=
+match pp with
+ | EmptyPolicy => None
+ | @ConsPolicy dp rule_d pp' => if (eq_dec_Description dp d) then 
+     match rule_d with
+       | @rule _ your reqrment => Some (constRequest your, requestItem your reqrment)
+       | free _ => Some (constValue d (measure d), requestItem d (freeRequirement d) )
+       | never _ => Some ( constStop, requestItem d (neverRequirement d)) (*don't matter *)
+       | multiReqAnd _ rule1 morerules => Some ( constStop, requestItem d (neverRequirement d)) (* TODO *)
+       | multiReqOr _ rule1 morerules => Some (constStop, requestItem d (neverRequirement d)) (* TODO *)
+      end
+    else findandMeasureItem pp' d 
+end.
+Fixpoint rmAllFromPolicy (pp : PrivacyPolicy) (d : Description) : PrivacyPolicy :=
+match pp with
+ | EmptyPolicy => EmptyPolicy
+ | @ConsPolicy dp r pp' => if (eq_dec_Description dp d) then rmAllFromPolicy pp' d
+      else
+      @ConsPolicy dp r (rmAllFromPolicy pp' d)
+end. 
+Fixpoint handleRequest' (pp : PrivacyPolicy) (d : Description) :=
+ (match findandMeasureItem pp d with 
+   | None => (rmAllFromPolicy pp d,constStop, requestItem d (neverRequirement d))
+   | Some (mvalue,reqItem) => (rmAllFromPolicy pp d, mvalue, reqItem)
+  end). 
+  
+Lemma removedFromPrivacyHelper : forall pp d, exists c ri, 
+ handleRequest' pp d = (rmAllFromPolicy pp d,c,ri).
+ Proof. intros. induction pp. simpl. eauto.
+ simpl. destruct (eq_dec_Description d0 d).
+ destruct r. eexists. eexists.  eauto.
+ eexists. eexists.     
+  eauto.
+  eexists. eexists. eauto.
+  eexists. eexists. eauto.
+  eexists. eexists. eauto.
+  
+  destruct (findandMeasureItem pp d). destruct p. eexists. eexists. eauto.
+  eexists. eexists. reflexivity.
+  Qed.
+  Hint Resolve removedFromPrivacyHelper. 
+Lemma removedFromPrivacyHelper2 : forall pp d pp' c ri, 
+ handleRequest' pp d = (pp',c,ri) -> 
+ pp' = (rmAllFromPolicy pp d).
+ Proof.  intros.
+ destruct pp. simpl.
+ inversion H. auto.
+ simpl.
+ simpl in H.
+ simpl. destruct (eq_dec_Description d0 d). destruct r.
+ subst. inversion H; subst. reflexivity.
+ subst. inversion H; subst. reflexivity.
+ subst. inversion H; subst. reflexivity.
+ subst. inversion H; subst. reflexivity.
+ subst. inversion H; subst. reflexivity.
+ destruct findandMeasureItem . destruct p.
+ subst. inversion H; subst. reflexivity.
+ subst. inversion H; subst. reflexivity.
+ Qed.
+ Hint Resolve removedFromPrivacyHelper2. 
+
+Theorem youCantFindit : forall pp d, findandMeasureItem (rmAllFromPolicy pp d) d = None.
+Proof. intros. induction pp. auto.
+simpl. destruct (eq_dec_Description d0 d). assumption.
+simpl. destruct (eq_dec_Description d0 d). contradiction.
+assumption.
+Qed. 
+
+Hint Resolve youCantFindit. 
+
+
+Theorem removedFromPrivacy : forall pp d pp' c ri,
+ handleRequest' pp d = (pp',c,ri) -> 
+ findandMeasureItem pp' d = None.
+ Proof. intros. assert (pp' = rmAllFromPolicy pp d). eauto.
+  rewrite H0. eauto.
+ Qed.
+Hint Resolve removedFromPrivacy. 
+(*
 Fixpoint handleRequest' (pp : PrivacyPolicy) (d : Description) : 
 (PrivacyPolicy * Const * RequestItem):=
  match pp with
@@ -564,7 +645,7 @@ Fixpoint handleRequest' (pp : PrivacyPolicy) (d : Description) :
        | (ppres,messres,reqRes) => (@ConsPolicy dp rule_d ppres,messres,reqRes)
      end
  end. 
- 
+ *)
 Definition handleRequestST (st: State) (d: Description) := match st with
  | state vars prostate => match prostate with
      | proState a p pp b unres dls => match(handleRequest' pp d) with 
@@ -972,8 +1053,6 @@ eapply IHstm1. eauto.
 eapply IHstm1. constructor.  eauto.
 Qed.
 
-Definition otherGuy (st: State) := notMe (getMe st). 
-
 Theorem onlySendOrReceiveChangesNetwork : forall (stm stm': Statement) (st st': State) (n n' : Network),
  (stm,st,n) ⇓ (stm',st',n') -> 
  n = n' \/
@@ -1233,10 +1312,34 @@ match st with
 end
 end.
 SearchAbout PrivacyPolicy.
-Theorem isRemovedFromPrivacy : forall st t c m, 
-  varSubst t st = Some c -> 
-  (EffectStatement (effect_HandleRequest t)), st, n) ⇓ (Skip, st',n)
-  
+
+
+Theorem isRemovedFromPrivacyhandleST : forall st d, 
+findandMeasureItem (getPrivacy (handleRequestST st d)) d = None.
+Proof. intros. destruct st. simpl. destruct p.
+destruct p0. simpl. auto.
+simpl.    
+destruct (eq_dec_Description d0 d). destruct r1; simpl; auto.
+
+destruct (findandMeasureItem p0 d). destruct p1. simpl.
+destruct r1;
+destruct (eq_dec_Description d0 d); contradiction || auto.
+
+simpl. 
+destruct r1;
+destruct (eq_dec_Description d0 d); contradiction || auto.
+Qed.
+Hint Resolve isRemovedFromPrivacyhandleST.
+
+Theorem isRemovedFromPrivacy : forall st st' n t d, 
+  varSubst t st = Some (constRequest d) -> 
+  (EffectStatement (effect_HandleRequest t), st, n) ⇓ (Skip, st',n) -> 
+  findandMeasureItem (getPrivacy st') d = None.
+Proof. intros. inversion H0. subst.
+simpl in H2. rewrite H in H2. inversion H2.
+auto.
+Qed.  
+
 
      
 Theorem sendWillSend : forall v p n,evalChoose IsMyTurntoSend (state v p) = true -> exists  st' n', 
