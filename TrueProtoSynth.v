@@ -1226,6 +1226,18 @@ eapply bigstep_stm_step. constructor. apply E_ChooseFalse. auto.
 constructor. constructor. apply receiveWhenStop. auto.
 Qed.
 
+Definition getPrivacy (st : State) : PrivacyPolicy :=
+match st with
+ | state _ ps => match ps with
+    | proState _ _ pp _ _ _ => pp
+end
+end.
+SearchAbout PrivacyPolicy.
+Theorem isRemovedFromPrivacy : forall st t c m, 
+  varSubst t st = Some c -> 
+  (EffectStatement (effect_HandleRequest t)), st, n) ⇓ (Skip, st',n)
+  
+
      
 Theorem sendWillSend : forall v p n,evalChoose IsMyTurntoSend (state v p) = true -> exists  st' n', 
 ((OneProtocolStep (state v p) , (state v p), n) ⇓⇓(EndStatement, st', n') 
@@ -1279,6 +1291,7 @@ match n with
  | cons x nil => Some x
  | cons _ xs => lastMessage xs
 end.
+
 
 Theorem gargle : forall v p n st' n' d m ,evalChoose IsMyTurntoSend (state v p) = true -> 
 lastMessage n' = Some (networkMessage (getMe (state v p)) (notMe (getMe (state v p)))  (constValue d m)) -> 
