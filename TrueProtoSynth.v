@@ -108,12 +108,11 @@ Require Import MyShortHand.
 
 Definition measurementDenote (d: Description) :=
 match d with
- | descriptor r => match r with
+ | descriptor r => (match r with
     | pcrMR n => nat
     | virusCheckerNameR => nat
     | virusCheckerVersionR => bool
-end
-
+    end)
 end.
 
 
@@ -434,10 +433,9 @@ Inductive Computation :=
  Proof. decide equality. Defined.
  
 Inductive Statement :=
- | SendStatement : Term -> Participant -> Participant -> Statement (*for now/simplicity, Participant not a variable*)
+ | SendStatement : Term -> Participant -> Participant -> Statement
  | ReceiveStatement : VarID -> Statement
  | EffectStatement : Effect -> Statement
-(* | ReduceStatewithMeasurement : Term -> Statement*)
  | Compute : VarID -> Computation -> Statement
  | Assignment : VarID -> Term -> Statement
  | Choose : Condition -> Statement -> Statement -> Statement
@@ -446,9 +444,6 @@ Inductive Statement :=
  | EndStatement : Statement
  | Skip : Statement
  | Wait : Statement
- | VariableSubstError
- | MeasurementRequirementNotMet
- | VariableAssignmentError
 .
 
 
@@ -716,13 +711,13 @@ Fixpoint stmHead (stm : Statement) : Statement :=
   | (Chain stm1 _) => stmHead stm1
   | x => x
  end.  
-    
+   (*
 Inductive isError : Statement -> Prop :=
  | isvarsubsterr : isError VariableSubstError
  | isMeasurmentReqNotMet : isError MeasurementRequirementNotMet
  | isVarAssErr : isError VariableAssignmentError
  .
-Hint Constructors isError.
+Hint Constructors isError. *)
 Print  reduceUnresolved. 
 
 
@@ -977,6 +972,28 @@ eapply IHstm1. eauto.
 eapply IHstm1. constructor.  eauto.
 Qed.
 
+Definition otherGuy (st: State) := notMe (getMe st). 
+
+Theorem onlySendOrReceiveChangesNetwork : forall (stm stm': Statement) (st st': State) (n n' : Network),
+ (stm,st,n) ⇓ (stm',st',n') -> 
+ n = n' \/
+ (exists t p1 p2, headStatement stm = SendStatement t p1 p2) \/
+ (exists vid, headStatement stm = ReceiveStatement vid)
+ .
+ Proof. intro. induction stm; intros; try (right; left; exists t; exists p; exists p0; reflexivity) ||
+ (try (left; inversion H; subst; reflexivity)).
+ inversion H; subst.
+   
+ right. right. exists v. auto.
+ left. reflexivity.
+ right. right. exists v. auto.
+ inversion H; subst.
+ eauto.
+ eauto.
+ eauto.
+ eauto.
+ Qed.
+ 
 Theorem canSendST_implies_handleExists : forall st, evalChoose CanSend st = true -> exists c, handleCompute compGetMessageToSend st = Some c.
 Proof.
 intros; simpl in H;  simpl; destruct st; simpl; destruct p; destruct (canSend l p0);  eauto;
@@ -1195,6 +1212,21 @@ Qed.
 Hint Resolve sendOnNetworkAppends.         
 Require Import Omega. 
 
+Theorem receiveWhenStop : forall n vid v p n',
+receiveN n (getMe (state v p)) = Some (constStop, n') ->
+(ReceiveStatement vid, (state v p), n) ⇓ 
+(StopStatement,assign vid constStop (state v p), n').
+Proof. intros.  eapply E_ReceiveStop. assumption.
+Qed.
+Theorem oneStepProtoStopsWhenTold :forall v p n n', evalChoose IsMyTurntoSend (state v p) = false -> 
+receiveN n (getMe (state v p)) = Some (constStop, n') -> 
+((OneProtocolStep (state v p) , (state v p), n) ⇓⇓ (StopStatement, assign receivedMESSAGE constStop (state v p), n')) .
+Proof. intros.
+eapply bigstep_stm_step. constructor. apply E_ChooseFalse. auto.
+constructor. constructor. apply receiveWhenStop. auto.
+Qed.
+
+     
 Theorem sendWillSend : forall v p n,evalChoose IsMyTurntoSend (state v p) = true -> exists  st' n', 
 ((OneProtocolStep (state v p) , (state v p), n) ⇓⇓(EndStatement, st', n') 
 \/  
