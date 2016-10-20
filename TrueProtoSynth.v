@@ -423,8 +423,10 @@ Inductive Computation :=
  | compGetNextRequest
  . 
  Inductive Effect :=
- | effect_HandleRequest : Term -> Effect
+(* | effect_HandleRequest : Term -> Effect*)
+ | effect_StoreRequest : Term -> Effect
  | effect_ReduceStatewithMeasurement : Term -> Effect
+ | effect_ReducePrivacyWithRequest : Term -> Effect
  | effect_MvFirstDesire :  Effect
  .  
  Inductive Participant :=
@@ -844,19 +846,42 @@ match st with
             end
 end.
 
+Definition storeRequest (d : Description) (st : State) : State :=
+match st with
+ | state vs ps => match ps with
+      | proState x x0 x1 x2 x3 queue => state vs (proState  x x0 x1 x2 x3 (d :: queue))
+end
+end. 
+
+Definition reducePrivacy_w_RequestST (d : Description) (st : State) : State :=
+match st with
+ | state vs ps => match ps with
+      | proState x x0 pp x2 x3 x4 => state vs (proState x x0 (rmAllFromPolicy pp d) x2 x3 x4)
+     end
+end. 
 
 Definition handleEffect (e : Effect) (st : State) : option State :=
 match e with
- | effect_HandleRequest t => match (varSubst t st) with 
+ (*| effect_HandleRequest t => match (varSubst t st) with 
                               | Some (constRequest d) => Some (handleRequestST st d)
                               | _ => None
-                              end 
+                              end *)
+ | effect_StoreRequest t => match (varSubst t st) with 
+                              | Some (constRequest r) => Some (storeRequest r st) 
+                              | _ => None 
+                              end
+ | effect_ReducePrivacyWithRequest t=> match (varSubst t st) with 
+                                        | Some (constRequest r) => Some (reducePrivacy_w_RequestST r st)
+                                        | _ => None
+                                        end
  | effect_ReduceStatewithMeasurement t => match (varSubst t st) with 
                                            | Some c => (reduceStateWithMeasurement c st)
                                            | _ => None
                                            end
  | effect_MvFirstDesire => Some (mvNextDesire st)
 end.
+
+
 Check measure. 
 Definition getNextDesire (st : State) : option Description :=
 match st with
@@ -988,6 +1013,8 @@ Definition proto_handleCanSend (st : State) :=
  IFS CanSend
     THEN Compute toSendMESSAGE compGetMessageToSend >>
          SendStatement (variable toSendMESSAGE) (getMe st) (notMe (getMe st)) >> 
+         Compute 
+         EffectStatement
          EndStatement
     ELSE (*Can't send and queued request exists *) 
       SendStatement (const constStop) (getMe st) (notMe (getMe st)) >> 
@@ -1028,7 +1055,7 @@ IFS (IsMeasurement (variable (receivedMESSAGE)))
  ELSE
   (IFS (IsRequest (variable (receivedMESSAGE)))
     THEN 
-      EffectStatement (effect_HandleRequest (variable (receivedMESSAGE))) >> EndStatement
+      EffectStatement (effect_StoreRequest (variable (receivedMESSAGE))) >> EndStatement
     ELSE (*we must have received a stop *)
       StopStatement
   ). 
