@@ -444,22 +444,22 @@ Definition net_isEmpty ( n : Network) : bool :=
  | cons x x0 => false
 end.
 
-(* the option indicates that a condition failed to be met *)
-Definition reduceStateWithMeasurement (v : Const) (st : State) : option State := 
+Definition reduceStateWithMeasurement (v : Const) (st : State) : State := 
  match v with
  | constValue d denotedVal => (match st with
                                 | state varst  prost=> (match prost with
                                     | proState a g p pp toReq myUnresolved tosend => 
                                        (match (reduceUnresolved d denotedVal myUnresolved) with
-                                         | Some newUnresolvedState => Some ( 
+                                         | Some newUnresolvedState => ( 
                                             state varst 
                                               (proState a g p (reducePrivacy d denotedVal pp) toReq     
                                                         newUnresolvedState tosend))
-                                         | None => None
+                                         | None => state varst (proState a No p (reducePrivacy d denotedVal pp) toReq
+                                                       myUnresolved tosend)
                                        end)
                                     end)
                               end)
- | _ => Some st
+ | _ => st
  end.  
 
 (* Answered the question: "Can I comply with this request? "
@@ -867,7 +867,7 @@ match e with
                                         | _ => None
                                         end
  | effect_ReduceStatewithMeasurement t => match (varSubst t st) with 
-                                           | Some c => (reduceStateWithMeasurement c st)
+                                           | Some c =>Some (reduceStateWithMeasurement c st)
                                            | _ => None
                                            end
  | effect_MvFirstDesire => Some (mvNextDesire st)
@@ -1049,14 +1049,18 @@ Definition proto_handleCantSend (st : State):= IFS ExistsNextDesire
  
 Definition proto_handleIsMyTurnToSend (st: State) := 
 (
-IFS QueuedRequestsExist
-  THEN 
-   proto_handleCanSend st
-  ELSE (*No queued up things for me. So I can continue down my list of things I want. *)
-   proto_handleCantSend st
+IFS IsAllGood
+  THEN
+    IFS QueuedRequestsExist
+      THEN 
+         proto_handleCanSend st
+      ELSE (*No queued up things for me. So I can continue down my list of things I want. *)
+         proto_handleCantSend st
+  ELSE
+    SendStatement (const constStop) (getMe st) (notMe (getMe st)) >>
+    StopStatement
 ).
 
- 
 Definition proto_handleNotMyTurnToSend (st : State) :=
 ReceiveStatement (receivedMESSAGE) >>
 IFS (IsMeasurement (variable (receivedMESSAGE)))
@@ -1105,12 +1109,9 @@ intros. left. destruct st; inversion H; subst. auto.
 simpl. 
 intros. inversion H; subst.    eapply IHstm1.
 eauto.
-
-eapply IHstm1. eauto.
-
-eapply IHstm1. eauto.
-
-eapply IHstm1. constructor.  eauto.
+eapply IHstm1; eauto.
+eapply IHstm1; eauto.
+eapply IHstm1; constructor;  eauto.
 Qed.
 
 Theorem onlySendOrReceiveChangesNetwork : forall (stm stm': Statement) (st st': State) (n n' : Network),
@@ -1119,13 +1120,12 @@ Theorem onlySendOrReceiveChangesNetwork : forall (stm stm': Statement) (st st': 
  (exists t p1 p2, headStatement stm = SendStatement t p1 p2) \/
  (exists vid, headStatement stm = ReceiveStatement vid)
  .
- Proof. intro. induction stm; intros; try (right; left; exists t; exists p; exists p0; reflexivity) ||
+ Proof. intro; induction stm; intros; try (right; left; exists t; exists p; exists p0; reflexivity) ||
  (try (left; inversion H; subst; reflexivity)).
  inversion H; subst.
-   
- right. right. exists v. auto.
- left. reflexivity.
- right. right. exists v. auto.
+ right. right; exists v; auto.
+ left; reflexivity.
+ right; right; exists v; auto.
  inversion H; subst.
  eauto.
  eauto.
@@ -1161,24 +1161,31 @@ Proof. intros; unfold OneProtocolStep; constructor; assumption.
 Qed.
 Hint Resolve evalReceiveTurn.
 
-Theorem eval_myTurnToSend_queuedRequest : forall st n, (evalChoose QueuedRequestsExist st) = true -> (proto_handleIsMyTurnToSend st, st, n) ⇓ 
+Theorem eval_myTurnToSend_queuedRequest : forall st n, (evalChoose QueuedRequestsExist st) = true ->
+(evalChoose IsAllGood st) = true ->  
+ (proto_handleIsMyTurnToSend st, st, n) ⇓⇓ 
 (proto_handleCanSend st, st, n).
-Proof. intros; unfold proto_handleIsMyTurnToSend; constructor; assumption.
+Proof. intros. unfold proto_handleIsMyTurnToSend. eapply bigstep_stm_step.
+cca. cca.
 Qed.
 Hint Resolve eval_myTurnToSend_queuedRequest.
-Theorem eval_myTurnToSend_NOqueuedRequest : forall st n, (evalChoose QueuedRequestsExist st) = false -> (proto_handleIsMyTurnToSend st, st, n) ⇓ 
+Theorem eval_myTurnToSend_NOqueuedRequest : forall st n, (evalChoose QueuedRequestsExist st) = false ->
+ (evalChoose IsAllGood st) = true ->  
+(proto_handleIsMyTurnToSend st, st, n) ⇓⇓ 
 (proto_handleCantSend st, st, n).
-Proof. intros; unfold proto_handleIsMyTurnToSend; constructor; assumption.
+Proof. intros; unfold proto_handleIsMyTurnToSend. eapply bigstep_stm_step.
+cca. cca.
 Qed.
-Hint Resolve eval_myTurnToSend_NOqueuedRequest.      
+Hint Resolve eval_myTurnToSend_NOqueuedRequest.
 
-
-Theorem eval_existsNextDesire : forall st n, (evalChoose ExistsNextDesire st) = true -> (proto_handleCantSend st, st, n) ⇓ 
+Theorem eval_existsNextDesire : forall st n, (evalChoose ExistsNextDesire st) = true -> 
+(evalChoose IsAllGood st) = true ->  
+(proto_handleCantSend st, st, n) ⇓
  (proto_handleExistsNextDesire st, st, n)
 .
-Proof. intros; unfold proto_handleIsMyTurnToSend; constructor; assumption.
+Proof. intros; unfold proto_handleIsMyTurnToSend. cca.
 Qed.
-Hint Resolve eval_existsNextDesire.      
+Hint Resolve eval_existsNextDesire.
 
 Print OneProtocolStep. 
 
@@ -1222,7 +1229,7 @@ apply canSendST_implies_handleExists in H1. destruct H1.
 exists x. 
 eapply bigstep_stm_step. cca.
 unfold proto_handleIsMyTurnToSend.
-eapply bigstep_stm_step. cca.
+eapply bigstep_stm_step. constructor. 
 unfold proto_handleCanSend. 
 eapply bigstep_stm_step. constructor. constructor.   cca.
 eapply bigstep_stm_step. constructor. constructor. constructor.
@@ -1381,11 +1388,9 @@ Proof. intros. destruct st. simpl. destruct p.
 destruct p0. simpl. auto.
 simpl.    
 destruct (eq_dec_Description d0 d). destruct r1; simpl; auto.
-
 destruct (findandMeasureItem p0 d). destruct p1. simpl.
 destruct r1;
 destruct (eq_dec_Description d0 d); contradiction || auto.
-
 simpl. 
 destruct r1;
 destruct (eq_dec_Description d0 d); contradiction || auto.
@@ -1400,23 +1405,18 @@ Proof. intros. inversion H0; subst.
 simpl in H2. rewrite H in H2. inversion H2. subst. 
 Theorem x : forall d st, findandMeasureItem (getPrivacy (reducePrivacy_w_RequestST d st)) d = None.
 intros. destruct st. simpl. destruct p. simpl. auto. Qed. apply x. 
-Qed.  
+Qed.
 
-
-     
 Theorem sendWillSend : forall v p n,evalChoose IsMyTurntoSend (state v p) = true -> exists  st' n', 
 ((OneProtocolStep (state v p) , (state v p), n) ⇓⇓(EndStatement, st', n') 
 \/  
 (OneProtocolStep (state v p) , (state v p), n) ⇓⇓ (StopStatement, st', n') 
 )
  /\  length n + 1 = length n' .
-Proof.
-intros. 
+Proof. intros. 
 destruct (evalChoose QueuedRequestsExist (state v p)) eqn: quedRes.
 destruct (evalChoose CanSend (state v p)) eqn : cansend. 
-
 Check eval1.
-
 specialize eval1 with (v:=v) (p := p) (n := n).
 intro.
 apply H0 in H.
@@ -1623,6 +1623,8 @@ end.
       DualEval (stmL, stL) (stmR, stR) n -> 
       DualEval (StopStatement,stL') (StopStatement,stR') n''.
       Hint Constructors DualEval.
+
+
 Theorem finalHelper : forall stL stR n, reverse (getAction stL) = getAction stR -> 
 DualEval (OneProtocolStep stL, stL) (OneProtocolStep stR, stR) n -> exists stL stR n, 
 DualEval (StopStatement,stL) (StopStatement, stR) n.
