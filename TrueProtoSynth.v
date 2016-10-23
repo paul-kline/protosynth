@@ -12,7 +12,7 @@
 *)
 
 (* The first step is to define what it is for which we would like to ask. Hence "nouns". *)
-
+Require Import MyShortHand. 
 Inductive Noun : Set:=
   | VirusChecker
   | PCR.
@@ -27,7 +27,7 @@ Hint Resolve eq_dec_noun (*: eq_dec_db.*).
  
 (*Require Import String.*) 
 Require Import Coq.Relations.Relation_Definitions.
-Require Import Coq.Classes.EquivDec.
+
 
  (* Now we define what it is we would like to know about these nouns. *)
 Inductive Attribute : Set :=
@@ -36,19 +36,7 @@ Inductive Attribute : Set :=
   | Index : nat -> Attribute
   | Version : Attribute.
 
-Ltac rec_eq :=
- match goal with
-    | [ x : ?T, y : ?T |- _ ] => 
-       (match T with
-        | nat => generalize nat_eq_eqdec
-        | bool => generalize bool_eqdec
-        | unit => generalize unit_eqdec
-       end) ; 
-       intros X; destruct X with x y as [| paul];
-       try (left; inversion e; subst; reflexivity);
-       try (right; unfold complement in paul; unfold not; 
-            intros Hpaul; apply paul; inversion Hpaul; reflexivity)
-    end.
+
 
 
 
@@ -82,7 +70,6 @@ is 'easy.'It is much more involved to be able to compare indexed types. *)
 
 Inductive Description : Set :=
   | descriptor {n : Noun} {a : Attribute} : DescriptionR n a -> Description.
-
 
 Theorem eq_dec_Description : 
 forall d1 d2 : Description,
@@ -129,10 +116,6 @@ end.
   We must "lock in" what it is that we have measured. We do this in
   the type of Sendable_Measurement.*)
 
-Inductive Message : Set :=
-| Sendable_Measurement (d: Description) : (measurementDenote d) -> Message
-| RequestS : Description -> Message
-| StopMessage : Message.
 Theorem eq_dec_bool : forall b c : bool, 
 {b = c} + {b <> c}.
 decide equality.
@@ -144,36 +127,6 @@ Require Import Coq.Program.Equality.
 Require Import Eqdep_dec.
 Require Import Coq.Arith.EqNat.
 Require Import Coq.Arith.Peano_dec.
- 
-Theorem sendable_measurment_inversion : 
-forall d : Description, forall n n1 : (measurementDenote d), 
-@Sendable_Measurement d n = @Sendable_Measurement d n1 -> n = n1.
-Proof. intros.
-inversion H. apply inj_pair2_eq_dec. apply eq_dec_Description. Print existT.   apply H1.
-Qed.
-Hint Resolve  sendable_measurment_inversion. 
-
-
-
-Theorem lemma1 : forall d : Description, forall m1 m2 : (measurementDenote d), {m1 = m2} + {m1 <> m2}.
-Proof. intros. destruct d. destruct d; simpl in m1; simpl in m2; (apply nat_eq_eqdec) || (apply bool_eqdec).
-Qed.
-Hint Resolve  lemma1. 
-(*
-Theorem eq_dec_Message : forall x y : Message,
-  { x = y} + {x <> y}. Proof. intros. *)
-  
-  Ltac not_eq := let x := fresh "beats" in (let y := fresh "beats" in  ((try right); unfold not; intros x; inversion x as [y];
-     (try (apply inj_pair2_eq_dec in y); auto with eq_dec_db)  )).
-Theorem eq_dec_Message : forall x y : Message,
-  { x = y} + {x <> y}.   
-Proof. intros. destruct x. destruct y.   destruct (eq_dec_Description d d0). subst. destruct (lemma1 d0 m m0); subst.
-left. refl. right. not_eq. not_eq. not_eq. not_eq.
-destruct y. not_eq.
-destruct (eq_dec_Description d d0). subst. left. refl.
-not_eq. not_eq. destruct y. not_eq. not_eq. left; refl.
-Defined.
-Hint Resolve  eq_dec_Message.  
 
 
 (* Here we begin specificiation of requirements. So not only do I want a particular measurment,
@@ -182,7 +135,14 @@ Hint Resolve  eq_dec_Message.
 Inductive Requirement (d : Description) :=
 | requirement : ( (measurementDenote d) -> bool) -> Requirement d.
 
+Require Import FunctionalExtensionality. 
+Theorem eq_dec_f {A} {B} : forall (a b : (A -> B)), a =<> b.
+Proof. intros. Admitted.
 Check requirement.
+
+Theorem eq_dec_Requirement : forall d (x y : Requirement d), x =<> y.
+Proof. intros. destruct d, x, y,d; simpl in b, b0; destruct (eq_dec_f b b0); eqdecHelper.  
+Qed.
 
 (*Examples *)
 Definition  des1 := (descriptor (pcrMR 1)). 
@@ -232,14 +192,6 @@ Definition myPrivacyPolicy := ConsPolicy myRule1 EmptyPolicy.
 
 Definition myrequirement1 := fun (x : nat) => (x > 7).
 
-(* Here is what a session is: We either send something
-   and then another Session, or receive a message and 
-   produce another session. A Branch is shown here, but never used.*)
-Inductive Session :=
- | Send : Message -> Session -> Session
- | Receive : (Message -> Session) -> Session
- | Stop : Session
- .
 
 (* This helps with protocol generation. *)
 Inductive Action : Set :=
@@ -257,16 +209,16 @@ Inductive Action : Set :=
  Definition measure (d: Description) : measurementDenote d.
  Proof. destruct d. destruct d. simpl. exact n.
  simpl. exact 0.
- simpl. exact true. 
+ simpl; exact true. 
  Defined.
  
  (*A RequestItem is used to compose a list of the items and requirements upon those items in an attestation *)
 Inductive RequestItem : Set :=
  | requestItem (d : Description) : (Requirement d) -> RequestItem.
  Theorem eq_dec_RequestItem : forall x y : RequestItem,
- {x = y} + {x <> y}. Proof. intros. destruct x. destruct y. destruct (eq_dec_Description d d0). subst.
- destruct r0. (*Need function equality. Do I need equality on this? *)      
- Admitted.   
+ {x = y} + {x <> y}. Proof. intros. destruct x,y. destruct (eq_dec_Description d d0); subst. (destruct r, r0).  eauto. destruct (eq_dec_f b b0);subst. eqdecHelper. destruct d0. simpl in b0,b. destruct d. simpl.
+Admitted.
+
 Inductive RequestLS : Set :=
  | emptyRequestLS : RequestLS
  | ConsRequestLS : RequestItem -> RequestLS -> RequestLS.
@@ -328,34 +280,6 @@ Check neverRequirement.
  *)
 
 
-Fixpoint handleRequest (pp : PrivacyPolicy) (d : Description) : 
-(PrivacyPolicy * Message * RequestItem):=
- match pp with
- | EmptyPolicy => (EmptyPolicy, StopMessage, requestItem d (neverRequirement d))  (*by default, do not give away*)
- | @ConsPolicy dp rule_d pp' => if (eq_dec_Description dp d) 
-    then
-      match rule_d with
-       | @rule _ your reqrment => (pp', RequestS your, requestItem your reqrment)
-       | free _ => (pp', Sendable_Measurement d (measure d), requestItem d (freeRequirement d) )
-       | never _ => (pp', StopMessage, requestItem d (neverRequirement d)) (*don't matter *)
-       | multiReqAnd _ rule1 morerules => (pp', StopMessage, requestItem d (neverRequirement d)) (* TODO *)
-       | multiReqOr _ rule1 morerules => (pp', StopMessage, requestItem d (neverRequirement d)) (* TODO *)
-      end
-    else
-     match handleRequest pp' d with
-       | (ppres,messres,reqRes) => (@ConsPolicy dp rule_d ppres,messres,reqRes)
-     end
- end. 
- 
-Definition canSend (ls : list Description) (priv : PrivacyPolicy) : option Description :=
-(match ls with
- | nil => None
- | cons d ds => 
-   (match (handleRequest priv d) with 
-     | (_, Sendable_Measurement d _,_) => Some d  
-     | _ => None
-     end)
-end).
    
 (* the above is only a definition (as opposed to fixpoint). this helps us make sure we respond "in order" *)
 
@@ -396,12 +320,14 @@ match priv with
   right; unfold not;intros;inversion H.
   right; unfold not;intros;inversion H.
   decide equality. rec_eq. Defined.
-  
+
   Inductive Const :=
    | constValue (d: Description) : (measurementDenote d) -> Const 
    | constRequest : Description -> Const
-   | constStop : Const.
-   
+   | constStop : Const
+   | constNULL : Const
+   | constMeasurementPlaceHolder : Const.
+
 Inductive Term :=
  | variable : VarID -> Term
  | const : Const -> Term
@@ -415,12 +341,18 @@ Inductive Condition :=
  | IsMeasurement : Term -> Condition
  | IsRequest : Term -> Condition
  | IsStop : Term -> Condition
+ | IsAllGood : Condition
 .
 
-
+Inductive AllGood :=
+ | Yes
+ | No
+ | Unset.
+ 
 Inductive Computation := 
  | compGetMessageToSend
  | compGetNextRequest
+ | compGetfstQueue
  . 
  Inductive Effect :=
 (* | effect_HandleRequest : Term -> Effect*)
@@ -428,6 +360,9 @@ Inductive Computation :=
  | effect_ReduceStatewithMeasurement : Term -> Effect
  | effect_ReducePrivacyWithRequest : Term -> Effect
  | effect_MvFirstDesire :  Effect
+ | effect_rmFstQueued : Effect
+ | effect_cp_ppUnresolved : Term -> Effect
+ | effect_setAllGood : AllGood -> Effect
  .  
  Inductive Participant :=
  |  ATTESTER
@@ -449,17 +384,15 @@ Inductive Statement :=
  | Wait : Statement
 .
 
-
-
-
 Notation "'IFS' x 'THEN' y 'ELSE' z" := (Choose x y z)(at level 80, right associativity). 
 Notation "x '>>' y" := (Chain x y)  (at level 60, right associativity).
 (*Notation "(x >> .. >> y)" := (Chain x .. (Chain y StopMessage) ..).*)
 
 Definition VarState := list (VarID*Const).
+ 
 Inductive ProState :=
  (*  action <who am I?> privacyPol <things I want to ask for!> <Things I've asked for and am waiting for a response> tosend *)
- | proState : Action -> Participant ->  PrivacyPolicy -> RequestLS -> RequestLS -> list Description
+ | proState : Action -> AllGood -> Participant ->  PrivacyPolicy -> RequestLS -> RequestLS -> list Description
       -> ProState.
 Inductive State :=
  state : VarState -> ProState -> State.       
@@ -481,8 +414,6 @@ match st with
  | state varst _ => varSubst' t varst
 end.
 
-
-    
 Inductive NetworkMessage :=
  networkMessage : Participant -> Participant -> Const -> NetworkMessage. 
 Definition Network := list NetworkMessage.
@@ -516,20 +447,19 @@ end.
 (* the option indicates that a condition failed to be met *)
 Definition reduceStateWithMeasurement (v : Const) (st : State) : option State := 
  match v with
- | constRequest _ => Some st
- | constStop => Some st
  | constValue d denotedVal => (match st with
                                 | state varst  prost=> (match prost with
-                                    | proState a p pp toReq myUnresolved tosend => 
+                                    | proState a g p pp toReq myUnresolved tosend => 
                                        (match (reduceUnresolved d denotedVal myUnresolved) with
                                          | Some newUnresolvedState => Some ( 
                                             state varst 
-                                              (proState a p (reducePrivacy d denotedVal pp) toReq     
+                                              (proState a g p (reducePrivacy d denotedVal pp) toReq     
                                                         newUnresolvedState tosend))
                                          | None => None
                                        end)
                                     end)
                               end)
+ | _ => Some st
  end.  
 
 (* Answered the question: "Can I comply with this request? "
@@ -650,8 +580,8 @@ Fixpoint handleRequest' (pp : PrivacyPolicy) (d : Description) :
  *)
 Definition handleRequestST (st: State) (d: Description) := match st with
  | state vars prostate => match prostate with
-     | proState a p pp b unres dls => match(handleRequest' pp d) with 
-                                | (pp',c,ri) => state ((toSendMESSAGE,c)::vars) (proState a p pp' b (ConsRequestLS ri unres) dls)
+     | proState a g p pp b unres dls => match(handleRequest' pp d) with 
+                                | (pp',c,ri) => state ((toSendMESSAGE,c)::vars) (proState a g p pp' b (ConsRequestLS ri unres) dls)
                                                   
                               end
 end
@@ -663,10 +593,19 @@ end.
   Possible reasons for failure:
  1.   The request is an unsatifiable object from the privacy policy. 
  *)
+ Definition canSend (ls : list Description) (priv : PrivacyPolicy) : option Description :=
+(match ls with
+ | nil => None
+ | cons d ds => 
+   (match (handleRequest' priv d) with 
+     | (_, constValue d _,_) => Some d  
+     | _ => None
+     end)
+end).
 Definition canSendST (st : State) : option Description :=
 match st with
  | state vars prostate => match prostate with
-                           | proState _ _ pp _ _ ls =>  canSend ls pp
+                           | proState _ _ _ pp _ _ ls =>  canSend ls pp
                           end
 end.
 
@@ -679,7 +618,7 @@ end.
 Definition isMyTurn (st : State) : bool :=
 match st with
  | state vs ps => (match ps with
-     | proState a _ _ _ _ _ => (match a with
+     | proState a _ _ _ _ _ _ => (match a with
                                  | ASend => true
                                  | AReceive => false
                                 end)
@@ -688,15 +627,15 @@ end.
 Definition queuedRequestsExist (st : State) := 
 match st with
  | state vs ps => match ps with
-       | proState _ _ _ _ _  nil => false
-       | proState _ _ _ _ _  _ => true
+       | proState _ _ _ _ _ _  nil => false
+       | proState _ _ _ _ _ _ _ => true
         end
 
  end. 
 Definition existsNextDesire (st : State) :=
 match st with
  | state _ ps =>match ps with
-            | proState _ _ _ wants _ _ =>match wants with
+            | proState _ _ _ _ wants _ _ =>match wants with
                              | emptyRequestLS => false
                              | ConsRequestLS x x0 => true
                             end
@@ -706,7 +645,7 @@ end.
 Fixpoint evalChoose (cond : Condition) (st: State) : bool :=
  (match st with
  | state varst prostate => (match prostate with
-      | proState act p pp toReq unres ls => (match cond with
+      | proState act g p pp toReq unres ls => (match cond with
                | IsMyTurntoSend => isMyTurn st
                | QueuedRequestsExist => queuedRequestsExist st
                | ExistsNextDesire => existsNextDesire st
@@ -734,6 +673,16 @@ Fixpoint evalChoose (cond : Condition) (st: State) : bool :=
                     | Some constStop => true
                     | _ => false
                     end)
+               | IsAllGood => (match st with
+                             | state vars ps => (match ps with
+                               | proState x g x1 x2 x3 x4 x5 => 
+                                  (match g with
+                                   | Yes => true 
+                                   | No => false
+                                   | Unset => false
+                                    end)
+                              end)
+                            end)
                end) 
       end)
 
@@ -803,7 +752,7 @@ unfold receiveN in H. destruct p. simpl in H.
 intros.
 erewrite <- IHn. 
     simpl. 
-auto. omega.        
+auto. omega.```          
 *)
 
 Definition fst3 {A B C : Type} (tripl : (A * B * C)) : A := match tripl with 
@@ -829,7 +778,7 @@ Print  reduceUnresolved.
 Definition getMe (st: State) : Participant :=
  match st with
  | state _ prostate => match prostate with
-                        | proState _ p _ _ _ _ => p
+                        | proState _ _ p _ _ _ _ => p
 end
 
 end.
@@ -837,10 +786,10 @@ end.
 Definition mvNextDesire (st : State) : State :=
 match st with
  | state vars ps =>match ps with
-            | proState a b c wants e f =>(match wants with
-                   | emptyRequestLS => state vars (proState a b c 
+            | proState a g b c wants e f =>(match wants with
+                   | emptyRequestLS => state vars (proState a g b c 
                       emptyRequestLS e f)
-                   | ConsRequestLS ri rest => state vars (proState a b c rest
+                   | ConsRequestLS ri rest => state vars (proState a g b c rest
                       (ConsRequestLS ri e) f )
                   end) 
             end
@@ -849,17 +798,60 @@ end.
 Definition storeRequest (d : Description) (st : State) : State :=
 match st with
  | state vs ps => match ps with
-      | proState x x0 x1 x2 x3 queue => state vs (proState  x x0 x1 x2 x3 (d :: queue))
+      | proState x g x0 x1 x2 x3 queue => state vs (proState  x g x0 x1 x2 x3 (d :: queue))
 end
 end. 
 
 Definition reducePrivacy_w_RequestST (d : Description) (st : State) : State :=
 match st with
  | state vs ps => match ps with
-      | proState x x0 pp x2 x3 x4 => state vs (proState x x0 (rmAllFromPolicy pp d) x2 x3 x4)
+      | proState x g x0 pp x2 x3 x4 => state vs (proState x g x0 (rmAllFromPolicy pp d) x2 x3 x4)
      end
 end. 
 
+Definition handleRmFstQueued (st : State) :=
+match st with
+ | state vs ps => match ps with
+    | proState x g x0 x1 x2 x3 x4 => state vs
+       (proState x g x0 x1 x2 x3 (tail x4)) 
+end
+end. 
+
+Fixpoint rmFromPP (pp : PrivacyPolicy) (d : Description) :=
+match pp with
+ | EmptyPolicy => EmptyPolicy
+ | @ConsPolicy dp x x0 => if (eq_dec_Description d dp) then  rmFromPP x0 d 
+                                                       else  @ConsPolicy dp x (rmFromPP x0 d)
+end. 
+Fixpoint getCounterReqItemFromPP (pp : PrivacyPolicy) (d : Description) : option RequestItem :=
+match pp with
+ | EmptyPolicy => None
+ | @ConsPolicy dp x x0 => if (eq_dec_Description d dp) then match x with
+ | @rule _ dd  r => Some (requestItem dd r)
+ | free _ => None
+ | never _ => None
+ | multiReqAnd _ _ x0 => None
+ | multiReqOr _ _ x0 => None
+end 
+                                                       else  (getCounterReqItemFromPP x0 d)
+end. 
+Definition handlecp_ppUnresolved (d : Description)  (st : State) : option State := 
+match st with
+ | state vs ps => match ps with
+    | proState x g x0 pp x2 x3 x4 => match  getCounterReqItemFromPP pp d with 
+                                      | None => None
+                                      | Some reqI => Some (state vs (proState x g x0 pp x2 (ConsRequestLS reqI x3) x4))
+                                      end
+end
+end. 
+
+Definition handleSetAllGood (g : AllGood) (st : State) : State:=
+match st with
+ | state var ps => match ps with
+          | proState x x0 x1 x2 x3 x4 x5 => state var (proState x g x1 x2 x3 x4 x5) 
+end
+end.
+ 
 Definition handleEffect (e : Effect) (st : State) : option State :=
 match e with
  (*| effect_HandleRequest t => match (varSubst t st) with 
@@ -879,14 +871,20 @@ match e with
                                            | _ => None
                                            end
  | effect_MvFirstDesire => Some (mvNextDesire st)
-end.
+ | effect_rmFstQueued  =>  Some (handleRmFstQueued st)
+ | effect_cp_ppUnresolved t =>  match (varSubst t st) with 
+                                           | Some (constRequest d) => (handlecp_ppUnresolved d st)
+                                           | _ => None
+                                           end
+ | effect_setAllGood x  => Some (handleSetAllGood x st)
+end. 
 
 
 Check measure. 
 Definition getNextDesire (st : State) : option Description :=
 match st with
  | state _ ps =>match ps with
-            | proState _ _ _ wants _ _ =>(match wants with
+            | proState _ _ _ _ wants _ _ =>(match wants with
                              | emptyRequestLS => None
                              | ConsRequestLS ri _ => (match ri with
                                          | requestItem d x => Some d
@@ -896,9 +894,19 @@ match st with
             end
 end.
 
+Definition handleGetfstQueue (st : State) :=
+match st with
+ | state _ ps => match ps with
+    | proState x g x0 x1 x2 x3 x4 => match x4 with
+ | nil => None
+ | cons x x0 => Some (constRequest x)
+end
+end
+end.
 
 Definition handleCompute (comp : Computation) (st : State) : option Const :=
  match comp with
+  | compGetfstQueue => handleGetfstQueue st
   | compGetMessageToSend => match (canSendST st) with 
                               | Some d => Some (constValue d (measure d))
                               | None => None
@@ -1013,8 +1021,10 @@ Definition proto_handleCanSend (st : State) :=
  IFS CanSend
     THEN Compute toSendMESSAGE compGetMessageToSend >>
          SendStatement (variable toSendMESSAGE) (getMe st) (notMe (getMe st)) >> 
-         Compute 
-         EffectStatement
+         Compute (variden 1) compGetfstQueue >>
+         EffectStatement (effect_ReducePrivacyWithRequest (variable (variden 1))) >>
+         EffectStatement effect_rmFstQueued >>
+         
          EndStatement
     ELSE (*Can't send and queued request exists *) 
       SendStatement (const constStop) (getMe st) (notMe (getMe st)) >> 
@@ -1138,7 +1148,7 @@ match n with
  | cons _ ls => mostRecentFromMe st ls
 end. 
  
-Tactic Notation "inv" hyp(H) := inversion H; subst.
+
  
  Theorem evalSendTurn : forall  st n, (evalChoose IsMyTurntoSend st) = true -> (OneProtocolStep st ,st,n) ⇓ (proto_handleIsMyTurnToSend st, st, n).
 Proof.
@@ -1197,7 +1207,7 @@ Hint Unfold proto_handleIsMyTurnToSend.
 Hint Unfold proto_handleNotMyTurnToSend.
 Hint Unfold proto_handleExistsNextDesire.  
 
-Tactic Notation "cca" := repeat constructor; assumption. 
+
 
 (*(EndStatement, assign toSendMESSAGE x (state v p), sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) x n)
 ⇓⇓ (EndStatement, st', n')
@@ -1300,14 +1310,15 @@ Qed.
 Theorem eval6 : forall v p n r, 
 evalChoose IsMyTurntoSend (state v p)      = false -> 
 receiveN n (getMe (state v p)) = Some (constRequest r, tail n) -> 
-(OneProtocolStep (state v p), (state v p), n) ⇓⇓ (EndStatement, (handleRequestST (assign receivedMESSAGE (constRequest r) (state v p)) r), tail n).
+(OneProtocolStep (state v p), (state v p), n) ⇓⇓ (EndStatement, (storeRequest r (assign receivedMESSAGE (constRequest r) (state v p))), tail n).
 Proof. intros. unfold OneProtocolStep.
  intros. 
 eapply bigstep_stm_step. cca.
 eapply bigstep_stm_step. autounfold. constructor. constructor. Print E_Receive.  constructor.  apply H0.  unfold not. intros. inv H1.
 eapply bigstep_stm_step. constructor. apply E_ChooseFalse. simpl. destruct p. auto.
 eapply bigstep_stm_step.    constructor. constructor. simpl. destruct p. auto.
-eapply bigstep_stm_step. cca. auto.   
+eapply bigstep_stm_step. cca.
+constructor. constructor.
 Qed.
 
 Theorem eval7 : forall v p n, 
@@ -1358,7 +1369,7 @@ Qed.
 Definition getPrivacy (st : State) : PrivacyPolicy :=
 match st with
  | state _ ps => match ps with
-    | proState _ _ pp _ _ _ => pp
+    | proState _ _ _ pp _ _ _ => pp
 end
 end.
 SearchAbout PrivacyPolicy.
@@ -1383,11 +1394,12 @@ Hint Resolve isRemovedFromPrivacyhandleST.
 
 Theorem isRemovedFromPrivacy : forall st st' n t d, 
   varSubst t st = Some (constRequest d) -> 
-  (EffectStatement (effect_HandleRequest t), st, n) ⇓ (Skip, st',n) -> 
+  (EffectStatement (effect_ReducePrivacyWithRequest t), st, n) ⇓ (Skip, st',n) -> 
   findandMeasureItem (getPrivacy st') d = None.
-Proof. intros. inversion H0. subst.
-simpl in H2. rewrite H in H2. inversion H2.
-auto.
+Proof. intros. inversion H0; subst.
+simpl in H2. rewrite H in H2. inversion H2. subst. 
+Theorem x : forall d st, findandMeasureItem (getPrivacy (reducePrivacy_w_RequestST d st)) d = None.
+intros. destruct st. simpl. destruct p. simpl. auto. Qed. apply x. 
 Qed.  
 
 
@@ -1557,14 +1569,14 @@ end.
  Definition switchSendRec ( st : State) : State := 
   match st with
    | state vars ps=> match ps with
-       | proState a b c d e f => state vars (proState (reverse a) b c d e f)
+       | proState a g b c d e f => state vars (proState (reverse a) g b c d e f)
       end
 
   end. 
   Definition getAction ( st : State) : Action := 
   match st with
    | state vars ps=> match ps with
-       | proState a b c d e f => a
+       | proState a g b c d e f => a
       end
   end. 
 
