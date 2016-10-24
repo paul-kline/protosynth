@@ -13,136 +13,30 @@
 
 (* The first step is to define what it is for which we would like to ask. Hence "nouns". *)
 Require Import MyShortHand. 
-Inductive Noun : Set:=
-  | VirusChecker
-  | PCR.
-  
-Create HintDb eq_dec_db. 
-Theorem eq_dec_noun : forall n1 n2 : Noun, {n1 = n2} + {n1 <> n2}.
-Proof. intros.   destruct n1, n2; 
-  try (left;reflexivity); right; unfold not; intros H; inversion H.
-Defined.
 
-Hint Resolve eq_dec_noun (*: eq_dec_db.*).
- 
 (*Require Import String.*) 
+(*
 Require Import Coq.Relations.Relation_Definitions.
-
-
- (* Now we define what it is we would like to know about these nouns. *)
-Inductive Attribute : Set :=
-  | Name : Attribute
-  | Hash : Attribute
-  | Index : nat -> Attribute
-  | Version : Attribute.
-
-
-
-
-
-Theorem eq_dec_attribute : forall a1 a2 : Attribute,
-                    {a1 = a2} + {a1 <> a2}.
-Proof. decide equality; rec_eq.
-Defined. 
-Hint Resolve eq_dec_attribute : eq_dec_db. 
-Require Import Coq.Program.Equality.
-
-(*We only want to disallow nonsensical combinations, like a (PCR, version),
- hence this relation. *)
-Inductive DescriptionR : Noun -> Attribute -> Set :=
-  | pcrMR : forall n, DescriptionR PCR (Index n)
-  | virusCheckerNameR : DescriptionR VirusChecker Name
-  | virusCheckerVersionR : DescriptionR VirusChecker Version.
-  
-Theorem eq_dec_DescriptionR1 : 
-forall n : Noun,
-forall a : Attribute,
-forall x y : DescriptionR n a,
-x = y.
-Proof. intros;
-induction x; dependent induction y;
-( reflexivity).
-Defined.
-Hint Resolve eq_dec_DescriptionR1. 
-
-(* This 'extra step' is done simply so that comparison between descriptors
-is 'easy.'It is much more involved to be able to compare indexed types. *)
-
-Inductive Description : Set :=
-  | descriptor {n : Noun} {a : Attribute} : DescriptionR n a -> Description.
-
-Theorem eq_dec_Description : 
-forall d1 d2 : Description,
-{d1 = d2} + {d1 <> d2}. 
-Proof. intros. destruct d1, d2.   
-specialize eq_dec_attribute with a a0. intros. destruct H.
- specialize eq_dec_noun with n n0. intros.
-destruct H. left. subst. specialize eq_dec_DescriptionR1 with n0 a0 d0 d.
-intros. subst. reflexivity.
-right. unfold not. intros. inversion H. contradiction.
-right. unfold not. intros. inversion H. contradiction.
-Defined. 
-Hint Resolve eq_dec_Description . (*: eq_dec_db.
-Hint Resolve eq_dec_DescriptionR1 : eq_dec_db.  *)
-
+*)
 (*Add LoadPath "/users/paulkline/Documents/coqs/dependent-crypto".
 Add LoadPath "/users/paulkline/Documents/coqs/cpdt/src".
 Add LoadPath "C:\Users\Paul\Documents\coqs\dependent-crypto".
 Add LoadPath "C:\Users\Paul\Documents\coqs\cpdt\src". *)
-Require Import MyShortHand.
-
-(*This defines what the type of measuring these things should be. *)
-
-Definition measurementDenote (d: Description) :=
-match d with
- | descriptor r => (match r with
-    | pcrMR n => nat
-    | virusCheckerNameR => nat
-    | virusCheckerVersionR => bool
-    end)
-end.
-
-
-(*Let us add to our building blocks by defining what a message can be.
-  In it's simplest form, a message can only be a request (RequestS) or a response to a request.
-  It turns out a response to a request can take the form of any of the 3 defined messages. 
-   1. You can comply with the request and send a "Sendable_Measurement."
-   2. You can conditionally comply with the request by countering with another request, depending on its
-      result. 
-   3. You can refuse all together with a StopMessage.
-  A StopMessage is also used to indicate good termination, i.e. I'm done.
-  
-  
-  We must "lock in" what it is that we have measured. We do this in
-  the type of Sendable_Measurement.*)
-
-Theorem eq_dec_bool : forall b c : bool, 
-{b = c} + {b <> c}.
-decide equality.
-Defined.
-Hint Resolve  eq_dec_bool.  
-
-
+Require Import ProtoSynthDataTypes. 
+Require Import ProtoSynthDataTypeEqualities.
+Require Import ProtoSynthProtocolDataTypes. 
+Require Import Coq.Lists.List.
+(*
 Require Import Coq.Program.Equality.
 Require Import Eqdep_dec.
 Require Import Coq.Arith.EqNat.
 Require Import Coq.Arith.Peano_dec.
+*)
 
 
-(* Here we begin specificiation of requirements. So not only do I want a particular measurment,
-   but I want it to be certain values. *) 
 
-Inductive Requirement (d : Description) :=
-| requirement : ( (measurementDenote d) -> bool) -> Requirement d.
 
-Require Import FunctionalExtensionality. 
-Theorem eq_dec_f {A} {B} : forall (a b : (A -> B)), a =<> b.
-Proof. intros. Admitted.
-Check requirement.
 
-Theorem eq_dec_Requirement : forall d (x y : Requirement d), x =<> y.
-Proof. intros. destruct d, x, y,d; simpl in b, b0; destruct (eq_dec_f b b0); eqdecHelper.  
-Qed.
 
 (*Examples *)
 Definition  des1 := (descriptor (pcrMR 1)). 
@@ -153,32 +47,6 @@ apply requirement. simpl. exact ((fun (x : nat) => Nat.leb x 7)).
 Defined.
 Definition req2 := 
  requirement (des1) ((fun (x : nat) => Nat.leb x 7)).
- 
- (* This begins the defining of what a privacy policy is. First we define a rule.
-    A rule regulates the release of a measurement. We could decide to release information if
-    some counter condition holds; we could release it for free; we could explicitly never release it; 
-    or some combination of and-ing and or-ing rules.
-    Note that at this point we've allowed for nonsensical release rules like, "never release or release for free",
-     "release for free and never release".
-    
-    
-    NOTE: If we can't request something twice, what if duplicate occurs in rule req?
-          todo: keep all received measurements and check those first for the value *) 
-Inductive Rule (mything : Description) :=  
-| rule  {your : Description} : (Requirement your) -> Rule mything
-| free : Rule mything
-| never : Rule mything
-| multiReqAnd : Rule mything ->Rule mything -> Rule mything
-| multiReqOr : Rule mything -> Rule mything -> Rule mything.   
-
-
-(* simply a list of rules. *)
-Inductive PrivacyPolicy :=
-| EmptyPolicy : PrivacyPolicy
-| ConsPolicy {d :Description}: 
-    Rule d -> 
-    PrivacyPolicy -> PrivacyPolicy. 
-Check req1.
 
 Definition myRule1 := rule (des1) (requirement (descriptor (pcrMR 2))
  (fun x : nat => Nat.leb x 9)).
@@ -186,24 +54,17 @@ Check myRule1.
 Check ConsPolicy.
 Print myRule1. 
 Definition myPrivacyPolicy := ConsPolicy myRule1 EmptyPolicy.
- 
- 
 
 
 Definition myrequirement1 := fun (x : nat) => (x > 7).
 
 
 (* This helps with protocol generation. *)
-Inductive Action : Set :=
- | ASend : Action
- | AReceive : Action.
 
- Theorem eq_dec_Action : forall x y : Action,
- {x = y} + {x <>y }.
- Proof. decide equality. Defined.
- Hint Resolve  eq_dec_Action. 
+
+
  
- Require Import Coq.Lists.List.
+ 
  
  (* placeholder measurement function. need this to exist *) 
  Definition measure (d: Description) : measurementDenote d.
@@ -212,16 +73,10 @@ Inductive Action : Set :=
  simpl; exact true. 
  Defined.
  
- (*A RequestItem is used to compose a list of the items and requirements upon those items in an attestation *)
-Inductive RequestItem : Set :=
- | requestItem (d : Description) : (Requirement d) -> RequestItem.
- Theorem eq_dec_RequestItem : forall x y : RequestItem,
- {x = y} + {x <> y}. Proof. intros. destruct x,y. destruct (eq_dec_Description d d0); subst. (destruct r, r0).  eauto. destruct (eq_dec_f b b0);subst. eqdecHelper. destruct d0. simpl in b0,b. destruct d. simpl.
-Admitted.
 
-Inductive RequestLS : Set :=
- | emptyRequestLS : RequestLS
- | ConsRequestLS : RequestItem -> RequestLS -> RequestLS.
+ 
+
+
  
  (* Now we get into functions needed to define the getProtocol function. 
     Due to coqs linear nature, we must define in this order, but know that
@@ -250,12 +105,7 @@ Fixpoint reduceUnresolved (d : Description) (v : measurementDenote d)
      end
  end. rewrite <- e in v. exact v. Defined. 
  
-Inductive Role : Set :=
- | Appraiser
- | Attester. 
-Theorem eq_dec_Role: forall x y : Role, {x = y} + {x <> y}. 
-Proof. decide equality. Defined.
-Hint Resolve eq_dec_Role. 
+
 
 Definition freeRequirement (d : Description): Requirement d:= 
  requirement d (fun _ => true).
@@ -280,13 +130,8 @@ Check neverRequirement.
  *)
 
 
-   
-(* the above is only a definition (as opposed to fixpoint). this helps us make sure we respond "in order" *)
-
-
 (* Now that we know some measurement value, can we ease any requirements stated in the privacy policy? 
 Stay tuned to find out! *)
-
 Fixpoint reducePrivacy (d : Description) (v : (measurementDenote d)) (priv : PrivacyPolicy) : PrivacyPolicy.
 refine (
 match priv with
@@ -303,99 +148,9 @@ match priv with
       end
     
  end). subst. exact v. Defined.
- 
- (* main course *)
 
- Inductive VarID :=
-  | receivedMESSAGE : VarID
-  | toSendMESSAGE : VarID
-  | variden : nat -> VarID
-  . 
-  Theorem eq_dec_VarID : forall x y : VarID, {x = y} + {x <> y}.
-  Proof. intros. destruct x,y; try (left; reflexivity).
-  right; unfold not;intros;inversion H.
-  right; unfold not;intros;inversion H.
-  right; unfold not;intros;inversion H.
-  right; unfold not;intros;inversion H.
-  right; unfold not;intros;inversion H.
-  right; unfold not;intros;inversion H.
-  decide equality. rec_eq. Defined.
 
-  Inductive Const :=
-   | constValue (d: Description) : (measurementDenote d) -> Const 
-   | constRequest : Description -> Const
-   | constStop : Const
-   | constNULL : Const
-   | constMeasurementPlaceHolder : Const.
-
-Inductive Term :=
- | variable : VarID -> Term
- | const : Const -> Term
- .
-Inductive Condition :=
- | IsMyTurntoSend : Condition
- | QueuedRequestsExist : Condition
- | ExistsNextDesire : Condition
- | CanSend :  Condition
- | IsSend :  Condition
- | IsMeasurement : Term -> Condition
- | IsRequest : Term -> Condition
- | IsStop : Term -> Condition
- | IsAllGood : Condition
-.
-
-Inductive AllGood :=
- | Yes
- | No
- | Unset.
- 
-Inductive Computation := 
- | compGetMessageToSend
- | compGetNextRequest
- | compGetfstQueue
- . 
- Inductive Effect :=
-(* | effect_HandleRequest : Term -> Effect*)
- | effect_StoreRequest : Term -> Effect
- | effect_ReduceStatewithMeasurement : Term -> Effect
- | effect_ReducePrivacyWithRequest : Term -> Effect
- | effect_MvFirstDesire :  Effect
- | effect_rmFstQueued : Effect
- | effect_cp_ppUnresolved : Term -> Effect
- | effect_setAllGood : AllGood -> Effect
- .  
- Inductive Participant :=
- |  ATTESTER
- |  APPRAISER. 
- Theorem eq_dec_Participant : forall x y : Participant, {x = y} + {x <> y}.
- Proof. decide equality. Defined.
- 
-Inductive Statement :=
- | SendStatement : Term -> Participant -> Participant -> Statement
- | ReceiveStatement : VarID -> Statement
- | EffectStatement : Effect -> Statement
- | Compute : VarID -> Computation -> Statement
- | Assignment : VarID -> Term -> Statement
- | Choose : Condition -> Statement -> Statement -> Statement
- | Chain : Statement -> Statement -> Statement
- | StopStatement : Statement
- | EndStatement : Statement
- | Skip : Statement
- | Wait : Statement
-.
-
-Notation "'IFS' x 'THEN' y 'ELSE' z" := (Choose x y z)(at level 80, right associativity). 
-Notation "x '>>' y" := (Chain x y)  (at level 60, right associativity).
-(*Notation "(x >> .. >> y)" := (Chain x .. (Chain y StopMessage) ..).*)
-
-Definition VarState := list (VarID*Const).
- 
-Inductive ProState :=
- (*  action <who am I?> privacyPol <things I want to ask for!> <Things I've asked for and am waiting for a response> tosend *)
- | proState : Action -> AllGood -> Participant ->  PrivacyPolicy -> RequestLS -> RequestLS -> list Description
-      -> ProState.
-Inductive State :=
- state : VarState -> ProState -> State.       
+       
 
 Fixpoint varSubst' (t : Term) (ls : VarState) : option Const :=
 match t with
@@ -414,9 +169,7 @@ match st with
  | state varst _ => varSubst' t varst
 end.
 
-Inductive NetworkMessage :=
- networkMessage : Participant -> Participant -> Const -> NetworkMessage. 
-Definition Network := list NetworkMessage.
+
 
 (* When we send a message, it gets appended to the end of the list. This makes receiving
 in the correct order easier. *)
@@ -452,7 +205,7 @@ Definition reduceStateWithMeasurement (v : Const) (st : State) : State :=
                                        (match (reduceUnresolved d denotedVal myUnresolved) with
                                          | Some newUnresolvedState => ( 
                                             state varst 
-                                              (proState a g p (reducePrivacy d denotedVal pp) toReq     
+                                              (proState a Yes p (reducePrivacy d denotedVal pp) toReq     
                                                         newUnresolvedState tosend))
                                          | None => state varst (proState a No p (reducePrivacy d denotedVal pp) toReq
                                                        myUnresolved tosend)
@@ -915,31 +668,10 @@ Definition handleCompute (comp : Computation) (st : State) : option Const :=
                               | None => None
                               | Some desire => Some (constRequest desire)
                             end)
- end
-.
- 
-(*Inductive Statement :=
- | SendStatement : Term -> Participant -> Participant -> Statement (*for now/simplicity, Participant not a variable*)
- | ReceiveStatement : VarID -> Statement
- | EffectStatement : Effect -> Statement
-(* | ReduceStatewithMeasurement : Term -> Statement*)
- | Compute : VarID -> Computation -> Statement
- | Assignment : VarID -> Term -> Statement
- | Choose : Condition -> Statement -> Statement -> Statement
- | Chain : Statement -> Statement -> Statement
- | StopStatement : Statement
- | Skip : Statement
- | Wait : Statement
- | VariableSubstError
- | MeasurementRequirementNotMet
- | VariableAssignmentError
- | Done
-.
-*)
+ end.
 
- Reserved Notation " x '⇓'  x'"
+Reserved Notation " x '⇓'  x'"
                   (at level 40).
-
 Inductive stmEval : (Statement * State * Network) -> (Statement * State * Network) -> Prop :=
    | E_Send : forall st n term f t v, (varSubst term st) = Some v -> 
               v <> constStop ->  
@@ -1012,6 +744,7 @@ Notation "x ⇓⇓ x'" := (BigStep_stmEval x x') (at level 35).
 Hint Constructors BigStep_stmEval. 
 
 
+
 Definition notMe (p : Participant) : Participant :=
 match p with
  | ATTESTER => APPRAISER
@@ -1048,15 +781,14 @@ Definition proto_handleCantSend (st : State):= IFS ExistsNextDesire
       . 
  
 Definition proto_handleIsMyTurnToSend (st: State) := 
-(
-IFS IsAllGood
-  THEN
+(IFS IsAllGood THEN
+    EffectStatement (effect_setAllGood Unset) >>
     IFS QueuedRequestsExist
       THEN 
          proto_handleCanSend st
       ELSE (*No queued up things for me. So I can continue down my list of things I want. *)
          proto_handleCantSend st
-  ELSE
+ ELSE
     SendStatement (const constStop) (getMe st) (notMe (getMe st)) >>
     StopStatement
 ).
@@ -1077,12 +809,12 @@ IFS (IsMeasurement (variable (receivedMESSAGE)))
 
 Definition OneProtocolStep (st : State) : Statement :=
   (* first step is to find out if we're sending or receiving. *)
-    (IFS IsMyTurntoSend 
-     THEN
-      proto_handleIsMyTurnToSend st
+(
+IFS IsMyTurntoSend THEN
+ proto_handleIsMyTurnToSend st
       
-    ELSE (* I AM RECEIVING *) 
-     proto_handleNotMyTurnToSend st
+ELSE (* I AM RECEIVING *) 
+ proto_handleNotMyTurnToSend st
      ).
        
 Definition getProState (st : State) : ProState :=
@@ -1094,7 +826,8 @@ Fixpoint headStatement (stm : Statement) : Statement :=
 match stm with
  | Chain stm1 _ => headStatement stm1 
  | stmm => stmm
-end. 
+end.
+
 
 Theorem onlyEffect_effects : forall (stm stm': Statement) (st st': State) (n n' : Network),
  (stm,st,n) ⇓ (stm',st',n') ->  
@@ -1104,16 +837,173 @@ intro. induction stm ; try (intros; inversion H; left; reflexivity).
 intros. simpl. left. inversion H. subst. destruct st.  auto. auto.
 destruct st; auto.
 intros. right. exists e. auto.
-intros. left. inversion H; subst.   destruct st. auto.
-intros. left. destruct st; inversion H; subst. auto.
+intros. left. inversion H; subst;   destruct st; auto.
+intros; left; destruct st; inversion H; subst. auto.
 simpl. 
-intros. inversion H; subst.    eapply IHstm1.
+intros; inversion H; subst.    eapply IHstm1.
 eauto.
 eapply IHstm1; eauto.
 eapply IHstm1; eauto.
 eapply IHstm1; constructor;  eauto.
 Qed.
+Hint Resolve onlyEffect_effects.
 
+Theorem proto1 : forall st n, evalChoose IsMyTurntoSend st = true -> 
+ (OneProtocolStep st, st, n) ⇓ (proto_handleIsMyTurnToSend st, st, n).
+Proof. intros. constructor; auto.
+Qed.
+Theorem proto0 : forall st n, evalChoose IsMyTurntoSend st = false -> 
+ (OneProtocolStep st, st, n) ⇓ (proto_handleNotMyTurnToSend st, st, n).
+Proof. intros. constructor; auto.
+Qed.
+
+Theorem proto11 : forall st n, evalChoose IsAllGood st = true -> 
+ (proto_handleIsMyTurnToSend st, st, n) ⇓ (proto_handleCanSend st, st, n).
+Proof. intros. unfold proto_handleIsMyTurnToSend. eapply E_ChooseTrue.  constructor; auto.
+Qed.
+
+     unfold OneProtocolStep.  eapply E_ChooseTrue.   constructor. eauto.  auto.    
+Theorem eval1 : forall v p n, evalChoose IsMyTurntoSend (state v p) = true -> 
+evalChoose QueuedRequestsExist (state v p)                          = true ->
+evalChoose CanSend (state v p)                                      = true -> exists c,  
+ (OneProtocolStep (state v p), (state v p), n) ⇓⇓ (EndStatement, assign toSendMESSAGE c (state v p) ,sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) c n).
+Proof. intros. unfold OneProtocolStep.
+assert (evalChoose CanSend (state v p) = true). assumption.  
+apply canSendST_implies_handleExists in H1. destruct H1.
+exists x. 
+eapply bigstep_stm_step. cca.
+unfold proto_handleIsMyTurnToSend.
+eapply bigstep_stm_step. constructor. 
+unfold proto_handleCanSend. 
+eapply bigstep_stm_step. constructor. constructor.   cca.
+eapply bigstep_stm_step. constructor. constructor. constructor.
+rewrite H1. auto.
+
+eapply bigstep_stm_step. constructor. constructor. constructor. simpl.  auto.       cca.
+Qed.
+
+(*(StopStatement, state v p, sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) constStop n) ⇓⇓ (EndStatement, ?st, ?n')*)
+Theorem eval2 : forall v p n, 
+evalChoose IsMyTurntoSend (state v p)      = true -> 
+evalChoose QueuedRequestsExist (state v p) = true ->
+evalChoose CanSend (state v p)             = false ->   
+(OneProtocolStep (state v p), (state v p), n) ⇓⇓ (StopStatement, state v p , (sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) constStop n)).
+Proof. intros. unfold OneProtocolStep.
+eapply bigstep_stm_step. cca.
+unfold proto_handleIsMyTurnToSend.
+eapply bigstep_stm_step. cca.
+unfold proto_handleCanSend.
+eapply bigstep_stm_step. constructor. apply E_ChooseFalse. assumption.
+eapply bigstep_stm_step. constructor. constructor. constructor. auto.
+constructor. 
+cca.
+Qed.
+
+    Theorem ifwillthenway : forall st, evalChoose ExistsNextDesire st = true ->exists c,  handleCompute compGetNextRequest st = Some c .
+    Proof.
+    intros. destruct st. destruct p. destruct r.   simpl. exists constStop. intros. inversion H.
+    simpl. destruct r. exists (constRequest d). auto. 
+    Qed.
+
+
+(*(EndStatement, mvNextDesire (assign toSendMESSAGE x (state v p)), sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) x n)
+*)
+Theorem eval3 : forall v p n, 
+evalChoose IsMyTurntoSend (state v p)      = true -> 
+evalChoose QueuedRequestsExist (state v p) = false ->
+evalChoose ExistsNextDesire (state v p)    = true ->   exists r,
+(OneProtocolStep (state v p), (state v p), n) ⇓⇓ (EndStatement, mvNextDesire (assign toSendMESSAGE r (state v p)), (sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) r n)).
+Proof. intros. unfold OneProtocolStep.
+
+assert (evalChoose ExistsNextDesire (state v p) = true). assumption.  
+
+apply ifwillthenway in H1. destruct H1. exists x. 
+eapply bigstep_stm_step. cca.
+unfold proto_handleIsMyTurnToSend.
+eapply bigstep_stm_step. cca.
+unfold proto_handleCantSend. 
+eapply bigstep_stm_step. cca.
+eapply bigstep_stm_step. constructor. constructor. constructor. rewrite H1. auto. 
+
+
+eapply bigstep_stm_step. cca.
+eapply bigstep_stm_step; constructor; constructor; constructor; destruct p; destruct r;    simpl; eauto.
+Qed.
+
+(*
+(StopStatement, state v p, sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) constStop n)*)
+Theorem eval4 : forall v p n, 
+evalChoose IsMyTurntoSend (state v p)      = true -> 
+evalChoose QueuedRequestsExist (state v p) = false ->
+evalChoose ExistsNextDesire (state v p)    = false -> 
+(OneProtocolStep (state v p), (state v p), n) ⇓⇓ (StopStatement, state v p, (sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) constStop n)).
+Proof. intros. unfold OneProtocolStep.
+eapply bigstep_stm_step.  cca.
+eapply bigstep_stm_step. cca.
+eapply bigstep_stm_step. cca.
+eapply bigstep_stm_step. constructor. autounfold. constructor. constructor. auto.
+auto. 
+Qed.
+
+Theorem eval5 : forall v p n d c, 
+evalChoose IsMyTurntoSend (state v p)      = false -> 
+receiveN n (getMe (state v p)) = Some (constValue d c, tail n) -> exists pp',
+reduceStateWithMeasurement (constValue d c) (assign receivedMESSAGE (constValue d c) (state v p)) = pp' -> 
+(OneProtocolStep (state v p), (state v p), n) ⇓⇓ (EndStatement, (assign receivedMESSAGE (constValue d c) (state v p)), tail n).
+Proof. intros. unfold OneProtocolStep.
+eexists. intros. 
+eapply bigstep_stm_step. cca.
+eapply bigstep_stm_step. autounfold. constructor. constructor. Print E_Receive.  constructor.  apply H0.  unfold not. intros. inv H2.
+eapply bigstep_stm_step. constructor. constructor. simpl. destruct p. auto.
+eapply bigstep_stm_step.    constructor. constructor. constructor. unfold handleEffect. rewrite <- H1.  reflexivity. auto.
+Qed.
+
+Theorem eval6 : forall v p n r, 
+evalChoose IsMyTurntoSend (state v p)      = false -> 
+receiveN n (getMe (state v p)) = Some (constRequest r, tail n) -> 
+(OneProtocolStep (state v p), (state v p), n) ⇓⇓ (EndStatement, (storeRequest r (assign receivedMESSAGE (constRequest r) (state v p))), tail n).
+Proof. intros. unfold OneProtocolStep.
+ intros. 
+eapply bigstep_stm_step. cca.
+eapply bigstep_stm_step. autounfold. constructor. constructor. Print E_Receive.  constructor.  apply H0.  unfold not. intros. inv H1.
+eapply bigstep_stm_step. constructor. apply E_ChooseFalse. simpl. destruct p. auto.
+eapply bigstep_stm_step.    constructor. constructor. simpl. destruct p. auto.
+eapply bigstep_stm_step. cca.
+constructor. constructor.
+Qed.
+
+Theorem eval7 : forall v p n, 
+evalChoose IsMyTurntoSend (state v p)      = false -> 
+receiveN n (getMe (state v p)) = Some (constStop, tail n) -> 
+(OneProtocolStep (state v p), (state v p), n) ⇓⇓ (StopStatement,  (assign receivedMESSAGE constStop (state v p)), tail n).
+Proof. intros. unfold OneProtocolStep. 
+ intros. 
+eapply bigstep_stm_step. cca.
+eapply bigstep_stm_step. autounfold. constructor. eapply E_ChainBad. constructor. apply H0. auto.
+Qed.
+
+Theorem eval8 : forall v p n, 
+evalChoose IsMyTurntoSend (state v p)      = false -> 
+receiveN n (getMe (state v p)) = None -> 
+(OneProtocolStep (state v p), (state v p), n) ⇓⇓ (Wait >> (proto_handleNotMyTurnToSend (state v p)),   (state v p), n).
+Proof. intros. unfold OneProtocolStep. 
+ intros. 
+eapply bigstep_stm_step. constructor. apply E_ChooseFalse. auto.
+eapply bigstep_stm_step. autounfold. constructor. eapply E_ChainWait.  eapply E_ReceiveWait. assumption.
+constructor. apply E_KeepWaiting. assumption.
+Qed.
+  
+Hint Resolve eval1 eval2 eval3 eval4 eval5 eval6 eval7 eval8.  
+
+Theorem receiveTurnAlwaysFinishes : forall st n,  
+ evalChoose IsMyTurntoSend st = false ->  exists st' n', 
+ (OneProtocolStep st,st,n) ⇓⇓ (EndStatement,st',n') \/
+ (OneProtocolStep st,st,n) ⇓⇓ (StopStatement,st',n').
+Proof. intros. destruct (receiveN n (getMe st)) eqn:recstat. destruct p. destruct c.
+ eexists. eexists.
+ left.  eapply bigstep_stm_step. constructor. apply E_ChooseFalse. auto.
+        eapply bigstep_stm_step. unfold proto_handleNotMyTurnToSend.  constructor. constructor. constructor.
+        apply recstat. nono.  auto. 
 Theorem onlySendOrReceiveChangesNetwork : forall (stm stm': Statement) (st st': State) (n n' : Network),
  (stm,st,n) ⇓ (stm',st',n') -> 
  n = n' \/
@@ -1219,138 +1109,9 @@ Hint Unfold proto_handleExistsNextDesire.
 (*(EndStatement, assign toSendMESSAGE x (state v p), sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) x n)
 ⇓⇓ (EndStatement, st', n')
 *)
-Theorem eval1 : forall v p n, evalChoose IsMyTurntoSend (state v p) = true -> 
-evalChoose QueuedRequestsExist (state v p)                          = true ->
-evalChoose CanSend (state v p)                                      = true -> exists c,  
- (OneProtocolStep (state v p), (state v p), n) ⇓⇓ (EndStatement, assign toSendMESSAGE c (state v p) ,sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) c n).
-Proof. intros. unfold OneProtocolStep.
-assert (evalChoose CanSend (state v p) = true). assumption.  
-apply canSendST_implies_handleExists in H1. destruct H1.
-exists x. 
-eapply bigstep_stm_step. cca.
-unfold proto_handleIsMyTurnToSend.
-eapply bigstep_stm_step. constructor. 
-unfold proto_handleCanSend. 
-eapply bigstep_stm_step. constructor. constructor.   cca.
-eapply bigstep_stm_step. constructor. constructor. constructor.
-rewrite H1. auto.
-
-eapply bigstep_stm_step. constructor. constructor. constructor. simpl.  auto.       cca.
-Qed.
-
-(*(StopStatement, state v p, sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) constStop n) ⇓⇓ (EndStatement, ?st, ?n')*)
-Theorem eval2 : forall v p n, 
-evalChoose IsMyTurntoSend (state v p)      = true -> 
-evalChoose QueuedRequestsExist (state v p) = true ->
-evalChoose CanSend (state v p)             = false ->   
-(OneProtocolStep (state v p), (state v p), n) ⇓⇓ (StopStatement, state v p , (sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) constStop n)).
-Proof. intros. unfold OneProtocolStep.
-eapply bigstep_stm_step. cca.
-unfold proto_handleIsMyTurnToSend.
-eapply bigstep_stm_step. cca.
-unfold proto_handleCanSend.
-eapply bigstep_stm_step. constructor. apply E_ChooseFalse. assumption.
-eapply bigstep_stm_step. constructor. constructor. constructor. auto.
-constructor. 
-cca.
-Qed.
-
-    Theorem ifwillthenway : forall st, evalChoose ExistsNextDesire st = true ->exists c,  handleCompute compGetNextRequest st = Some c .
-    Proof.
-    intros. destruct st. destruct p. destruct r.   simpl. exists constStop. intros. inversion H.
-    simpl. destruct r. exists (constRequest d). auto. 
-    Qed.
-
-
-(*(EndStatement, mvNextDesire (assign toSendMESSAGE x (state v p)), sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) x n)
-*)
-Theorem eval3 : forall v p n, 
-evalChoose IsMyTurntoSend (state v p)      = true -> 
-evalChoose QueuedRequestsExist (state v p) = false ->
-evalChoose ExistsNextDesire (state v p)    = true ->   exists r,
-(OneProtocolStep (state v p), (state v p), n) ⇓⇓ (EndStatement, mvNextDesire (assign toSendMESSAGE r (state v p)), (sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) r n)).
-Proof. intros. unfold OneProtocolStep.
-
-assert (evalChoose ExistsNextDesire (state v p) = true). assumption.  
-
-apply ifwillthenway in H1. destruct H1. exists x. 
-eapply bigstep_stm_step. cca.
-unfold proto_handleIsMyTurnToSend.
-eapply bigstep_stm_step. cca.
-unfold proto_handleCantSend. 
-eapply bigstep_stm_step. cca.
-eapply bigstep_stm_step. constructor. constructor. constructor. rewrite H1. auto. 
-
-
-eapply bigstep_stm_step. cca.
-eapply bigstep_stm_step; constructor; constructor; constructor; destruct p; destruct r;    simpl; eauto.
-Qed.
-
 (*
-(StopStatement, state v p, sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) constStop n)*)
-Theorem eval4 : forall v p n, 
-evalChoose IsMyTurntoSend (state v p)      = true -> 
-evalChoose QueuedRequestsExist (state v p) = false ->
-evalChoose ExistsNextDesire (state v p)    = false -> 
-(OneProtocolStep (state v p), (state v p), n) ⇓⇓ (StopStatement, state v p, (sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) constStop n)).
-Proof. intros. unfold OneProtocolStep.
-eapply bigstep_stm_step.  cca.
-eapply bigstep_stm_step. cca.
-eapply bigstep_stm_step. cca.
-eapply bigstep_stm_step. constructor. autounfold. constructor. constructor. auto.
-auto. 
-Qed.
 
-Theorem eval5 : forall v p n d c, 
-evalChoose IsMyTurntoSend (state v p)      = false -> 
-receiveN n (getMe (state v p)) = Some (constValue d c, tail n) -> exists pp',
-reduceStateWithMeasurement (constValue d c) (assign receivedMESSAGE (constValue d c) (state v p)) = Some pp' -> 
-(OneProtocolStep (state v p), (state v p), n) ⇓⇓ (EndStatement, (assign receivedMESSAGE (constValue d c) (state v p)), tail n).
-Proof. intros. unfold OneProtocolStep.
-eexists. intros. 
-eapply bigstep_stm_step. cca.
-eapply bigstep_stm_step. autounfold. constructor. constructor. Print E_Receive.  constructor.  apply H0.  unfold not. intros. inv H2.
-eapply bigstep_stm_step. constructor. constructor. simpl. destruct p. auto.
-eapply bigstep_stm_step.    constructor. constructor. constructor. unfold handleEffect. rewrite <- H1.  reflexivity. auto.
-Qed.
-
-Theorem eval6 : forall v p n r, 
-evalChoose IsMyTurntoSend (state v p)      = false -> 
-receiveN n (getMe (state v p)) = Some (constRequest r, tail n) -> 
-(OneProtocolStep (state v p), (state v p), n) ⇓⇓ (EndStatement, (storeRequest r (assign receivedMESSAGE (constRequest r) (state v p))), tail n).
-Proof. intros. unfold OneProtocolStep.
- intros. 
-eapply bigstep_stm_step. cca.
-eapply bigstep_stm_step. autounfold. constructor. constructor. Print E_Receive.  constructor.  apply H0.  unfold not. intros. inv H1.
-eapply bigstep_stm_step. constructor. apply E_ChooseFalse. simpl. destruct p. auto.
-eapply bigstep_stm_step.    constructor. constructor. simpl. destruct p. auto.
-eapply bigstep_stm_step. cca.
-constructor. constructor.
-Qed.
-
-Theorem eval7 : forall v p n, 
-evalChoose IsMyTurntoSend (state v p)      = false -> 
-receiveN n (getMe (state v p)) = Some (constStop, tail n) -> 
-(OneProtocolStep (state v p), (state v p), n) ⇓⇓ (StopStatement,  (assign receivedMESSAGE constStop (state v p)), tail n).
-Proof. intros. unfold OneProtocolStep. 
- intros. 
-eapply bigstep_stm_step. cca.
-eapply bigstep_stm_step. autounfold. constructor. eapply E_ChainBad. constructor. apply H0. auto.
-Qed.
-
-Theorem eval8 : forall v p n, 
-evalChoose IsMyTurntoSend (state v p)      = false -> 
-receiveN n (getMe (state v p)) = None -> 
-(OneProtocolStep (state v p), (state v p), n) ⇓⇓ (Wait >> (proto_handleNotMyTurnToSend (state v p)),   (state v p), n).
-Proof. intros. unfold OneProtocolStep. 
- intros. 
-eapply bigstep_stm_step. constructor. apply E_ChooseFalse. auto.
-eapply bigstep_stm_step. autounfold. constructor. eapply E_ChainWait.  eapply E_ReceiveWait. assumption.
-constructor. apply E_KeepWaiting. assumption.
-Qed.
-  
-Hint Resolve eval1 eval2 eval3 eval4 eval5 eval6 eval7 eval8.  
-
+*)
 Theorem sendOnNetworkAppends : forall  f t c n, length (sendOnNetwork f t c n) = length n + 1.
 Proof. intros. induction n.
 auto.

@@ -28,7 +28,7 @@ right; unfold not; intros; inversion H; contradiction).
 
 Tactic Notation "inv" hyp(H) := inversion H; subst.
 Tactic Notation "cca" := repeat constructor; assumption.
-
+Tactic Notation "nono" := unfold not; let nm := fresh "X" in intro nm; inversion nm.
 Require Export Coq.Program.Equality.
 Require Export Eqdep_dec.
 Require Export Coq.Arith.EqNat.
