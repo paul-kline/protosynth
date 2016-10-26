@@ -10,9 +10,7 @@ Inductive VarID :=
 Inductive Const :=
  | constValue (d: Description) : (measurementDenote d) -> Const 
  | constRequest : Description -> Const
- | constStop : Const
- | constNULL : Const
- | constMeasurementPlaceHolder : Const.
+ | constStop : Const.
 
 Inductive Term :=
  | variable : VarID -> Term

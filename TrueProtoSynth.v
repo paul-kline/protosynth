@@ -22,6 +22,7 @@ Require Import Coq.Relations.Relation_Definitions.
 Add LoadPath "/users/paulkline/Documents/coqs/cpdt/src".
 Add LoadPath "C:\Users\Paul\Documents\coqs\dependent-crypto".
 Add LoadPath "C:\Users\Paul\Documents\coqs\cpdt\src". *)
+Add LoadPath "C:\Users\Paul\Documents\coqStuff\protosynth". 
 Require Import ProtoSynthDataTypes. 
 Require Import ProtoSynthDataTypeEqualities.
 Require Import ProtoSynthProtocolDataTypes. 
@@ -848,6 +849,76 @@ eapply IHstm1; constructor;  eauto.
 Qed.
 Hint Resolve onlyEffect_effects.
 
+Definition modifyState (a : AllGood) (st : State) : State :=
+match st with
+ | state vars ps => match ps with
+ | proState x x0 x1 x2 x3 x4 x5 =>  state vars (proState x a x1 x2 x3 x4 x5)
+end
+end.
+Definition modifyProState (a : AllGood) (ps : ProState) : ProState := 
+match ps with
+ | proState x x0 x1 x2 x3 x4 x5 => (proState x a x1 x2 x3 x4 x5)
+end.
+
+Ltac proto := match goal with 
+ | [ H : evalChoose ?C ?T = false |- (IFS ?C THEN _ ELSE _,_,_) ⇓ _  ] => apply E_ChooseFalse; (progress auto)
+ | [ |- (IFS ?C THEN _ ELSE _,_,_) ⇓ _  ] => (apply E_ChooseTrue; reflexivity) || (apply E_ChooseFalse; reflexivity)
+ end.
+ 
+Tactic Notation "step" := eapply bigstep_stm_step; [constructor|].
+Theorem receiveAlwaysFinishes : forall vars prst n m n', evalChoose IsMyTurntoSend (state vars prst) = false -> 
+ receiveN n (getMe (state vars prst)) = Some (m, n') -> 
+ m <> constStop ->  exists prst',
+ (OneProtocolStep (state vars prst), (state vars prst), n) ⇓⇓ (EndStatement, (state ((receivedMESSAGE,m)::vars) prst'), n').
+Proof. intros. destruct m, prst. destruct (reduceUnresolved d m r0) eqn:unres. eexists. 
+eapply bigstep_stm_step. c. unfold OneProtocolStep.
+proto. step. unfold proto_handleNotMyTurnToSend. c. c. apply H0. auto.
+step.  proto.
+step. c. c. simpl.  reflexivity.
+rewrite unres. c. apply E_End.
+
+eexists.
+eapply bigstep_stm_step. c. unfold OneProtocolStep.
+proto. step. unfold proto_handleNotMyTurnToSend. c. c. apply H0. auto.
+step. proto.
+step. c. c. simpl.  reflexivity.
+rewrite unres. c. apply E_End.
+
+eexists.
+eapply bigstep_stm_step. c. unfold OneProtocolStep.
+proto. step. unfold proto_handleNotMyTurnToSend. c. c. apply H0. auto.
+step. proto. simpl.
+step. proto. step. c. c. reflexivity.  
+ simpl.
+ c. c.
+nono H1.
+Qed.
+
+Theorem receiveAlwaysSetsAllGood : forall vars prst prst' n m n', evalChoose IsMyTurntoSend (state vars prst) = false -> 
+ (OneProtocolStep (state vars prst), (state vars prst), n) ⇓⇓ (EndStatement, (state ((receivedMESSAGE,m)::vars) prst'), n') -> 
+ prst' = modifyProState Yes prst \/ prst' = modifyProState No prst. 
+Proof. intros.  
+specialize receiveAlwaysFinishes with (vars:= vars) (prst:=prst)(n:=n)(m:=m)(n':=n').
+intros. 
+ . .  in H0.  
+left.
+eapply bigstep_stm_step. constructor. apply E_ChooseFalse. auto.
+eapply bigstep_stm_step. constructor. constructor. constructor. apply H0. assumption.
+destruct m eqn:whatism. 
+eapply bigstep_stm_step. constructor. constructor. simpl. destruct prst.  auto.
+simpl. destruct prst.  destruct (reduceUnresolved d m0 r0) eqn:unres. eapply bigstep_stm_step.
+simpl. constructor. constructor. simpl.  constructor. simpl. rewrite unres.        
+ reflexivity. constructor. econstructor.  eauto.  
+eapply bigstep_stm_step. constructor. constructor. simpl.  auto.    constructor.
+simpl.
+rewrite unres. reflexivity.  constructor. eauto.  constructor.  .  
+destruct (reduceUnresolved d m r0) eqn:unres.
+simpl. reflexivity. simpl. rewrite unres. auto. 
+destruct (reduceUnresolved d m r0) eqn:unres.
+simpl. reflexivity. simpl. rewrite unres. auto.               auto.       constructor; auto.    
+constructor.   constructor; auto.              auto.       constructor; auto.    
+constructor.   constructor; auto.
+Qed.
 Theorem proto1 : forall st n, evalChoose IsMyTurntoSend st = true -> 
  (OneProtocolStep st, st, n) ⇓ (proto_handleIsMyTurnToSend st, st, n).
 Proof. intros. constructor; auto.
