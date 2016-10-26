@@ -829,6 +829,195 @@ match stm with
  | stmm => stmm
 end.
 
+Fixpoint lastMessage (n:Network) : option NetworkMessage :=
+match n with
+ | nil => None
+ | cons x nil => Some x
+ | cons _ xs => lastMessage xs
+end.
+
+
+
+
+Fixpoint hasNetworkAction (stm:Statement) : bool :=
+match stm with
+ | SendStatement x x0 x1 => false
+ | ReceiveStatement x => false
+ | _ => true
+end.
+Fixpoint countMaxNetworkActions (stm : Statement) : nat :=
+match stm with
+ | SendStatement x x0 x1 => 1
+ | ReceiveStatement x => 1
+ | Choose x x0 x1 => max (countMaxNetworkActions x0) (countMaxNetworkActions x1)
+ | Chain x x0 => (countMaxNetworkActions x) + (countMaxNetworkActions x0)
+ | _ => 0
+end. 
+
+Fixpoint countMinNetworkActions (stm : Statement) : nat :=
+match stm with
+ | SendStatement x x0 x1 => 1
+ | ReceiveStatement x => 1
+ | Choose x x0 x1 => min (countMinNetworkActions x0) (countMinNetworkActions x1)
+ | Chain x x0 => (countMinNetworkActions x) + (countMinNetworkActions x0)
+ | _ => 0
+end.
+
+Theorem onestepProtocolmaxAction_eq_minAction : forall st, 
+countMinNetworkActions (OneProtocolStep st) = (countMaxNetworkActions (OneProtocolStep st)).
+Proof. intros; compute; reflexivity.
+Qed.
+
+Theorem onestepProtocolmaxAction_eq_1 : forall st, 
+(countMaxNetworkActions (OneProtocolStep st)) = 1.
+Proof. intros. compute. reflexivity. 
+Qed.
+
+Fixpoint countMinSends (stm : Statement) : nat :=
+match stm with
+ | SendStatement x x0 x1 => 1
+ | Choose x x0 x1 => min (countMinSends x0) (countMinSends x1)
+ | Chain x x0 => (countMinSends x) + (countMinSends x0)
+ | _ => 0
+end. 
+
+Fixpoint countMinReceives (stm : Statement) : nat :=
+match stm with
+ | ReceiveStatement x => 1
+ | Choose x x0 x1 => min (countMinReceives x0) (countMinReceives x1)
+ | Chain x x0 => (countMinReceives x) + (countMinReceives x0)
+ | _ => 0
+end.
+
+Fixpoint countMaxSends (stm : Statement) : nat :=
+match stm with
+ | SendStatement x x0 x1 => 1
+ | Choose x x0 x1 => max (countMaxSends x0) (countMaxSends x1)
+ | Chain x x0 => (countMaxSends x) + (countMaxSends x0)
+ | _ => 0
+end. 
+
+Fixpoint countMaxReceives (stm : Statement) : nat :=
+match stm with
+ | ReceiveStatement x => 1
+ | Choose x x0 x1 => max (countMaxReceives x0) (countMaxReceives x1)
+ | Chain x x0 => (countMaxReceives x) + (countMaxReceives x0)
+ | _ => 0
+end.
+
+Inductive SingularNetworkAction :Statement -> Action -> Prop :=
+ | s_Send (stm : Statement): (countMaxReceives stm) = 0 /\ 
+                             (countMinSends stm) = 1 /\
+                             (countMaxSends stm) = 1 -> SingularNetworkAction stm ASend
+ | s_Receive (stm : Statement): (countMaxSends stm) = 0 /\
+                             (countMinReceives stm) = 1 /\ 
+                             (countMaxReceives stm) = 1 -> SingularNetworkAction stm AReceive.
+Hint Constructors SingularNetworkAction. 
+Inductive NetworkActionChain : Action -> Prop :=
+ | nac_emptySend : NetworkActionChain ASend
+ | nac_emptyReceive : NetworkActionChain AReceive
+ | nac_Send {stm} : SingularNetworkAction stm ASend -> NetworkActionChain AReceive -> NetworkActionChain ASend
+ | nac_Receive {stm}: SingularNetworkAction stm AReceive -> NetworkActionChain ASend -> NetworkActionChain AReceive.
+ Hint Constructors NetworkActionChain. 
+
+Theorem oneStepSend : forall st stm' n, 
+ evalChoose IsMyTurntoSend st = true -> 
+ (OneProtocolStep st, st, n) ⇓ (stm', st, n) ->
+ SingularNetworkAction stm' ASend.
+ Proof. intros. inversion H0; subst.
+ apply s_Send. simpl. omega. rewrite H in H2. inversion H2.
+ Qed.
+
+Theorem oneStepReceives : forall st stm' n, 
+ evalChoose IsMyTurntoSend st = false -> 
+ (OneProtocolStep st, st, n) ⇓ (stm', st, n) ->
+ SingularNetworkAction stm' AReceive.
+ Proof. intros. inversion H0; subst.
+ rewrite H in H2. inversion H2.
+ apply s_Receive.  simpl. omega.
+ Qed.
+ Hint Resolve oneStepSend oneStepReceives. 
+ SearchAbout Action.
+ 
+ Definition reverse (a : Action) : Action := 
+ match a with
+ | ASend => AReceive
+ | AReceive => ASend
+end. 
+
+ Definition switchSendRec ( st : State) : State := 
+  match st with
+   | state vars ps=> match ps with
+       | proState a g b c d e f => state vars (proState (reverse a) g b c d e f)
+      end
+
+  end. 
+  Definition getAction ( st : State) : Action := 
+  match st with
+   | state vars ps=> match ps with
+       | proState a g b c d e f => a
+      end
+  end. 
+  (*⇓
+  U+21af ⇊
+  ↡ ⍗ *)
+  Definition rever (st : State) : State := 
+match st with
+ | state vars ps => match ps with
+ | proState x x0 x1 x2 x3 x4 x5 => state vars (proState (reverse x) x0 x1 x2 x3 x4 x5)
+end
+end. 
+Reserved Notation " x '⟱'  x'"
+                  (at level 40).
+Definition DualState : Type := ((Statement*State) * (Statement* State)* Network). 
+Print DualState. 
+ Inductive DualEval : DualState -> DualState -> Prop :=
+ (*
+  | dulift : forall leftState rightState, 
+       (getAction leftState) = reverse (getAction rightState) -> 
+        DualEval ((OneProtocolStep leftState, leftState),(OneProtocolStep rightState, rightState) nil)
+                 ((OneProtocolStep leftState, leftState),(OneProtocolStep rightState, rightState) nil)
+                 *)
+                 
+  | duLeft : forall leftSTM leftState rightSTM rightState n leftState' n',
+      (leftSTM , leftState, n) ⇓⇓ (EndStatement, leftState', n') -> 
+      DualEval ((leftSTM, leftState), (rightSTM,rightState), n)
+               ( (OneProtocolStep (rever leftState'), rever leftState'),(rightSTM, rightState), n'). 
+       
+  | duRight : forall leftSTM leftState rightSTM rightState n,
+      DualEval (leftSTM,leftState) (rightSTM, rightState) n -> 
+      forall rightState' n',
+      (rightSTM , rightState, n) ⇓⇓ (EndStatement, rightState', n') -> 
+      DualEval (leftSTM, leftState) (OneProtocolStep (switchSendRec rightState'), switchSendRec rightState') n'
+      
+  (*| leftIsWait : forall leftSTM leftState rightSTM rightState n,
+      DualEval (leftSTM, leftState) (rightSTM,rightState) n -> 
+      forall leftState' n' stm',
+      (leftSTM , leftState, n) ⇓⇓ (Wait >> stm', leftState', n') -> 
+      forall n'' rightState',
+      (rightSTM , rightState, n') ⇓⇓ (EndStatement, rightState', n'') ->
+      DualEval (Wait >> stm', leftState') (OneProtocolStep (switchSendRec rightState'), (switchSendRec rightState')) n''
+      
+  | rightIsWait : forall leftSTM leftState rightSTM rightState n,
+      DualEval (leftSTM, leftState) (rightSTM,rightState) n -> 
+      forall rightState' n' stm',
+      (rightSTM , rightState, n) ⇓⇓ (Wait >> stm', rightState', n') -> 
+      forall n'' leftState',
+      (leftSTM , leftState, n') ⇓⇓ (EndStatement, leftState', n'') ->
+      DualEval (OneProtocolStep (switchSendRec leftState'), (switchSendRec leftState')) (Wait >> stm', rightState') n'' *)
+      (* Those are wrong anyway. Well, not wrong, but we need more. What if the side not waiting goes to a stop?*)
+      
+  | duFinishLeftFirst : forall stmL stL stL' stmR stR stR' n n' n'',
+      (stmL , stL, n) ⇓⇓ (StopStatement, stL', n') ->
+      (stmR, stR, n')  ⇓⇓ (StopStatement, stR', n'') -> 
+      DualEval (stmL, stL) (stmR, stR) n -> 
+      DualEval (StopStatement,stL') (StopStatement,stR') n''
+  | duFinishRightFirst : forall stmL stL stL' stmR stR stR' n n' n'',
+      (stmR, stR, n)  ⇓⇓ (StopStatement, stR', n') -> 
+      (stmL , stL, n') ⇓⇓ (StopStatement, stL', n'') ->
+      DualEval (stmL, stL) (stmR, stR) n -> 
+      DualEval (StopStatement,stL') (StopStatement,stR') n''.
+      Hint Constructors DualEval.
 
 Theorem onlyEffect_effects : forall (stm stm': Statement) (st st': State) (n n' : Network),
  (stm,st,n) ⇓ (stm',st',n') ->  
@@ -893,6 +1082,26 @@ step. proto. step. c. c. reflexivity.
  c. c.
 nono H1.
 Qed.
+
+
+
+Lemma mkAtt_and_App_have_rev_actions : forall ppP ppT reqls, 
+ reverse(getAction(mkAttesterState ppT)) = getAction(mkAppraiserState ppP reqls).
+Proof. intros; auto. Qed.
+
+Theorem finalHelper : forall ppApp ppAtt reqLSApp n stL stR,
+ stR = mkAttesterState ppAtt -> 
+ stL = mkAppraiserState ppApp reqLSApp -> 
+  
+DualEval (OneProtocolStep stL, stL) (OneProtocolStep stR, stR) n -> exists stL stR n, 
+DualEval (StopStatement,stL) (StopStatement, stR) n.
+Proof. unfold mkAttesterState. unfold mkAppraiserState. unfold mkState. intros. subst.
+eexists. eexists. exists nil. apply DualEval
+inversion H. simpl in H0.     simpl in H.       destruct stL.    
+Theorem final : exists stL stR n, 
+DualEval (StopStatement,stL) (StopStatement, stR) n.
+Proof. intros.   eexists. eexists. eexists.
+econstructor.   
 
 Theorem receiveAlwaysSetsAllGood : forall vars prst prst' n m n', evalChoose IsMyTurntoSend (state vars prst) = false -> 
  (OneProtocolStep (state vars prst), (state vars prst), n) ⇓⇓ (EndStatement, (state ((receivedMESSAGE,m)::vars) prst'), n') -> 
@@ -1282,188 +1491,7 @@ eexists. eexists.
  
 auto.
 Qed.
-Fixpoint lastMessage (n:Network) : option NetworkMessage :=
-match n with
- | nil => None
- | cons x nil => Some x
- | cons _ xs => lastMessage xs
-end.
 
 
 
-
-Fixpoint hasNetworkAction (stm:Statement) : bool :=
-match stm with
- | SendStatement x x0 x1 => false
- | ReceiveStatement x => false
- | _ => true
-end.
-Fixpoint countMaxNetworkActions (stm : Statement) : nat :=
-match stm with
- | SendStatement x x0 x1 => 1
- | ReceiveStatement x => 1
- | Choose x x0 x1 => max (countMaxNetworkActions x0) (countMaxNetworkActions x1)
- | Chain x x0 => (countMaxNetworkActions x) + (countMaxNetworkActions x0)
- | _ => 0
-end. 
-
-Fixpoint countMinNetworkActions (stm : Statement) : nat :=
-match stm with
- | SendStatement x x0 x1 => 1
- | ReceiveStatement x => 1
- | Choose x x0 x1 => min (countMinNetworkActions x0) (countMinNetworkActions x1)
- | Chain x x0 => (countMinNetworkActions x) + (countMinNetworkActions x0)
- | _ => 0
-end.
-
-Theorem onestepProtocolmaxAction_eq_minAction : forall st, 
-countMinNetworkActions (OneProtocolStep st) = (countMaxNetworkActions (OneProtocolStep st)).
-Proof. intros; compute; reflexivity.
-Qed.
-
-Theorem onestepProtocolmaxAction_eq_1 : forall st, 
-(countMaxNetworkActions (OneProtocolStep st)) = 1.
-Proof. intros. compute. reflexivity. 
-Qed.
-
-Fixpoint countMinSends (stm : Statement) : nat :=
-match stm with
- | SendStatement x x0 x1 => 1
- | Choose x x0 x1 => min (countMinSends x0) (countMinSends x1)
- | Chain x x0 => (countMinSends x) + (countMinSends x0)
- | _ => 0
-end. 
-
-Fixpoint countMinReceives (stm : Statement) : nat :=
-match stm with
- | ReceiveStatement x => 1
- | Choose x x0 x1 => min (countMinReceives x0) (countMinReceives x1)
- | Chain x x0 => (countMinReceives x) + (countMinReceives x0)
- | _ => 0
-end.
-
-Fixpoint countMaxSends (stm : Statement) : nat :=
-match stm with
- | SendStatement x x0 x1 => 1
- | Choose x x0 x1 => max (countMaxSends x0) (countMaxSends x1)
- | Chain x x0 => (countMaxSends x) + (countMaxSends x0)
- | _ => 0
-end. 
-
-Fixpoint countMaxReceives (stm : Statement) : nat :=
-match stm with
- | ReceiveStatement x => 1
- | Choose x x0 x1 => max (countMaxReceives x0) (countMaxReceives x1)
- | Chain x x0 => (countMaxReceives x) + (countMaxReceives x0)
- | _ => 0
-end.
-
-Inductive SingularNetworkAction :Statement -> Action -> Prop :=
- | s_Send (stm : Statement): (countMaxReceives stm) = 0 /\ 
-                             (countMinSends stm) = 1 /\
-                             (countMaxSends stm) = 1 -> SingularNetworkAction stm ASend
- | s_Receive (stm : Statement): (countMaxSends stm) = 0 /\
-                             (countMinReceives stm) = 1 /\ 
-                             (countMaxReceives stm) = 1 -> SingularNetworkAction stm AReceive.
-Hint Constructors SingularNetworkAction. 
-Inductive NetworkActionChain : Action -> Prop :=
- | nac_emptySend : NetworkActionChain ASend
- | nac_emptyReceive : NetworkActionChain AReceive
- | nac_Send {stm} : SingularNetworkAction stm ASend -> NetworkActionChain AReceive -> NetworkActionChain ASend
- | nac_Receive {stm}: SingularNetworkAction stm AReceive -> NetworkActionChain ASend -> NetworkActionChain AReceive.
- Hint Constructors NetworkActionChain. 
-
-Theorem oneStepSend : forall st stm' n, 
- evalChoose IsMyTurntoSend st = true -> 
- (OneProtocolStep st, st, n) ⇓ (stm', st, n) ->
- SingularNetworkAction stm' ASend.
- Proof. intros. inversion H0; subst.
- apply s_Send. simpl. omega. rewrite H in H2. inversion H2.
- Qed.
-
-Theorem oneStepReceives : forall st stm' n, 
- evalChoose IsMyTurntoSend st = false -> 
- (OneProtocolStep st, st, n) ⇓ (stm', st, n) ->
- SingularNetworkAction stm' AReceive.
- Proof. intros. inversion H0; subst.
- rewrite H in H2. inversion H2.
- apply s_Receive.  simpl. omega.
- Qed.
- Hint Resolve oneStepSend oneStepReceives. 
- SearchAbout Action.
- 
- Definition reverse (a : Action) : Action := 
- match a with
- | ASend => AReceive
- | AReceive => ASend
-end. 
-
- Definition switchSendRec ( st : State) : State := 
-  match st with
-   | state vars ps=> match ps with
-       | proState a g b c d e f => state vars (proState (reverse a) g b c d e f)
-      end
-
-  end. 
-  Definition getAction ( st : State) : Action := 
-  match st with
-   | state vars ps=> match ps with
-       | proState a g b c d e f => a
-      end
-  end. 
-
- Inductive DualEval : (Statement*State) ->(Statement* State) -> Network -> Prop :=
- 
-  | dulift : forall leftState rightState, 
-       (getAction leftState) = reverse (getAction rightState) -> 
-        DualEval (OneProtocolStep leftState, leftState) (OneProtocolStep rightState, rightState) nil
-  | duLeft : forall leftSTM leftState rightSTM rightState n,
-      DualEval (leftSTM, leftState) (rightSTM,rightState) n -> 
-      forall leftState' n',
-      (leftSTM , leftState, n) ⇓⇓ (EndStatement, leftState', n') -> 
-      DualEval (OneProtocolStep (switchSendRec leftState'), switchSendRec leftState') (rightSTM, rightState) n'
-       
-  | duRight : forall leftSTM leftState rightSTM rightState n,
-      DualEval (leftSTM,leftState) (rightSTM, rightState) n -> 
-      forall rightState' n',
-      (rightSTM , rightState, n) ⇓⇓ (EndStatement, rightState', n') -> 
-      DualEval (leftSTM, leftState) (OneProtocolStep (switchSendRec rightState'), switchSendRec rightState') n'
-      
-  | leftIsWait : forall leftSTM leftState rightSTM rightState n,
-      DualEval (leftSTM, leftState) (rightSTM,rightState) n -> 
-      forall leftState' n' stm',
-      (leftSTM , leftState, n) ⇓⇓ (Wait >> stm', leftState', n') -> 
-      forall n'' rightState',
-      (rightSTM , rightState, n') ⇓⇓ (EndStatement, rightState', n'') ->
-      DualEval (Wait >> stm', leftState') (OneProtocolStep (switchSendRec rightState'), (switchSendRec rightState')) n''
-      
-  | rightIsWait : forall leftSTM leftState rightSTM rightState n,
-      DualEval (leftSTM, leftState) (rightSTM,rightState) n -> 
-      forall rightState' n' stm',
-      (rightSTM , rightState, n) ⇓⇓ (Wait >> stm', rightState', n') -> 
-      forall n'' leftState',
-      (leftSTM , leftState, n') ⇓⇓ (EndStatement, leftState', n'') ->
-      DualEval (OneProtocolStep (switchSendRec leftState'), (switchSendRec leftState')) (Wait >> stm', rightState') n'' 
-  | duFinishLeftFirst : forall stmL stL stL' stmR stR stR' n n' n'',
-      (stmL , stL, n) ⇓⇓ (StopStatement, stL', n') ->
-      (stmR, stR, n')  ⇓⇓ (StopStatement, stR', n'') -> 
-      DualEval (stmL, stL) (stmR, stR) n -> 
-      DualEval (StopStatement,stL') (StopStatement,stR') n''
-  | duFinishRightFirst : forall stmL stL stL' stmR stR stR' n n' n'',
-      (stmR, stR, n)  ⇓⇓ (StopStatement, stR', n') -> 
-      (stmL , stL, n') ⇓⇓ (StopStatement, stL', n'') ->
-      DualEval (stmL, stL) (stmR, stR) n -> 
-      DualEval (StopStatement,stL') (StopStatement,stR') n''.
-      Hint Constructors DualEval.
-
-
-Theorem finalHelper : forall stL stR n, reverse (getAction stL) = getAction stR -> 
-DualEval (OneProtocolStep stL, stL) (OneProtocolStep stR, stR) n -> exists stL stR n, 
-DualEval (StopStatement,stL) (StopStatement, stR) n.
-Proof. intros. destruct stL, stR. destruct p, p0. destruct a, a0; simpl in H.
-inversion H. simpl in H0.     simpl in H.       destruct stL.    
-Theorem final : exists stL stR n, 
-DualEval (StopStatement,stL) (StopStatement, stR) n.
-Proof. intros.   eexists. eexists. eexists.
-econstructor.   
  

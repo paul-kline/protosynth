@@ -79,3 +79,12 @@ Inductive State :=
 Inductive NetworkMessage :=
  networkMessage : Participant -> Participant -> Const -> NetworkMessage. 
 Definition Network := list NetworkMessage.
+
+
+Definition mkState (a : Action) (p : Participant) (pp : PrivacyPolicy) (rls : RequestLS) : State:=
+ state nil (proState a Yes p pp rls emptyRequestLS nil).
+ 
+Definition mkAppraiserState (pp : PrivacyPolicy) (rls : RequestLS) : State :=
+ mkState ASend APPRAISER pp rls.
+Definition mkAttesterState (pp : PrivacyPolicy) : State := 
+ mkState AReceive ATTESTER pp emptyRequestLS.
