@@ -1,0 +1,12 @@
+(* -- CoqIde wishlist
+
+1. Code folding
+2. split view
+3. ctrl + click = goto definition
+4. detect external file changes
+5. smarter match case generation (instead of x0 x1... maybe first couple letters of each type?)
+6. compile file doesn't work on windows. fix!
+7. An outline of all defined things. 
+
+
+*)

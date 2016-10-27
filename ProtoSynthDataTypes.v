@@ -31,7 +31,7 @@ match d with
  | descriptor r => (match r with
     | pcrMR n => nat
     | virusCheckerNameR => nat
-    | virusCheckerVersionR => bool
+    | virusCheckerVersionR => nat
     end)
 end.
 
