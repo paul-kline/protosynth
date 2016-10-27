@@ -247,6 +247,18 @@ match pp with
       end
     else findandMeasureItem pp' d 
 end.
+Theorem findAndMeasureItemL : forall pp d d0 val x, findandMeasureItem pp d = Some (constValue d0 val, x) -> d = d0.
+Proof. intros. induction pp.  inv H.
+destruct r. simpl in H. destruct (eq_dec_Description d1 d). subst. inv H.
+apply IHpp. assumption.
+simpl in H. destruct (eq_dec_Description d1 d). subst. inv H. subst. refl.
+apply IHpp. assumption.
+simpl in H. destruct (eq_dec_Description d1 d). subst. inv H. apply IHpp. assumption.
+simpl in H.  destruct (eq_dec_Description d1 d). subst. inv H. apply IHpp. assumption.
+simpl in H.  destruct (eq_dec_Description d1 d). subst. inv H. apply IHpp. assumption.
+Qed.
+Hint Resolve findAndMeasureItemL.
+ 
 Fixpoint rmAllFromPolicy (pp : PrivacyPolicy) (d : Description) : PrivacyPolicy :=
 match pp with
  | EmptyPolicy => EmptyPolicy
@@ -262,12 +274,6 @@ Fixpoint handleRequest' (pp : PrivacyPolicy) (d : Description) :=
 Definition snd3 {A B C : Type} (x : (A*B*C) ): B := match x with 
  | (_,b,_) => b
  end. 
-Lemma handleReqSameD : forall d pp, snd3 (handleRequest' pp d) = constRequest d \/
-snd3 (handleRequest' pp d) = constStop  .
-Proof. intros. induction pp.  simpl. right. refl.
-simpl.  
-destruct (eq_dec_Description d0 d). destruct r. subst.
-simpl. left.          
 Lemma removedFromPrivacyHelper : forall pp d, exists c ri, 
  handleRequest' pp d = (rmAllFromPolicy pp d,c,ri).
  Proof. intros. induction pp. simpl. eauto.
@@ -282,6 +288,28 @@ Lemma removedFromPrivacyHelper : forall pp d, exists c ri,
   destruct (findandMeasureItem pp d). destruct p. eexists. eexists. eauto.
   eexists. eexists. reflexivity.
   Qed.
+
+Lemma handleReqSameD : forall pp d d0  val x y,  (handleRequest' pp d) = (x, constValue d0 val,y) -> d0 = d.
+Proof. intros. destruct pp; intros.  simpl in H. inv H.
+destruct r. simpl in H. destruct (eq_dec_Description d1 d). inv H.
+destruct (findandMeasureItem pp d) eqn:eff. symmetry. destruct p. destruct c.  eapply findAndMeasureItemL. apply eff.   in eff.  
+destruct pp, d. simpl in H. inv H. simpl in H.     (findandMeasureItem pp d). destruct p. apply IHpp.  inv H. subst.        
+apply IHpp. 
+simpl in H. destruct (eq_dec_Description d d0). subst. destruct r. inv H.
+simpl in H. inv H. refl.
+inv H. inv H. inv H.
+
+apply IHpp. rewrite <- H. destruct pp. simpl. refl. simpl. refl.       
+          
+destruct r. 
+simpl in H. destruct (eq_dec_Description d1 d). inv H.  subst. inv H. apply IHpp. assumption.        
+  \/
+snd3 (handleRequest' pp d) = constStop  .
+Proof. intros. induction pp.  simpl. right. refl.
+simpl.  
+destruct (eq_dec_Description d0 d). destruct r. subst.
+simpl. left.          
+
   Hint Resolve removedFromPrivacyHelper. 
 Lemma removedFromPrivacyHelper2 : forall pp d pp' c ri, 
  handleRequest' pp d = (pp',c,ri) -> 
@@ -364,6 +392,13 @@ end.
      | _ => None
      end)
 end).
+
+Theorem handleReqL : forall pp ls d, handleRequest' pp d = 
+Theorem canSendL : forall pp ls d, (canSend ls pp = Some d )-> (head ls) =Some  d.
+Proof. intros. destruct ls. inv H. rewrite <- H.
+simpl. destruct (handleRequest' pp d0). destruct p. destruct c.
+simpl.           
+
 Definition canSendST (st : State) : option Description :=
 match st with
  | state vars prostate => match prostate with
@@ -766,7 +801,6 @@ Definition proto_handleCanSend (st : State) :=
          Compute (variden 1) compGetfstQueue >>
          EffectStatement (effect_ReducePrivacyWithRequest (variable (variden 1))) >>
          EffectStatement effect_rmFstQueued >>
-         
          EndStatement
     ELSE (*Can't send and queued request exists *) 
       SendStatement (const constStop) (getMe st) (notMe (getMe st)) >> 
@@ -978,10 +1012,11 @@ end.
 
 
 Ltac proto := match goal with 
+ | [ |- context[ OneProtocolStep _]] => unfold OneProtocolStep; proto
  | [ H : evalChoose ?C ?T = false |- (IFS ?C THEN _ ELSE _,_,_) ⇓ _  ] => apply E_ChooseFalse; (progress auto)
- | [ |- (IFS ?C THEN _ ELSE _,_,_) ⇓ _  ] => (apply E_ChooseTrue; reflexivity) || (apply E_ChooseFalse; reflexivity)
+ | [ |- (IFS ?C THEN _ ELSE _,_,_) ⇓ _  ] => (apply E_ChooseTrue; (reflexivity || assumption)) || (apply E_ChooseFalse; reflexivity)
  end.
- 
+ Hint Unfold OneProtocolStep proto_handleIsMyTurnToSend proto_handleNotMyTurnToSend. 
 Tactic Notation "step" := eapply multistep_step; [constructor|].
 
 Theorem canSendST_implies_handleExists : forall st, evalChoose CanSend st = true -> exists c, handleCompute compGetMessageToSend st = Some c.
@@ -989,33 +1024,172 @@ Proof.
 intros; simpl in H;  simpl; destruct st; simpl; destruct p; destruct (canSend l p0);  eauto;
 inversion H. Qed.
 Hint Resolve canSendST_implies_handleExists.
-Theorem eval1 : forall v p n, 
-evalChoose IsAllGood (state v p)          = true ->
-evalChoose IsMyTurntoSend (state v p)     = true -> 
-evalChoose QueuedRequestsExist (state v p)= true ->
-evalChoose CanSend (state v p)            = true -> exists c,  
- (OneProtocolStep (state v p), (state v p), n) ⇓⇓ (EndStatement, assign toSendMESSAGE c (state v p) ,sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) c n).
-Proof. intros. unfold OneProtocolStep.
-assert (evalChoose CanSend (state v p) = true). assumption.  
-apply canSendST_implies_handleExists in H2. destruct H2.
-exists x. 
+Theorem eval_1 : forall st n,
+evalChoose IsMyTurntoSend st = true -> 
+(OneProtocolStep st, st, n) ⇓ (proto_handleIsMyTurnToSend st, st, n).
+Proof. intros. c. auto.
+Qed.
+Theorem eval_0 : forall st n,
+evalChoose IsMyTurntoSend st = false -> 
+(OneProtocolStep st, st, n) ⇓ (proto_handleNotMyTurnToSend st, st, n).
+Proof. intros. proto.
+Qed.
+
+
+Theorem eval_11 : forall st n,
+evalChoose IsAllGood st = true -> 
+(proto_handleIsMyTurnToSend st, st, n) ⇓ (EffectStatement (effect_setAllGood Unset) >>
+     (IFS QueuedRequestsExist THEN proto_handleCanSend st
+      ELSE proto_handleCantSend st), st, n).
+Proof. intros. c. auto.
+Qed.
+
+Theorem eval_10 : forall st n,
+evalChoose IsAllGood st = false -> 
+(proto_handleIsMyTurnToSend st, st, n) ⇓ ( SendStatement (const constStop) (getMe st) (notMe (getMe st)) >> StopStatement, st, n).
+Proof. intros. unfold proto_handleIsMyTurnToSend.  proto.
+Qed.
+
+Definition getAllGood (st : State) : AllGood :=
+match st with
+ | state vars ps => match ps with
+    | proState x x0 x1 x2 x3 x4 x5 => x0
+end
+end. 
+
+Lemma allGood : forall st, evalChoose IsAllGood st = true -> getAllGood st = Yes.
+Proof. intros. dest st. dest p. simpl in H. dest a0. simpl. auto.
+inv H. inv H.
+Qed.
+    
+Theorem eval1 : forall st v (n: Network) a allg part pp rls unres l,
+st = state v (proState a allg part pp rls unres l) -> 
+evalChoose IsAllGood st         = true ->
+evalChoose IsMyTurntoSend st     = true -> 
+evalChoose QueuedRequestsExist st= true ->
+evalChoose CanSend st            = true -> exists d  p0,   
+ (OneProtocolStep st, st, n) ⇓⇓ (EndStatement,state ((variden 1, constRequest d) :: (toSendMESSAGE, constValue d (measure d)) :: v) (proState a Unset part (rmAllFromPolicy p0 d) rls unres (tail l)) ,sendOnNetwork (getMe st) (notMe (getMe st)) (constValue d (measure d)) n).
+Proof. intros. apply allGood in H0. subst. simpl. simpl in H0. subst.
+
+destruct (canSend l pp) eqn:fff.
+destruct l. simpl in fff. inv fff.
+
+eexists. eexists.
+step. unfold OneProtocolStep. proto.
+step. unfold proto_handleIsMyTurnToSend.  proto.
+step. c. c. simpl. refl.
+step. proto.
+step. unfold proto_handleCanSend.  proto.
+simpl.  step. c. c. simpl. simpl in fff.  rewrite fff. refl.
+step. c. c. simpl. refl. nono.
+step. c. c. simpl. refl. 
+step. c. c. simpl. refl.
+step. c. c. simpl. refl.
+c. 
+Lemma fef : forall d0 l pp d, canSend (d0 :: l) pp = Some d -> d0 =d .
+Proof. intros. simpl in H.   induction pp. simpl in H. inv H.
+simpl in H. destruct (eq_dec_Description d1 d0). destruct r.
+inv H. subst. inv H. refl. inv H. inv H. inv H.
+destruct (findandMeasureItem pp d0). destruct p. destruct c. subst. inv H.
+subst.
+apply IHpp. simpl.                      simpl in H.    
+apply E_End.  c.  
+step. c. c. simpl. refl.
+c. apply E_End.  c.                 step.  
+   refl.              proto.    
+
+     destruct (canSend l pp). refl.  step. c. c. simpl.   refl.     c.    proto.               apply E_ChooseTrue. assumption.    proto.    
+
+      unfold OneProtocolStep.
+assert (evalChoose CanSend st = true). assumption. destruct l. 
+apply canSendST_implies_handleExists in H3. destruct H3. 
+exists x. destruct x.  eexists. eexists. eexists.  
 eapply multistep_step. cca.
 unfold proto_handleIsMyTurnToSend.
 step. c. auto.
 step. c. c. refl.
 step. 
-c. simpl. destruct p.  auto.
-step. c. simpl. destruct p.   auto.
-destruct p. simpl. simpl in H3. simpl in H2.
+c. simpl. subst.   auto.
+step. c. simpl. subst.   auto.
+ simpl.
+step. c. c. subst. apply H3. subst. 
+step. c. c. subst. simpl. refl. nono. simpl in H4.  simpl in H2.    inv H2.
 
-Lemma canSendImpliesHead : forall v a a0 p p1 r r0 l0, 
-evalChoose CanSend (state v (proState a a0 p p1 r r0 l0)) = true-> 
-canSend l0 p1 = head l0 .
-Proof. intros. simpl in H. destruct l0, p1. refl.
-simpl in H. inv H.
-simpl in H. inv H.
-destruct (canSend (d :: l0) (ConsPolicy r1 p1)).
-simpl.  
+
+eexists. eexists. eexists.   
+eapply multistep_step. cca.
+unfold proto_handleIsMyTurnToSend.
+step. c. auto.
+step. c. c. refl.
+step. 
+c. simpl. subst.   auto.
+step. c. simpl. subst.   auto.
+ simpl.
+step. c. c. subst. apply H3. subst. 
+step. c. c. subst. simpl. refl. nono. simpl in H4.  simpl in H2.    inv H2.
+
+eexists. eexists. eexists.   
+eapply multistep_step. cca.
+unfold proto_handleIsMyTurnToSend.
+step. c. auto.
+step. c. c. refl.
+step. 
+c. simpl. subst.   auto.
+step. c. simpl. subst.   auto.
+ simpl.
+step. c. c. subst. apply H3. subst. 
+step. c. c. subst. simpl. refl. nono. simpl in H4.  simpl in H2.    inv H2.
+
+
+step. c. c. simpl. simpl in H3. inv H3.
+simpl in H3. inv H3.
+
+eexists. eexists. eexists. eexists. subst.     
+eapply multistep_step. cca.
+unfold proto_handleIsMyTurnToSend.
+step. c. auto.
+step. c. c. refl.
+step. 
+c. simpl. subst.   auto.
+step. c. simpl. subst.   auto.
+ simpl.
+step. c. c. subst. simpl.  apply H3. subst. 
+step. c. c. subst. simpl. refl. nono. simpl in H4.  simpl in H2.    inv H2.
+
+
+     refl.
+step. c. c. simpl. refl.
+step. c. c. simpl. refl.
+c. simpl. simpl. constr.   eapply E_End.    c.                
+simpl in H3. 
+simpl in H4. 
+destruct (canSend l p0). inv H5. nono.
+inv H5.
+destruct l. destruct p0.
+step. c. c. simpl. simpl in H3.  simpl in H3. inv H3. 
+ simpl in H3. inv H3.
+step. c. c. simpl. simpl in H3. inv H3.
+step. c. c.  simpl.        
+simpl in H3. inv H3.
+simpl in H3. inv H3.
+simpl.
+step. c. c. simpl. refl.
+step. c. c. simpl. refl.
+step. c. c. simpl. refl.
+c.  c.           
+
+
+ 
+        
+simpl in H3.     
+evalChoose CanSend st ->   
+  refl. 
+simpl in H3.    
+simpl in H3.      destruct l.      
+nono H5.          
+c.  simpl in H3. simpl in H2.
+
+
 rewrite H. 
 simpl in H. 
 simpl. 
