@@ -19,14 +19,16 @@ Require Export MyShortHand.
 Require Import Coq.Relations.Relation_Definitions.
 *)
 (*Add LoadPath "/users/paulkline/Documents/coqs/dependent-crypto".
-Add LoadPath "/users/paulkline/Documents/coqs/cpdt/src".
+
 Add LoadPath "C:\Users\Paul\Documents\coqs\dependent-crypto".
 Add LoadPath "C:\Users\Paul\Documents\coqs\cpdt\src". *)
-Add LoadPath "C:\Users\Paul\Documents\coqStuff\protosynth". 
+Add LoadPath "C:\Users\Paul\Documents\coqStuff\protosynth".
+Add LoadPath "/nfs/users/paulkline/Documents/coqs/protosynth/cpdt/src" .
 Require Export ProtoSynthDataTypes. 
 Require Export ProtoSynthDataTypeEqualities.
 Require Export ProtoSynthProtocolDataTypes. 
 Require Export Coq.Lists.List.
+Require Export CpdtTactics.
 (*
 Require Import Coq.Program.Equality.
 Require Import Eqdep_dec.
@@ -766,10 +768,11 @@ Inductive stmEval : (Statement * State * Network) -> (Statement * State * Networ
        (Chain stm1 stm2, st, n) ⇓ (Wait >> stm1 >> stm2,st',n')
    | E_Skip : forall st n, (Skip, st, n)  ⇓ (Skip, st, n )
    
-   | E_End : forall st n, 
-       (EndStatement, st, n) ⇓ (EndStatement, st, n) 
+   (*| E_End : forall st n, 
+       (EndStatement, st, n) ⇓ (EndStatement, st, n)
    | E_Stop : forall st n, 
-       (StopStatement, st, n) ⇓ (StopStatement, st, n) 
+       (StopStatement, st, n) ⇓ (StopStatement, st, n)
+       *) 
    | E_KeepWaiting : forall st n stm, 
        receiveN n (getMe st) = None -> 
        (Wait >> stm, st, n) ⇓ (Wait >> stm, st, n) 
@@ -779,24 +782,86 @@ Inductive stmEval : (Statement * State * Network) -> (Statement * State * Networ
    where "x '⇓' x' " := (stmEval x x').
 Hint Constructors stmEval. 
 
+Reserved Notation "x ⇓⇓ x'"(at level 35). 
 Inductive MultiStep_stmEval : (Statement * State * Network) -> (Statement * State * Network) -> Prop := 
 | multistep_id : forall stm st n stm' st' n', stmEval (stm,st,n) (stm',st',n') -> MultiStep_stmEval (stm,st,n) (stm',st',n')
-| multistep_step :  forall stm st n stm' st' n' stm'' st'' n'', 
-MultiStep_stmEval (stm,st,n) (stm',st',n') -> 
-MultiStep_stmEval (stm',st',n') (stm'',st'',n'') -> 
-MultiStep_stmEval (stm,st,n) (stm'',st'',n'').
-
-Notation "x ⇓⇓ x'" := (MultiStep_stmEval x x') (at level 35).
- 
-Hint Constructors MultiStep_stmEval. 
-
-
-
+| multistep_step : forall stm st n stm' st' n' stm'' st'' n'', 
+(stm, st, n)    ⇓⇓ (stm', st', n')  -> 
+(stm',st',n')   ⇓⇓ (stm'',st'',n'') -> 
+(stm, st, n) ⇓⇓ (stm'',st'',n'')
+ where "x ⇓⇓ x'" := (MultiStep_stmEval x x').
+Hint Constructors MultiStep_stmEval.
 Definition notMe (p : Participant) : Participant :=
 match p with
  | ATTESTER => APPRAISER
  | APPRAISER => ATTESTER
 end.
+
+Lemma lemma0000 : forall st st' stm' n n', 
+(EndStatement, st, n) ⇓⇓ (stm', st', n') -> False.
+Proof. intros. dependent induction H. inversion H. assumption.
+Qed.
+
+
+Lemma lemma00 : forall st st' stm x x2 n n', 
+(EffectStatement x  >> EndStatement, st, n) ⇓⇓ (SendStatement x2 (getMe st') (notMe (getMe st')) >> stm, st', n') -> False.
+Proof. intros. dependent induction H. inv H.
+ 
+eapply IHMultiStep_stmEval1.
+
+ refl.  
+
+inv H2. inv H1.
+eapply lemma0000. apply H7.
+inv H3. inv H1.
+inv H4.
+
+inv H2. inv H1.
+
+
+eapply lemma0000. apply H7.
+inv H1. inv H5. inv H1. inv H5.    
+inv H3. inv H1.
+inv H4.
+
+eapply lemma0000. apply H9.
+eapply lemma0000. apply H9.
+inv H1. inv H6.
+inv H1. inv H6.    
+eapply lemma0000. apply H9.
+inv H3. inv H1.
+inv H4.
+
+inv H2. inv H1.
+
+
+inv H2. inv H1.
+
+  refl.    
+   dependent induction H. inv H.
+eapply IHMultiStep_stmEval1. instantiate. instantiate. instantiate. instantiate. instantiate H7.   destruct stm. refl.  destruct x2.  
+inv H. inv H2.  
+
+ dep_destruct H. inv s. inv x0_1.
+inv x0_1. 
+inv H1. inv H1.       crush.  dep_induction H. inv s.    inv H. inv H1.
+inv H2. inv H1. dep_destruct H  
+
+   dependent induction H. inv H.
+eapply IHMultiStep_stmEval1.  refl.  
+
+  . inv H1. inv H2. inv H1.
+eapply lemma0000. eauto.
+inv H3. inv H3.
+inv H2. inv H1.
+apply lemma0000.   
+ inv H3. inv H1.
+inv H1.     
+ assumption.  inv H7. inv H4.
+ clear H1. clear H3. clear H2.
+ inv H. inv H1. inv H2. inv H1.    
+
+
 Definition proto_handleCanSend (st : State) :=
  IFS CanSend
     THEN Compute toSendMESSAGE compGetMessageToSend >>
@@ -1179,26 +1244,21 @@ Theorem receiveAlwaysFinishes : forall vars prst n m n', evalChoose IsMyTurntoSe
  m <> constStop ->  exists prst',
  (OneProtocolStep (state vars prst), (state vars prst), n) ⇓⇓ (EndStatement, (state ((receivedMESSAGE,m)::vars) prst'), n').
 Proof. intros. destruct m, prst. destruct (reduceUnresolved d m r0) eqn:unres. eexists. 
-eapply multistep_step. c. unfold OneProtocolStep.
+eapply multistep_step. c. unfold OneProtocolStep
 proto. step. unfold proto_handleNotMyTurnToSend. c. c. apply H0. auto.
-step.  proto.
-step. c. c. simpl.  reflexivity.
-rewrite unres. c. apply E_End.
+step.  proto. c. c. c. simpl. rewrite unres.   refl.
 
 eexists.
 eapply multistep_step. c. unfold OneProtocolStep.
 proto. step. unfold proto_handleNotMyTurnToSend. c. c. apply H0. auto.
 step. proto.
-step. c. c. simpl.  reflexivity.
-rewrite unres. c. apply E_End.
+ c. c. c.  simpl. rewrite unres.   reflexivity.
 
 eexists.
 eapply multistep_step. c. unfold OneProtocolStep.
 proto. step. unfold proto_handleNotMyTurnToSend. c. c. apply H0. auto.
 step. proto. simpl.
-step. proto. step. c. c. reflexivity.  
- simpl.
- c. c.
+step. proto. c. c. c.  reflexivity.
 nono H1.
 Qed.
 
