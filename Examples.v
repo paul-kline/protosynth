@@ -72,20 +72,52 @@ c. c.
 (*Now the left side must send the stop. *)
 apply dualmultistep_id. eapply duFinishLeftFirst.
 step. unfold OneProtocolStep. apply E_ChooseTrue. simpl.
-unblock_dep_elim. simpl. simpl_eq. refl.    
+unblock_dep_elim. simpl. simpl_eq. refl.
+step. apply E_ChooseFalse.  simpl.  unblock_dep_elim.  simpl.  simpl_eq. refl. 
+simpl.  unblock_dep_elim.  simpl.  simpl_eq.      
+Tactic Notation "ss" := unblock_dep_elim; simpl; simpl_eq. 
+step. proto.  refl. 
+c.  c.
+(* now tom must also go to stop. *)
+step. proto. unfold proto_handleNotMyTurnToSend. c. c. c. refl.
+Qed. 
 
- SearchAbout block. simpl_eqs. unblock goal.  auto.  refl.   simpl.   apply E_Ch proto.   c. simpl.  refl.   proto.     
-simpl. 
-step.     step.   c.      
-simpl. 
-
-  simpl. 
-
-step. proto.
-step. c. c. simpl.  refl.    proto.    
- .  c.  
-apply dualmultistep_step. 
-step.     proto.         
-c.                
-         proto.       proto.     
 End example1.  
+
+Theorem privacyiscool : forall 
+Theorem X : forall  ppApp ppAtt wants , exists STatt' STapp' n', 
+( (OneProtocolStep (mkAppraiserState ppApp wants), mkAppraiserState ppApp wants),  
+  (OneProtocolStep (mkAttesterState ppAtt), mkAttesterState ppAtt), nil)  ⟱⟱
+((StopStatement, STapp'), (StopStatement, STatt'), n') .
+Proof.  intro. induction ppApp; intros.   
+eexists. eexists. exists nil.
+step.
+(*appraiser makes first move*)
+eapply duFinishLeftFirst. 
+step. proto. unfold proto_handleIsMyTurnToSend.   
+proto. 
+proto. 
+proto.
+destruct wants. simpl.
+proto. 
+proto.  refl.
+c.  c.
+
+proto. destruct r. 
+step. c.  c.  simpl.   refl.
+proto.
+simpl. 
+proto.  
+c.  
+proto.  
+unfold proto_handleCantSend.  step.
+proto.
+apply E_ChooseFalse; reflexivity.  c.  simpl.  
+proto. 
+Ltac proto2 := match goal with 
+
+ end. proto2.  refl.   proto2; [ proto|].   
+proto.  proto. .  
+ (apply dualmultistep_step) || ((eapply dualmultistep_id) ; [constructor|]).
+step. 
+eapply dualmultistep_step.   

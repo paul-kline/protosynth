@@ -12,7 +12,7 @@
 *)
 
 (* The first step is to define what it is for which we would like to ask. Hence "nouns". *)
-Require Export MyShortHand. 
+Require Export MyShortHand.
 
 (*Require Import String.*) 
 (*
@@ -1013,14 +1013,83 @@ match st with
 end
 end. 
 
+Reserved Notation " x '⟱'  x'"
+                  (at level 40).
+Definition DualState : Type := ((Statement*State) * (Statement* State)* Network). 
+Print DualState. 
+ Inductive DualEval : DualState -> DualState -> Prop :=
+ (*
+  | dulift : forall leftState rightState, 
+       (getAction leftState) = reverse (getAction rightState) -> 
+        DualEval ((OneProtocolStep leftState, leftState),(OneProtocolStep rightState, rightState) nil)
+                 ((OneProtocolStep leftState, leftState),(OneProtocolStep rightState, rightState) nil)
+                 *)
+                 
+  | duLeft : forall leftSTM leftState rightSTM rightState n leftState' n',
+      (leftSTM , leftState, n) ⇓⇓ (EndStatement, leftState', n') -> 
+      ((leftSTM, leftState), (rightSTM,rightState), n) ⟱
+               ( (OneProtocolStep (rever leftState'), rever leftState'),(rightSTM, rightState), n')
+       
+  | duRight : forall leftSTM leftState rightSTM rightState rightState' n n',
+      (rightSTM , rightState, n) ⇓⇓ (EndStatement, rightState', n') ->
+      ((leftSTM,leftState), (rightSTM, rightState), n) ⟱
+            ((leftSTM, leftState), (OneProtocolStep (rever rightState'), rever rightState'), n')
+      
+  (*| leftIsWait : forall leftSTM leftState rightSTM rightState n,
+      DualEval (leftSTM, leftState) (rightSTM,rightState) n -> 
+      forall leftState' n' stm',
+      (leftSTM , leftState, n) ⇓⇓ (Wait >> stm', leftState', n') -> 
+      forall n'' rightState',
+      (rightSTM , rightState, n') ⇓⇓ (EndStatement, rightState', n'') ->
+      DualEval (Wait >> stm', leftState') (OneProtocolStep (switchSendRec rightState'), (switchSendRec rightState')) n''
+      
+  | rightIsWait : forall leftSTM leftState rightSTM rightState n,
+      DualEval (leftSTM, leftState) (rightSTM,rightState) n -> 
+      forall rightState' n' stm',
+      (rightSTM , rightState, n) ⇓⇓ (Wait >> stm', rightState', n') -> 
+      forall n'' leftState',
+      (leftSTM , leftState, n') ⇓⇓ (EndStatement, leftState', n'') ->
+      DualEval (OneProtocolStep (switchSendRec leftState'), (switchSendRec leftState')) (Wait >> stm', rightState') n'' *)
+      (* Those are wrong anyway. Well, not wrong, but we need more. What if the side not waiting goes to a stop?*)
+      
+  | duFinishLeftFirst : forall stmL stL stL' stmR stR stR' n n' n'',
+      (stmL , stL, n) ⇓⇓ (StopStatement, stL', n') ->
+      (stmR, stR, n')  ⇓⇓ (StopStatement, stR', n'') -> 
+      DualEval ((stmL, stL), (stmR, stR), n) ((StopStatement,stL'), (StopStatement,stR'), n'') 
+  | duFinishRightFirst : forall stmL stL stL' stmR stR stR' n n' n'',
+      (stmR, stR, n)  ⇓⇓ (StopStatement, stR', n') -> 
+      (stmL , stL, n') ⇓⇓ (StopStatement, stL', n'') -> 
+      ((stmL, stL), (stmR, stR), n) ⟱ ((StopStatement,stL'), (StopStatement,stR'), n'')
+       where "x '⟱' x' " := (DualEval x x').
+      Hint Constructors DualEval.
+Print MultiStep_stmEval. 
+
+
+Inductive DualMultiStep :  DualState -> DualState -> Prop :=
+ | dualmultistep_id : forall ds ds', ds ⟱  ds' -> DualMultiStep ds ds' 
+ | dualmultistep_step : forall ds ds' ds'', 
+    DualMultiStep ds ds' ->
+    DualMultiStep ds'  ds'' ->
+    DualMultiStep ds ds''.
+
+Tactic Notation "step" := (eapply multistep_step; [constructor|]) || ( ((apply dualmultistep_step) || (eapply dualmultistep_step)) ; [constructor|]).
+
 
 Ltac proto := match goal with 
+ | [ |- _ ⇓⇓ _] => step; [proto|]
+ | [ |- (EffectStatement _ >>_,_,_) ⇓⇓ _] => step; [c;c; (refl || auto)|]
  | [ |- context[ OneProtocolStep _]] => unfold OneProtocolStep; proto
+ | [ |- context[ proto_handleIsMyTurnToSend _]] => unfold proto_handleIsMyTurnToSend; proto
+ | [ |- context[ proto_handleNotMyTurnToSend _]] => unfold proto_handleNotMyTurnToSend; proto
+ | [ |- context[ proto_handleCanSend _]] => unfold proto_handleCanSend; proto
+ | [ |- context[ proto_handleCantSend _]] => unfold proto_handleCantSend; proto
+ | [ |- context[ proto_handleNoNextDesire _]] => unfold proto_handleNoNextDesire; proto
+ | [ |- context[ proto_handleExistsNextDesire _]] => unfold proto_handleExistsNextDesire; proto
  | [ H : evalChoose ?C ?T = false |- (IFS ?C THEN _ ELSE _,_,_) ⇓ _  ] => apply E_ChooseFalse; (progress auto)
  | [ |- (IFS ?C THEN _ ELSE _,_,_) ⇓ _  ] => (apply E_ChooseTrue; (reflexivity || assumption)) || (apply E_ChooseFalse; reflexivity)
+ | [ |- (SendStatement (const constStop) _ _ >> _, _,_)  ⇓ (_,_,_)] => apply E_ChainBad; (apply E_SendStop) || (eapply E_SendStop)
  end.
  Hint Unfold OneProtocolStep proto_handleIsMyTurnToSend proto_handleNotMyTurnToSend. 
-Tactic Notation "step" := eapply multistep_step; [constructor|].
 
 Theorem canSendST_implies_handleExists : forall st, evalChoose CanSend st = true -> exists c, handleCompute compGetMessageToSend st = Some c.
 Proof.
@@ -1072,65 +1141,6 @@ Theorem ifwillthenway : forall st, evalChoose ExistsNextDesire st = true ->exist
     Qed.
 
 
-
-Reserved Notation " x '⟱'  x'"
-                  (at level 40).
-Definition DualState : Type := ((Statement*State) * (Statement* State)* Network). 
-Print DualState. 
- Inductive DualEval : DualState -> DualState -> Prop :=
- (*
-  | dulift : forall leftState rightState, 
-       (getAction leftState) = reverse (getAction rightState) -> 
-        DualEval ((OneProtocolStep leftState, leftState),(OneProtocolStep rightState, rightState) nil)
-                 ((OneProtocolStep leftState, leftState),(OneProtocolStep rightState, rightState) nil)
-                 *)
-                 
-  | duLeft : forall leftSTM leftState rightSTM rightState n leftState' n',
-      (leftSTM , leftState, n) ⇓⇓ (EndStatement, leftState', n') -> 
-      ((leftSTM, leftState), (rightSTM,rightState), n) ⟱
-               ( (OneProtocolStep (rever leftState'), rever leftState'),(rightSTM, rightState), n')
-       
-  | duRight : forall leftSTM leftState rightSTM rightState rightState' n n',
-      (rightSTM , rightState, n) ⇓⇓ (EndStatement, rightState', n') ->
-      ((leftSTM,leftState), (rightSTM, rightState), n) ⟱
-            ((leftSTM, leftState), (OneProtocolStep (rever rightState'), rever rightState'), n')
-      
-  (*| leftIsWait : forall leftSTM leftState rightSTM rightState n,
-      DualEval (leftSTM, leftState) (rightSTM,rightState) n -> 
-      forall leftState' n' stm',
-      (leftSTM , leftState, n) ⇓⇓ (Wait >> stm', leftState', n') -> 
-      forall n'' rightState',
-      (rightSTM , rightState, n') ⇓⇓ (EndStatement, rightState', n'') ->
-      DualEval (Wait >> stm', leftState') (OneProtocolStep (switchSendRec rightState'), (switchSendRec rightState')) n''
-      
-  | rightIsWait : forall leftSTM leftState rightSTM rightState n,
-      DualEval (leftSTM, leftState) (rightSTM,rightState) n -> 
-      forall rightState' n' stm',
-      (rightSTM , rightState, n) ⇓⇓ (Wait >> stm', rightState', n') -> 
-      forall n'' leftState',
-      (leftSTM , leftState, n') ⇓⇓ (EndStatement, leftState', n'') ->
-      DualEval (OneProtocolStep (switchSendRec leftState'), (switchSendRec leftState')) (Wait >> stm', rightState') n'' *)
-      (* Those are wrong anyway. Well, not wrong, but we need more. What if the side not waiting goes to a stop?*)
-      
-  | duFinishLeftFirst : forall stmL stL stL' stmR stR stR' n n' n'',
-      (stmL , stL, n) ⇓⇓ (StopStatement, stL', n') ->
-      (stmR, stR, n')  ⇓⇓ (StopStatement, stR', n'') -> 
-      DualEval ((stmL, stL), (stmR, stR), n) ((StopStatement,stL'), (StopStatement,stR'), n'') 
-  | duFinishRightFirst : forall stmL stL stL' stmR stR stR' n n' n'',
-      (stmR, stR, n)  ⇓⇓ (StopStatement, stR', n') -> 
-      (stmL , stL, n') ⇓⇓ (StopStatement, stL', n'') -> 
-      ((stmL, stL), (stmR, stR), n) ⟱ ((StopStatement,stL'), (StopStatement,stR'), n'')
-       where "x '⟱' x' " := (DualEval x x').
-      Hint Constructors DualEval.
-Print MultiStep_stmEval.
-
-
-Inductive DualMultiStep :  DualState -> DualState -> Prop :=
- | dualmultistep_id : forall ds ds', ds ⟱  ds' -> DualMultiStep ds ds' 
- | dualmultistep_step : forall ds ds' ds'', 
-    DualMultiStep ds ds' ->
-    DualMultiStep ds'  ds'' ->
-    DualMultiStep ds ds''.
 
 
 
