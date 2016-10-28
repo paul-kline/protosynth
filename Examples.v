@@ -84,7 +84,89 @@ Qed.
 
 End example1.  
 
-Theorem privacyiscool : forall 
+Theorem privacyiscool : forall st n d stm st' n',
+(OneProtocolStep st, st, n) ⇓⇓ (SendStatement (const (constValue d (measure d))) (getMe st') (notMe (getMe st')) >> stm,st',n') -> 
+snd3 (handleRequest' (getPrivacy st') d) = constValue d (measure d) .
+Proof.  intros.
+inv H. 
+inv H1.
+
+inv H2.  inv H1. clear H2. 
+
+inv H7. inv H2. 
+inv H4.  inv H2.
+inv H10.  inv H6. 
+inv H8.  inv H6.  inv H6. inv H11.   
+
+(*yes *)
+inv H14.  inv H13. 
+inv H15.  inv H13. 
+
+inv H20.  inv H17. 
+inv H18.  inv H17. clear H18.  clear H15. clear H8. clear H4. 
+
+inv H24. inv H4. 
+inv H8. inv H4.  simpl  in H4. 
+inv H23.  inv H18. 
+
+simpl.  
+inv H2.  
+inv H2.  inv H3. 
+inv H1.  inv H1.
+
+inv H4. 
+inv H3. 
+inv H1.
+
+inv H2.  
+inv H1.  
+inv H. 
+inv H1. 
+subst.   subst.  inv H1.  subst.
+inv H2.  subst. 
+inv H1.  subst. .
+inv H1.  subst. 
+inv H7.  subst.  inv H5.  subst.  inv H6.  subst. 
+inv H5.  subst. 
+inv H5.  subst.
+inv H12.  subst.
+inv H10. subst. 
+inv H11. subst. 
+inv H10.  subst.
+inv H17.  subst. 
+inv H14. subst.
+
+inv H17. subst. 
+inv H15. subst. 
+inv H14. subst. 
+inv H14. subst.   
+
+inv H15. subst.
+inv H15.  subst.  
+inv H14. subst.
+inv H14. subst. 
+inv H15. subst.   
+
+inv H21. subst. 
+inv H14.  subst. 
+inv H15. subst. 
+inv H14. subst.
+
+inv H17.  subst. 
+inv H18. subst.
+inv H19.  subst. 
+inv H18. subst. 
+inv H18. subst.  
+inv H14. subst.
+inv H14. subst.
+inv H14. subst.    
+inv H12.  subst. 
+inv H11.  subst. 
+inv H4. subst.
+inv H11.  subst. 
+inv H11.  subst.  
+inv H4.  subst. 
+inv H17.  subst. 
 Theorem X : forall  ppApp ppAtt wants , exists STatt' STapp' n', 
 ( (OneProtocolStep (mkAppraiserState ppApp wants), mkAppraiserState ppApp wants),  
   (OneProtocolStep (mkAttesterState ppAtt), mkAttesterState ppAtt), nil)  ⟱⟱
