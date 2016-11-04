@@ -719,77 +719,77 @@ Definition handleCompute (comp : Computation) (st : State) : option Const :=
                             end)
  end.
 
-Reserved Notation " x '⇓'  x'"
+Reserved Notation " x '⇒'  x'"
                   (at level 40).
 Inductive stmEval : (Statement * State * Network) -> (Statement * State * Network) -> Prop :=
    | E_Send : forall st n term f t v, (varSubst term st) = Some v -> 
               v <> constStop ->  
-              (SendStatement term f t, st, n) ⇓
+              (SendStatement term f t, st, n) ⇒
                 (Skip, st, (sendOnNetwork f t v n))
-   | E_SendStop : forall st n term f t v, (varSubst term st) = Some constStop ->  (SendStatement term f t, st, n) ⇓
+   | E_SendStop : forall st n term f t v, (varSubst term st) = Some constStop ->  (SendStatement term f t, st, n) ⇒
       (StopStatement, st, (sendOnNetwork f t v n))
    | E_ReceiveStop : forall st n n' vid,
         receiveN n (getMe st) = Some (constStop,n')  ->
-        (ReceiveStatement vid, st,n) ⇓ (StopStatement, assign vid constStop st, n')
+        (ReceiveStatement vid, st,n) ⇒ (StopStatement, assign vid constStop st, n')
    | E_ReceiveWait : forall st n vid,
         receiveN n (getMe st) = None -> 
-        (ReceiveStatement vid, st, n) ⇓ (Wait >> (ReceiveStatement vid) ,st ,n)
+        (ReceiveStatement vid, st, n) ⇒ (Wait >> (ReceiveStatement vid) ,st ,n)
    | E_Wait : forall st n happy,
         receiveN n (getMe st) = Some happy ->
-        (Wait, st, n) ⇓ (Skip, st, n)
+        (Wait, st, n) ⇒ (Skip, st, n)
    | E_Receive : forall st n n' vid mess,
         receiveN n (getMe st) = Some (mess,n')  ->
         mess <> constStop ->
-        (ReceiveStatement vid, st,n) ⇓ (Skip, assign vid mess st, n')
+        (ReceiveStatement vid, st,n) ⇒ (Skip, assign vid mess st, n')
    | E_Effect : forall st n effect st',
         handleEffect effect st = Some st' ->  
-        (EffectStatement effect, st, n) ⇓ (Skip, st',n)
+        (EffectStatement effect, st, n) ⇒ (Skip, st',n)
    | E_Compute : forall st n vid compTerm c, 
         handleCompute compTerm st = Some c -> 
-        (Compute vid compTerm, st, n) ⇓
+        (Compute vid compTerm, st, n) ⇒
         (Skip, assign vid c st, n)
    | E_Assign : forall st n vid term2 c, 
        (varSubst term2 st) = Some c -> 
-       (Assignment vid term2, st, n) ⇓ (Skip, assign vid c st, n)
+       (Assignment vid term2, st, n) ⇒ (Skip, assign vid c st, n)
    | E_ChooseTrue : forall st n cond stmTrue stmFalse,
       (evalChoose cond st) = true -> 
-      (Choose cond stmTrue stmFalse, st, n) ⇓ (stmTrue, st, n)
+      (Choose cond stmTrue stmFalse, st, n) ⇒ (stmTrue, st, n)
    | E_ChooseFalse : forall st n cond stmTrue stmFalse,
       (evalChoose cond st) = false -> 
-      (Choose cond stmTrue stmFalse, st, n) ⇓ (stmFalse, st, n)
+      (Choose cond stmTrue stmFalse, st, n) ⇒ (stmFalse, st, n)
    | E_Chain : forall st n st' n' stm1 stm2, 
-       (stm1,st,n) ⇓ (Skip,st',n') -> 
-       (Chain stm1 stm2, st, n) ⇓ (stm2,st',n')
+       (stm1,st,n) ⇒ (Skip,st',n') -> 
+       (Chain stm1 stm2, st, n) ⇒ (stm2,st',n')
    | E_ChainBad : forall st n st' n' stm1 stm2, 
-       (stm1,st,n) ⇓ (StopStatement,st',n') -> 
-       (Chain stm1 stm2, st, n) ⇓ (StopStatement,st',n')
+       (stm1,st,n) ⇒ (StopStatement,st',n') -> 
+       (Chain stm1 stm2, st, n) ⇒ (StopStatement,st',n')
    | E_ChainWait : forall st n st' n' stm1 stm2, 
-       (stm1,st,n) ⇓ (Wait >> stm1,st',n') -> 
-       (Chain stm1 stm2, st, n) ⇓ (Wait >> stm1 >> stm2,st',n')
-   | E_Skip : forall st n, (Skip, st, n)  ⇓ (Skip, st, n )
+       (stm1,st,n) ⇒ (Wait >> stm1,st',n') -> 
+       (Chain stm1 stm2, st, n) ⇒ (Wait >> stm1 >> stm2,st',n')
+   | E_Skip : forall st n, (Skip, st, n)  ⇒ (Skip, st, n )
    
    (*| E_End : forall st n, 
-       (EndStatement, st, n) ⇓ (EndStatement, st, n)
+       (EndStatement, st, n) ⇒ (EndStatement, st, n)
    | E_Stop : forall st n, 
-       (StopStatement, st, n) ⇓ (StopStatement, st, n)
+       (StopStatement, st, n) ⇒ (StopStatement, st, n)
        *) 
    | E_KeepWaiting : forall st n stm, 
        receiveN n (getMe st) = None -> 
-       (Wait >> stm, st, n) ⇓ (Wait >> stm, st, n) 
+       (Wait >> stm, st, n) ⇒ (Wait >> stm, st, n) 
    | E_KeepWaiting2 : forall st n, 
        receiveN n (getMe st) = None -> 
-       (Wait, st, n) ⇓ (Wait, st, n) 
-   where "x '⇓' x' " := (stmEval x x').
+       (Wait, st, n) ⇒ (Wait, st, n) 
+   where "x '⇒' x' " := (stmEval x x').
 Hint Constructors stmEval. 
 
-Reserved Notation "x ⇓⇓ x'"(at level 35). 
+Reserved Notation "x ⇒* x'"(at level 35). 
 Inductive MultiStep_stmEval : (Statement * State * Network) -> (Statement * State * Network) -> Prop := 
 | multistep_id : forall stm st n stm' st' n', stmEval (stm,st,n) (stm',st',n') -> MultiStep_stmEval (stm,st,n) (stm',st',n')
 | multistep_step : forall stm st n stm' st' n' stm'' st'' n'', 
-(stm, st, n)    ⇓⇓ (stm', st', n')  -> 
-(stm',st',n')   ⇓⇓ (stm'',st'',n'') -> 
-(stm, st, n) ⇓⇓ (stm'',st'',n'')
- where "x ⇓⇓ x'" := (MultiStep_stmEval x x').
+(stm, st, n)    ⇒* (stm', st', n')  -> 
+(stm',st',n')   ⇒* (stm'',st'',n'') -> 
+(stm, st, n) ⇒* (stm'',st'',n'')
+ where "x ⇒* x'" := (MultiStep_stmEval x x').
 Hint Constructors MultiStep_stmEval.
 Definition notMe (p : Participant) : Participant :=
 match p with
@@ -797,69 +797,12 @@ match p with
  | APPRAISER => ATTESTER
 end.
 
-Lemma lemma0000 : forall st st' stm' n n', 
-(EndStatement, st, n) ⇓⇓ (stm', st', n') -> False.
+Lemma endEval : forall st st' stm' n n', 
+(EndStatement, st, n) ⇒* (stm', st', n') -> False.
 Proof. intros. dependent induction H. inversion H. assumption.
 Qed.
 
 
-Lemma lemma00 : forall st st' stm x x2 n n', 
-(EffectStatement x  >> EndStatement, st, n) ⇓⇓ (SendStatement x2 (getMe st') (notMe (getMe st')) >> stm, st', n') -> False.
-Proof. intros. dependent induction H. inv H.
- 
-eapply IHMultiStep_stmEval1.
-
- refl.  
-
-inv H2. inv H1.
-eapply lemma0000. apply H7.
-inv H3. inv H1.
-inv H4.
-
-inv H2. inv H1.
-
-
-eapply lemma0000. apply H7.
-inv H1. inv H5. inv H1. inv H5.    
-inv H3. inv H1.
-inv H4.
-
-eapply lemma0000. apply H9.
-eapply lemma0000. apply H9.
-inv H1. inv H6.
-inv H1. inv H6.    
-eapply lemma0000. apply H9.
-inv H3. inv H1.
-inv H4.
-
-inv H2. inv H1.
-
-
-inv H2. inv H1.
-
-  refl.    
-   dependent induction H. inv H.
-eapply IHMultiStep_stmEval1. instantiate. instantiate. instantiate. instantiate. instantiate H7.   destruct stm. refl.  destruct x2.  
-inv H. inv H2.  
-
- dep_destruct H. inv s. inv x0_1.
-inv x0_1. 
-inv H1. inv H1.       crush.  dep_induction H. inv s.    inv H. inv H1.
-inv H2. inv H1. dep_destruct H  
-
-   dependent induction H. inv H.
-eapply IHMultiStep_stmEval1.  refl.  
-
-  . inv H1. inv H2. inv H1.
-eapply lemma0000. eauto.
-inv H3. inv H3.
-inv H2. inv H1.
-apply lemma0000.   
- inv H3. inv H1.
-inv H1.     
- assumption.  inv H7. inv H4.
- clear H1. clear H3. clear H2.
- inv H. inv H1. inv H2. inv H1.    
 
 
 Definition proto_handleCanSend (st : State) :=
@@ -1032,7 +975,7 @@ Inductive NetworkActionChain : Action -> Prop :=
 
 Theorem oneStepSend : forall st stm' n, 
  evalChoose IsMyTurntoSend st = true -> 
- (OneProtocolStep st, st, n) ⇓ (stm', st, n) ->
+ (OneProtocolStep st, st, n) ⇒ (stm', st, n) ->
  SingularNetworkAction stm' ASend.
  Proof. intros. inversion H0; subst.
  apply s_Send. simpl. omega. rewrite H in H2. inversion H2.
@@ -1040,7 +983,7 @@ Theorem oneStepSend : forall st stm' n,
 
 Theorem oneStepReceives : forall st stm' n, 
  evalChoose IsMyTurntoSend st = false -> 
- (OneProtocolStep st, st, n) ⇓ (stm', st, n) ->
+ (OneProtocolStep st, st, n) ⇒ (stm', st, n) ->
  SingularNetworkAction stm' AReceive.
  Proof. intros. inversion H0; subst.
  rewrite H in H2. inversion H2.
@@ -1068,7 +1011,7 @@ end.
        | proState a g b c d e f => a
       end
   end. 
-  (*⇓
+  (*⇒
   U+21af ⇊
   ↡ ⍗ *)
   Definition rever (st : State) : State := 
@@ -1091,39 +1034,39 @@ Print DualState.
                  *)
                  
   | duLeft : forall leftSTM leftState rightSTM rightState n leftState' n',
-      (leftSTM , leftState, n) ⇓⇓ (EndStatement, leftState', n') -> 
+      (leftSTM , leftState, n) ⇒* (EndStatement, leftState', n') -> 
       ((leftSTM, leftState), (rightSTM,rightState), n) ⟱
                ( (OneProtocolStep (rever leftState'), rever leftState'),(rightSTM, rightState), n')
        
   | duRight : forall leftSTM leftState rightSTM rightState rightState' n n',
-      (rightSTM , rightState, n) ⇓⇓ (EndStatement, rightState', n') ->
+      (rightSTM , rightState, n) ⇒* (EndStatement, rightState', n') ->
       ((leftSTM,leftState), (rightSTM, rightState), n) ⟱
             ((leftSTM, leftState), (OneProtocolStep (rever rightState'), rever rightState'), n')
       
   (*| leftIsWait : forall leftSTM leftState rightSTM rightState n,
       DualEval (leftSTM, leftState) (rightSTM,rightState) n -> 
       forall leftState' n' stm',
-      (leftSTM , leftState, n) ⇓⇓ (Wait >> stm', leftState', n') -> 
+      (leftSTM , leftState, n) ⇒⇒ (Wait >> stm', leftState', n') -> 
       forall n'' rightState',
-      (rightSTM , rightState, n') ⇓⇓ (EndStatement, rightState', n'') ->
+      (rightSTM , rightState, n') ⇒⇒ (EndStatement, rightState', n'') ->
       DualEval (Wait >> stm', leftState') (OneProtocolStep (switchSendRec rightState'), (switchSendRec rightState')) n''
       
   | rightIsWait : forall leftSTM leftState rightSTM rightState n,
       DualEval (leftSTM, leftState) (rightSTM,rightState) n -> 
       forall rightState' n' stm',
-      (rightSTM , rightState, n) ⇓⇓ (Wait >> stm', rightState', n') -> 
+      (rightSTM , rightState, n) ⇒⇒ (Wait >> stm', rightState', n') -> 
       forall n'' leftState',
-      (leftSTM , leftState, n') ⇓⇓ (EndStatement, leftState', n'') ->
+      (leftSTM , leftState, n') ⇒⇒ (EndStatement, leftState', n'') ->
       DualEval (OneProtocolStep (switchSendRec leftState'), (switchSendRec leftState')) (Wait >> stm', rightState') n'' *)
       (* Those are wrong anyway. Well, not wrong, but we need more. What if the side not waiting goes to a stop?*)
       
   | duFinishLeftFirst : forall stmL stL stL' stmR stR stR' n n' n'',
-      (stmL , stL, n) ⇓⇓ (StopStatement, stL', n') ->
-      (stmR, stR, n')  ⇓⇓ (StopStatement, stR', n'') -> 
+      (stmL , stL, n) ⇒* (StopStatement, stL', n') ->
+      (stmR, stR, n')  ⇒* (StopStatement, stR', n'') -> 
       DualEval ((stmL, stL), (stmR, stR), n) ((StopStatement,stL'), (StopStatement,stR'), n'') 
   | duFinishRightFirst : forall stmL stL stL' stmR stR stR' n n' n'',
-      (stmR, stR, n)  ⇓⇓ (StopStatement, stR', n') -> 
-      (stmL , stL, n') ⇓⇓ (StopStatement, stL', n'') -> 
+      (stmR, stR, n)  ⇒* (StopStatement, stR', n') -> 
+      (stmL , stL, n') ⇒* (StopStatement, stL', n'') -> 
       ((stmL, stL), (stmR, stR), n) ⟱ ((StopStatement,stL'), (StopStatement,stR'), n'')
        where "x '⟱' x' " := (DualEval x x').
       Hint Constructors DualEval.
@@ -1141,8 +1084,8 @@ Tactic Notation "step" := (eapply multistep_step; [constructor|]) || ( ((apply d
 
 
 Ltac proto := match goal with 
- | [ |- _ ⇓⇓ _] => step; [proto|]
- | [ |- (EffectStatement _ >>_,_,_) ⇓⇓ _] => step; [c;c; (refl || auto)|]
+ | [ |- _ ⇒* _] => step; [proto|]
+ | [ |- (EffectStatement _ >>_,_,_) ⇒* _] => step; [c;c; (refl || auto)|]
  | [ |- context[ OneProtocolStep _]] => unfold OneProtocolStep; proto
  | [ |- context[ proto_handleIsMyTurnToSend _]] => unfold proto_handleIsMyTurnToSend; proto
  | [ |- context[ proto_handleNotMyTurnToSend _]] => unfold proto_handleNotMyTurnToSend; proto
@@ -1150,9 +1093,9 @@ Ltac proto := match goal with
  | [ |- context[ proto_handleCantSend _]] => unfold proto_handleCantSend; proto
  | [ |- context[ proto_handleNoNextDesire _]] => unfold proto_handleNoNextDesire; proto
  | [ |- context[ proto_handleExistsNextDesire _]] => unfold proto_handleExistsNextDesire; proto
- | [ H : evalChoose ?C ?T = false |- (IFS ?C THEN _ ELSE _,_,_) ⇓ _  ] => apply E_ChooseFalse; (progress auto)
- | [ |- (IFS ?C THEN _ ELSE _,_,_) ⇓ _  ] => (apply E_ChooseTrue; (reflexivity || assumption)) || (apply E_ChooseFalse; reflexivity)
- | [ |- (SendStatement (const constStop) _ _ >> _, _,_)  ⇓ (_,_,_)] => apply E_ChainBad; (apply E_SendStop) || (eapply E_SendStop)
+ | [ H : evalChoose ?C ?T = false |- (IFS ?C THEN _ ELSE _,_,_) ⇒ _  ] => apply E_ChooseFalse; (progress auto)
+ | [ |- (IFS ?C THEN _ ELSE _,_,_) ⇒ _  ] => (apply E_ChooseTrue; (reflexivity || assumption)) || (apply E_ChooseFalse; reflexivity)
+ | [ |- (SendStatement (const constStop) _ _ >> _, _,_)  ⇒ (_,_,_)] => apply E_ChainBad; (apply E_SendStop) || (eapply E_SendStop)
  end.
  Hint Unfold OneProtocolStep proto_handleIsMyTurnToSend proto_handleNotMyTurnToSend. 
 
@@ -1163,19 +1106,19 @@ inversion H. Qed.
 Hint Resolve canSendST_implies_handleExists.
 Theorem eval_1 : forall st n,
 evalChoose IsMyTurntoSend st = true -> 
-(OneProtocolStep st, st, n) ⇓ (proto_handleIsMyTurnToSend st, st, n).
+(OneProtocolStep st, st, n) ⇒ (proto_handleIsMyTurnToSend st, st, n).
 Proof. intros. c. auto.
 Qed.
 Theorem eval_0 : forall st n,
 evalChoose IsMyTurntoSend st = false -> 
-(OneProtocolStep st, st, n) ⇓ (proto_handleNotMyTurnToSend st, st, n).
+(OneProtocolStep st, st, n) ⇒ (proto_handleNotMyTurnToSend st, st, n).
 Proof. intros. proto.
 Qed.
 
 
 Theorem eval_11 : forall st n,
 evalChoose IsAllGood st = true -> 
-(proto_handleIsMyTurnToSend st, st, n) ⇓ (EffectStatement (effect_setAllGood Unset) >>
+(proto_handleIsMyTurnToSend st, st, n) ⇒ (EffectStatement (effect_setAllGood Unset) >>
      (IFS QueuedRequestsExist THEN proto_handleCanSend st
       ELSE proto_handleCantSend st), st, n).
 Proof. intros. c. auto.
@@ -1183,7 +1126,7 @@ Qed.
 
 Theorem eval_10 : forall st n,
 evalChoose IsAllGood st = false -> 
-(proto_handleIsMyTurnToSend st, st, n) ⇓ ( SendStatement (const constStop) (getMe st) (notMe (getMe st)) >> StopStatement, st, n).
+(proto_handleIsMyTurnToSend st, st, n) ⇒ ( SendStatement (const constStop) (getMe st) (notMe (getMe st)) >> StopStatement, st, n).
 Proof. intros. unfold proto_handleIsMyTurnToSend.  proto.
 Qed.
 
@@ -1210,7 +1153,7 @@ Theorem ifwillthenway : forall st, evalChoose ExistsNextDesire st = true ->exist
 
 
 Theorem onlyEffect_effects : forall (stm stm': Statement) (st st': State) (n n' : Network),
- (stm,st,n) ⇓ (stm',st',n') ->  
+ (stm,st,n) ⇒ (stm',st',n') ->  
  getProState st = getProState st' \/ exists e, (headStatement stm) = EffectStatement e. 
 Proof.
 intro. induction stm ; try (intros; inversion H; left; reflexivity).
@@ -1239,10 +1182,88 @@ match ps with
  | proState x x0 x1 x2 x3 x4 x5 => (proState x a x1 x2 x3 x4 x5)
 end.
 
+Theorem noOneTouchesAction : forall stm stm' n n' st st', 
+(stm,st,n) ⇒ (stm',st',n') -> getAction st = getAction st'.
+Proof. intro. induction stm; intros;inv H; try (progress auto || destruct st; refl).
+Focus 2. eapply IHstm1. apply H1.
+Focus 2. eapply IHstm1. apply H1.
+Focus 2. eapply IHstm1. apply H1.
+destruct e; (s H1).  (destruct (varSubst t st)). destruct c. inv H1. inv H1. dest st. dest p.  auto.
+inv H1. inv H1. destruct (varSubst t st); inv H1. dest st. dest p. destruct c.
+simpl. destruct (reduceUnresolved d m r0). simpl. refl. refl. refl. refl.
+destruct (varSubst t st). destruct c. inv H1. inv H1. dest st. dest p. refl.
+inv H1. inv H1. inv H1. dest st. dest p. simpl. dest r. refl.
+refl.
+inv H1. inv H1. dest st. dest p. refl. destruct (varSubst t st). destruct c. inv H1.
+dest st. dest p. s H1. destruct (getCounterReqItemFromPP p0 d). inv H1.
+refl. inv H1. inv H1. inv H1.
+inv H1. dest st. dest p.      refl.
+Qed.
+Theorem noOneTouchesAction_m : forall stm stm' n n' st st', 
+(stm,st,n) ⇒* (stm',st',n') -> getAction st = getAction st'.
+Proof. intros. dependent induction H. eapply noOneTouchesAction. apply H.
+rewrite IHMultiStep_stmEval1. assumption. 
+Qed.
+
+Theorem sending : forall stm' m n n' st st', 
+(OneProtocolStep st ,st,n) ⇒* (SendStatement m (getMe st') (notMe (getMe st')) >> stm',st',n') -> getAction st' = ASend. intros. dependent induction H generalizing m.  inv H. destruct stm'0. 
+eapply IHMultiStep_stmEval1. refl.  refl.  destruct stm'0. refl.      
+
+ intros. inv H; auto. dest st. refl.
+dest st.  refl. destruct effect. simpl in H1. destruct (varSubst t st). destruct c. inv H1. inv H1.
+dest st. dest p. refl. inv H1. inv H1. simpl in H1. 
+destruct (varSubst t st). inv H1. dest st. dest p. simpl.
+simpl. destruct c. simpl. destruct (reduceUnresolved d m r0). simpl. refl.
+simpl. refl. simpl. refl. simpl. refl.
+inv H1. simpl in H1. destruct (varSubst t st). destruct c. inv H1. inv H1. simpl. dest st.
+dest p. refl. inv H1. inv H1. simpl in H1. inv H1. dest st. dest p. simpl.
+dest r.    refl. refl. dest st. simpl in H1. dest p. inv H1. refl. 
+simpl in H1. destruct (varSubst t st). destruct c. inv H1. dest d. 
+s H1. dest st. s H1. dest p. destruct (getCounterReqItemFromPP p0 (descriptor d)). inv H1.
+refl . 
+inv H1. inv H1. inv H1.
+dest st. s H1. dest p. inv H1. refl. dest st. s H1. dest compTerm.
+s H1. dest p. destruct (canSend l p0). inv H1. refl. inv H1.
+refl. refl. dest st. refl.   (destruct (varSubst term2 st)). inv H1. refl.    refl.   
+  refl.               dest p. refl.             dest H1.  simpl in H1.                  
+simpl.         
+simpl.             
+auto. 
+  refl.  simpl. dest p. refl.     
+
+(            dest st. destruct p.  simpl in H1.  destruct H1 eqn:ef.  refl.   inv H1.    simpl.   simpl.  inv H.      
+Theorem sending : forall st st' t n n' stm',
+(OneProtocolStep st,st,n) ⇒* (SendStatement t (getMe st') (notMe (getMe st')) >> stm', st', n') -> getAction st = ASend.
+Proof. intros.  destruct st. destruct p.
+inv H. inv H1.  
+ destruct a. simpl. refl.       
+  -> 
+(OneProtocolStep st,st,n) ⇒ (proto_handleIsMyTurnToSend st, st, n).
+Proof. intros. inv H. inv H1.
+inv H7. inv H1. inv H1.   
+inv H2. inv H1. assumption.
+
+exfalso.
+inv H7. clear H2.
+inv H4.
+inv H5. inv H4.  
+inv H11. inv H8. inv H9. inv H8.        
+   inv H15. inv H12. inv H13. inv H12. inv H12. inv H16.
+   apply endEval in H19. assumption. inv H12. inv H16. inv H12.
+   inv H16. 
+   inv H13. inv H12. inv H12. apply endEval in H19. assumption. inv H12. inv H17.
+   inv H12. inv H17.                   
+
+   dependent induction H. inv H.
+eapply IHMultiStep_stmEval2. eauto.  
+   inv H. exfalso.  inv H1.
+inv H2. inv H1. apply H1.
+exfalso.
+inv H7. inv H4. inv H5. inv H4.     
 Theorem receiveAlwaysFinishes : forall vars prst n m n', evalChoose IsMyTurntoSend (state vars prst) = false -> 
  receiveN n (getMe (state vars prst)) = Some (m, n') -> 
  m <> constStop ->  exists prst',
- (OneProtocolStep (state vars prst), (state vars prst), n) ⇓⇓ (EndStatement, (state ((receivedMESSAGE,m)::vars) prst'), n').
+ (OneProtocolStep (state vars prst), (state vars prst), n) ⇒* (EndStatement, (state ((receivedMESSAGE,m)::vars) prst'), n').
 Proof. intros. destruct m, prst. destruct (reduceUnresolved d m r0) eqn:unres. eexists. 
 eapply multistep_step. c. unfold OneProtocolStep
 proto. step. unfold proto_handleNotMyTurnToSend. c. c. apply H0. auto.
@@ -1295,16 +1316,16 @@ econstructor.
 *)
 
 Theorem proto1 : forall st n, evalChoose IsMyTurntoSend st = true -> 
- (OneProtocolStep st, st, n) ⇓ (proto_handleIsMyTurnToSend st, st, n).
+ (OneProtocolStep st, st, n) ⇒ (proto_handleIsMyTurnToSend st, st, n).
 Proof. intros. constructor; auto.
 Qed.
 Theorem proto0 : forall st n, evalChoose IsMyTurntoSend st = false -> 
- (OneProtocolStep st, st, n) ⇓ (proto_handleNotMyTurnToSend st, st, n).
+ (OneProtocolStep st, st, n) ⇒ (proto_handleNotMyTurnToSend st, st, n).
 Proof. intros. constructor; auto.
 Qed.
 
 Theorem onlySendOrReceiveChangesNetwork : forall (stm stm': Statement) (st st': State) (n n' : Network),
- (stm,st,n) ⇓ (stm',st',n') -> 
+ (stm,st,n) ⇒ (stm',st',n') -> 
  n = n' \/
  (exists t p1 p2, headStatement stm = SendStatement t p1 p2) \/
  (exists vid, headStatement stm = ReceiveStatement vid)
@@ -1325,8 +1346,8 @@ Theorem onlySendOrReceiveChangesNetwork : forall (stm stm': Statement) (st st': 
 (*
 Theorem receiveTurnAlwaysFinishes : forall st n,  
  evalChoose IsMyTurntoSend st = false ->  exists st' n', 
- (OneProtocolStep st,st,n) ⇓⇓ (EndStatement,st',n') \/
- (OneProtocolStep st,st,n) ⇓⇓ (StopStatement,st',n').
+ (OneProtocolStep st,st,n) ⇒⇒ (EndStatement,st',n') \/
+ (OneProtocolStep st,st,n) ⇒⇒ (StopStatement,st',n').
 Proof. intros. destruct (receiveN n (getMe st)) eqn:recstat. destruct p. destruct c.
  eexists. eexists.
  left.  eapply multistep_step. constructor. apply E_ChooseFalse. auto.
@@ -1348,20 +1369,20 @@ end.
  
 
  
- Theorem evalSendTurn : forall  st n, (evalChoose IsMyTurntoSend st) = true -> (OneProtocolStep st ,st,n) ⇓ (proto_handleIsMyTurnToSend st, st, n).
+ Theorem evalSendTurn : forall  st n, (evalChoose IsMyTurntoSend st) = true -> (OneProtocolStep st ,st,n) ⇒ (proto_handleIsMyTurnToSend st, st, n).
 Proof.
 intros; unfold OneProtocolStep; constructor; assumption.
 Qed.
 Hint Resolve evalSendTurn. 
 
-Theorem evalReceiveTurn : forall st n, (evalChoose IsMyTurntoSend st) = false -> (OneProtocolStep st ,st,n) ⇓ (proto_handleNotMyTurnToSend st, st, n).
+Theorem evalReceiveTurn : forall st n, (evalChoose IsMyTurntoSend st) = false -> (OneProtocolStep st ,st,n) ⇒ (proto_handleNotMyTurnToSend st, st, n).
 Proof. intros; unfold OneProtocolStep; constructor; assumption.
 Qed.
 Hint Resolve evalReceiveTurn.
 
 Theorem eval_existsNextDesire : forall st n, (evalChoose ExistsNextDesire st) = true -> 
 (evalChoose IsAllGood st) = true ->  
-(proto_handleCantSend st, st, n) ⇓
+(proto_handleCantSend st, st, n) ⇒
  (proto_handleExistsNextDesire st, st, n)
 .
 Proof. intros; unfold proto_handleIsMyTurnToSend. cca.
@@ -1370,7 +1391,7 @@ Hint Resolve eval_existsNextDesire.
 
 Print OneProtocolStep. 
 
-Theorem eval_NoNextDesire : forall st n, (evalChoose ExistsNextDesire st) = false -> (proto_handleCantSend st, st, n) ⇓ 
+Theorem eval_NoNextDesire : forall st n, (evalChoose ExistsNextDesire st) = false -> (proto_handleCantSend st, st, n) ⇒ 
  (proto_handleNoNextDesire st, st, n)
 .
 Proof. intros; unfold proto_handleIsMyTurnToSend; constructor; assumption.
@@ -1398,7 +1419,7 @@ Hint Unfold proto_handleExistsNextDesire.
 
 
 (*(EndStatement, assign toSendMESSAGE x (state v p), sendOnNetwork (getMe (state v p)) (notMe (getMe (state v p))) x n)
-⇓⇓ (EndStatement, st', n')
+⇒⇒ (EndStatement, st', n')
 *)
 (*
 
@@ -1413,13 +1434,13 @@ Require Import Omega.
 
 Theorem receiveWhenStop : forall n vid v p n',
 receiveN n (getMe (state v p)) = Some (constStop, n') ->
-(ReceiveStatement vid, (state v p), n) ⇓ 
+(ReceiveStatement vid, (state v p), n) ⇒ 
 (StopStatement,assign vid constStop (state v p), n').
 Proof. intros.  eapply E_ReceiveStop. assumption.
 Qed.
 Theorem oneStepProtoStopsWhenTold :forall v p n n', evalChoose IsMyTurntoSend (state v p) = false -> 
 receiveN n (getMe (state v p)) = Some (constStop, n') -> 
-((OneProtocolStep (state v p) , (state v p), n) ⇓⇓ (StopStatement, assign receivedMESSAGE constStop (state v p), n')) .
+((OneProtocolStep (state v p) , (state v p), n) ⇒⇒ (StopStatement, assign receivedMESSAGE constStop (state v p), n')) .
 Proof. intros.
 eapply multistep_step. constructor. apply E_ChooseFalse. auto.
 constructor. constructor. apply receiveWhenStop. auto.
@@ -1451,7 +1472,7 @@ Hint Resolve isRemovedFromPrivacyhandleST.
 
 Theorem isRemovedFromPrivacy : forall st st' n t d, 
   varSubst t st = Some (constRequest d) -> 
-  (EffectStatement (effect_ReducePrivacyWithRequest t), st, n) ⇓ (Skip, st',n) -> 
+  (EffectStatement (effect_ReducePrivacyWithRequest t), st, n) ⇒ (Skip, st',n) -> 
   findandMeasureItem (getPrivacy st') d = None.
 Proof. intros. inversion H0; subst.
 simpl in H2. rewrite H in H2. inversion H2. subst. 
