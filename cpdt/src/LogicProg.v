@@ -10,8 +10,9 @@
 (* begin hide *)
 
 Require Import List Omega.
-
-Require Import Cpdt.CpdtTactics.
+Add LoadPath "/nfs/users/paulkline/Documents/coqs/protosynth/cpdt/src". 
+ 
+Require Import CpdtTactics.
 
 Set Implicit Arguments.
 Set Asymmetric Patterns.
