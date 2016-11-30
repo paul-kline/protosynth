@@ -31,13 +31,53 @@ Inductive Property : Type :=
   but the list of assumptions made to obtain that value. These assumptions 
   are not yet implemented.
 *)
+
+(* Instead of Measurements, let's have Measurments, which can be measurments, or
+assumptions depending on the environment. As the environment gets stronger, we 
+can turn assumptions into measurments. *)
+
+Inductive InterpolationMethod :=
+ | Linear
+ | Quadratic.
+
+
 Inductive Measurement : Type := 
  | MotorSpeed
+ | MotorInterpolation
  | BatteryVoltage_
  | BriefDischargeTest
  | Temperature_
  | TubeDiameter
- | MotorOn. 
+ | MotorOn.
+ 
+
+Check Prop -> Prop -> Prop.
+
+Class Environment A :={
+  measurable : A -> Measurement -> bool; 
+  denote (a : A) (m : Measurement) : Set;
+  measure (a : A) (m: Measurement) : (denote a m) }.
+
+ 
+Inductive BasicEnvironment :=
+ basicEnvironment.
+
+Definition basicMeasurable (m : Measurement) : bool:=
+match m with
+ | MotorSpeed => true
+ | BatteryVoltage_ => true
+ | Temperature_ => true
+ | MotorOn => true
+ | _ => false
+end.
+Definition basicDenote
+Instance basic : Environment BasicEnvironment :={
+  measuable
+}.
+
+Inductive Environment :=
+ | environment.
+  
 
 Module MeasurementProgramModule.
 
@@ -85,8 +125,7 @@ Inductive State :=
  state : nat -> State.
  
  (* dummy environment *)
-Inductive Environment :=
- | environment.
+
  
 (* dummy measurement taking *) 
 Definition measure (m : Measurement) (env : Environment) : (measurementDenote m).
