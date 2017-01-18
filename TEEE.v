@@ -56,21 +56,30 @@ Eval compute in (TypesDenote function).
 Definition measure (m : Measurement) : (TypesDenote (measurementTypes m)).
 Admitted.   
 
+
 Definition Time := nat. 
 (* The calculation language *)
 Inductive Calculation :=
- | calcMeasure (m : Measurement) : 
-     Time ->  TypedVar (measurementTypes m) -> Calculation 
- | calcDelay : 
-     Calculation -> nat -> Calculation. 
-     
+ | calcValue (m : Measurement) : TypesDenote (measurementTypes m) -> Calculation
+ | calcMeasure : Measurement -> Calculation 
+ | calcAdd : Calculation -> Calculation.
+
+Definition add : Calcul
+
+Inductive EvalCalculation : Calculation -> Prop :=
+ | evalcMeasure (m : Measurement) : EvalCalculation (calcMeasure m) ->
+     EvalCalculation (calcValue m (measure m)). 
+ | evalcAdd (c1 c2 : Calculation, : Calculation -> EvalCalculation  Calculation. 
 Inductive Var :=
  | var : forall t : Types,  TypedVar t -> Var. 
 
 Inductive Program :=
  | Calc : Var ->  Calculation -> Program
  | Measure (m : Measurement) :
-     TypedVar (measurementTypes m) -> 
+     TypedVar (measurementTypes m) -> Program
  | Delay : nat -> Program
  | Chain : Program -> Program -> Program.
+ 
+Inductive evalProgram :=
+ | eCalc
  
