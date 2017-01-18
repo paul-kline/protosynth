@@ -1,5 +1,6 @@
 Add LoadPath "/nfs/users/paulkline/Documents/coqs/protosynth/cpdt/src".
- 
+Add LoadPath "~/Documents/coqs/protosynth/cpdt/src".
+
  
 (* 
   direct/abstract desires called properites 
@@ -36,7 +37,7 @@ Inductive Property : Type :=
 assumptions depending on the environment. As the environment gets stronger, we 
 can turn assumptions into measurments. *)
 
-Inductive InterpolationMethod :=
+Inductive InterpolationMethod :Set :=
  | Linear
  | Quadratic.
 
@@ -53,31 +54,6 @@ Inductive Measurement : Type :=
 
 Check Prop -> Prop -> Prop.
 
-Class Environment A :={
-  measurable : A -> Measurement -> bool; 
-  denote (a : A) (m : Measurement) : Set;
-  measure (a : A) (m: Measurement) : (denote a m) }.
-
- 
-Inductive BasicEnvironment :=
- basicEnvironment.
-
-Definition basicMeasurable (m : Measurement) : bool:=
-match m with
- | MotorSpeed => true
- | BatteryVoltage_ => true
- | Temperature_ => true
- | MotorOn => true
- | _ => false
-end.
-Definition basicDenote
-Instance basic : Environment BasicEnvironment :={
-  measuable
-}.
-
-Inductive Environment :=
- | environment.
-  
 
 Module MeasurementProgramModule.
 
@@ -89,8 +65,36 @@ match m with
  | Temperature_ => nat
  | TubeDiameter => nat
  | MotorOn => bool
+ | MotorInterpolation => InterpolationMethod
 end.
- 
+
+Class Environment A :={
+  measurable : A -> Measurement -> bool; 
+  measure (a : A) (m: Measurement) : (measurable a m) = true ->  (measurementDenote m) }.
+
+
+Inductive BasicEnvironment :=
+ basicEnvironment.
+Definition basicMeasurable (m : Measurement) : bool :=
+match m with
+ | MotorSpeed => true
+ | BatteryVoltage_ => true
+ | Temperature_ => true
+ | MotorOn => true
+ | _ => false
+end.
+Definition basicMeasure {m} (p : (basicMeasurable m) = true ) : 
+(measurementDenote m).  destruct m. 
+exact 1. inversion p.  exact 1. inversion p.  exact 1. inversion p.  exact true. 
+Defined.
+
+Instance basicEnvironmentinstance : Environment BasicEnvironment :=
+{ measurable := fun _ => basicMeasurable;
+  measure := fun _ _ p => basicMeasure p
+}.
+
+Check measure. 
+
 Inductive Const : Set := 
  | const_dep (m : Measurement) : (measurementDenote m) -> Const
  | const_nat : nat -> Const
@@ -119,17 +123,14 @@ Inductive MeasurmentProgram : Set :=
  | mp_Chain : MeasurmentProgram -> MeasurmentProgram -> MeasurmentProgram. 
 Notation "x '>>' y" := (mp_Chain x y)  (at level 60, right associativity).
 
+Inductive MUnits : Set :=
+ | metersCubedPerSecond. 
+ 
 
 (* dummy state *)
 Inductive State := 
  state : nat -> State.
- 
- (* dummy environment *)
-
- 
-(* dummy measurement taking *) 
-Definition measure (m : Measurement) (env : Environment) : (measurementDenote m).
-Admitted.
+ Check nat -> Prop. 
 
 (* right now, programs are simply the measurment of the requested value.
   
@@ -143,18 +144,18 @@ match m with
  | Temperature_ => mp_measure returnVar Temperature_
  | TubeDiameter => mp_measure returnVar TubeDiameter 
  | MotorOn => mp_measure returnVar MotorOn
+ | MotorInterpolation => mp_measure returnVar MotorInterpolation
 end.
-
 
 (* 
 Thinking of a MeasurmentProgram as a function that returns the value of the
 requested measurement, evaluation returns a value (Const).
 
 Currently only 1 evaluation rule. That is that evaluation of a measurment
-   statement returns the meased value. 
+   statement returns the measured value. 
    
 We may also wish to include the Units of measurments and ensure measuring/
-conversion of properties is correct. 
+conversion of properties is correct. Yes, but this is a rabbithole of difficulty. Perhaps a 'lite' version. 
 *)
 
 Inductive eval : MeasurmentProgram -> State -> Environment -> Const -> Prop:=
