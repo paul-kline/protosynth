@@ -193,6 +193,9 @@ Inductive evalProgram : (Program * State) -> State -> Prop:=
      evalProgram (p1,s1) s1' ->
      evalProgram (p2, s1') s2' -> 
      evalProgram (Chain p1 p2, s1) s2'. 
+     
+Notation "x '>>' y" := (Chain x y)  (at level 60, right associativity).
+Definition measureMotorSpeed : Program. 
 
 
  . 
