@@ -247,7 +247,9 @@ Instance basicEnvironmentinstance : Environment BasicEnvironment :=
 
 Check measure. 
 
-
+(*
+https://coq.inria.fr/library/Coq.Lists.List.html
+*)
 Module ListNotations.
 Notation "[ ]" := nil (format "[ ]") : list_scope.
 Notation "[ x ]" := (cons x nil) : list_scope.
@@ -267,26 +269,40 @@ match p with
  | Temperature => [Temperature_]
 end.
 
-Fixpoint tmap (ls : list Measurement) :=
+Fixpoint map {A} {B} (ls : list A) (f : A -> B) : list B :=
 match ls with
- | nil => _
- | cons x x0 => _
-end
+ | nil => nil
+ | cons x xs => cons (f x) (map xs f)
+end.
+Fixpoint filter {A} (ls : list A) (f : A -> bool) : list A :=
+match ls with
+ | nil => nil
+ | cons x xs => if (f x) then cons x (filter xs f) else filter xs f
+end.
 
-Fixpoint getProgramType {A} (p : Property) (e : Environment A) :=
-match p with
- | FlowRate =>
- (*What are the measurements involved in flow rate?
- tubeDiameter, motorspeed, mm per revolution,  *)
-  nat -> nat -> Program
- | FlowRateConsistency => nat -> Program
- | BatteryVoltage => nat -> Program
- | BatteryChargeLevel => nat -> Program
- | BatteryHealth => nat -> Program
- | Temperature => nat -> Program
+Definition compose {A} {B} {C} (fbc : B -> C) (fab : A ->B) : (A -> C) :=
+ fun x : A => fbc (fab x). 
+ Check compose. 
+Check nat. 
+Fixpoint tmap (ls : list Measurement) : Set  :=
+match ls with
+ | nil => Program
+ | cons x xs => (TypesDenote (measurementTypes x)) -> (tmap xs) 
+end. 
+Definition notb (b : bool) : bool :=
+match b with
+ | true => false
+ | false => true
 end. 
 
- 
+Eval compute in (tmap (getNeededMeasurements FlowRate)). 
+
+Eval compute in ((compose notb (env_measurable BasicEnvironment ))). 
+Definition getProgramType {A} (p : Property) (e : Environment A) : Set. refine
+( 
+tmap (filter (getNeededMeasurements p) (compose notb (env_measurable _)))
+).   
+
 
 
 Definition getProgram {A} (p : Property) (e : Environment A) : (getProgramType p e). :=
