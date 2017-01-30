@@ -5,6 +5,7 @@ Inductive Types :=
  | degreesC
  | function
  | millimeters
+ | mmPerRevolutionT
  | boolstate
  .
  
@@ -16,6 +17,7 @@ Inductive Measurement : Type :=
  | BriefDischargeTest
  | Temperature_
  | TubeDiameter
+ | mmPerRevolution
  | MotorOn.
 
 Inductive InterpolationMethod :Set :=
@@ -29,6 +31,7 @@ match m with
  | BriefDischargeTest => volts
  | Temperature_ => degreesC
  | TubeDiameter => millimeters
+ | mmPerRevolution => mmPerRevolutionT
  | MotorOn => boolstate
  | MotorInterpolation => function
 end.
@@ -41,6 +44,7 @@ match t with
  | degreesC => nat
  | function => nat -> nat
  | millimeters => nat
+ | mmPerRevolutionT => nat
  | boolstate => bool
 end. 
 Eval compute in (TypesDenote function).
@@ -163,18 +167,23 @@ Inductive Program :=
 
 
 Definition VarState := list (VarID*Result).
- 
+
+Definition VarF := VarID -> option Result. 
+Definition emptyVars : VarF := fun _ => None.
+  
+ (*
 Fixpoint lookup (vid : VarID) (vs : VarState) : option Result :=
  match vs with 
   | nil => None
   | cons (vid',r) vs' => if  eq_dec_VarId vid vid' then Some r else 
       lookup vid vs'
  end. 
-
+*)
 
 Inductive State :=
- | state : Time -> VarState -> State.
-Definition getVS (s : State) : VarState :=
+ | state : Time -> VarF -> State.
+ 
+Definition getVF (s : State) : VarF :=
 match s with
  | state t vs => vs
 end. 
@@ -183,19 +192,115 @@ Definition gettime (s : State) : Time :=
 match s with
  | state t vs => t
 end.
+Definition varSet (id : VarID) (r : Result) (vf : VarF) : VarF :=
+ fun qID : VarID => if eq_dec_VarId qID id then Some r else (vf qID).  
 
 Inductive evalProgram : (Program * State) -> State -> Prop:=
  | eCalc : forall c r id s, 
              EvalCalculation c r -> evalProgram ((Calc (typeOf r) id c),s)
-                                      (state (gettime s) (cons (id,r) (getVS s))) 
- | eDelay : forall n s, evalProgram ((Delay n),s) (state ((gettime s) + n) (getVS s))
+              (state (gettime s) (varSet id r (getVF s))) 
+ | eDelay : forall n s, evalProgram ((Delay n),s) (state ((gettime s) + n) (getVF s))
  | eChain : forall p1 p2 s1 s1' s2', 
      evalProgram (p1,s1) s1' ->
      evalProgram (p2, s1') s2' -> 
      evalProgram (Chain p1 p2, s1) s2'. 
      
 Notation "x '>>' y" := (Chain x y)  (at level 60, right associativity).
-Definition measureMotorSpeed : Program. 
+Definition delayedMeasure (vid : VarID) (m : Measurement) (d : Time) : Program := 
+  Delay d >>
+  Calc (measurementTypes m) vid (calcMeasure m).
+  
+Inductive Property : Type :=
+  | FlowRate : Property
+  | FlowRateConsistency : Property
+  | BatteryVoltage : Property
+  | BatteryChargeLevel : Property
+  | BatteryHealth : Property
+  | Temperature : Property.
+
+
+Class Environment A :={
+  env_measurable : A -> Measurement -> bool; 
+  env_measure (a : A) (m: Measurement) : (env_measurable a m) = true ->  (TypesDenote(measurementTypes m)) }.
+
+
+Inductive BasicEnvironment :=
+ basicEnvironment.
+Definition basicMeasurable (m : Measurement) : bool :=
+match m with
+ | MotorSpeed => true
+ | BatteryVoltage_ => true
+ | Temperature_ => true
+ | MotorOn => true
+ | _ => false
+end.
+Definition basicMeasure {m} (p : (basicMeasurable m) = true ) : 
+(TypesDenote (measurementTypes m)).  destruct m. 
+exact 1. inversion p.  exact 1. inversion p.  exact 1. inversion p.
+inversion p.   exact true. 
+Defined.
+
+Instance basicEnvironmentinstance : Environment BasicEnvironment :=
+{ env_measurable := fun _ => basicMeasurable;
+  env_measure := fun _ _ p => basicMeasure p
+}.
+
+Check measure. 
+
+
+Module ListNotations.
+Notation "[ ]" := nil (format "[ ]") : list_scope.
+Notation "[ x ]" := (cons x nil) : list_scope.
+Notation "[ x ; y ; .. ; z ]" := (cons x (cons y .. (cons z nil) ..)) : list_scope.
+Notation "[ x ; .. ; y ]" := (cons x .. (cons y nil) ..) (compat "8.4") : list_scope.
+End ListNotations.
+
+Import ListNotations.
+   
+Definition getNeededMeasurements (p : Property) : list Measurement:=
+match p with
+ | FlowRate => [ TubeDiameter ; MotorSpeed ; mmPerRevolution ]
+ | FlowRateConsistency => [ TubeDiameter ; MotorSpeed ; mmPerRevolution ]
+ | BatteryVoltage => [ BatteryVoltage_ ]
+ | BatteryChargeLevel => [ BatteryVoltage_ ]
+ | BatteryHealth => [ BatteryVoltage_ ]
+ | Temperature => [Temperature_]
+end.
+
+Fixpoint tmap (ls : list Measurement) :=
+match ls with
+ | nil => _
+ | cons x x0 => _
+end
+
+Fixpoint getProgramType {A} (p : Property) (e : Environment A) :=
+match p with
+ | FlowRate =>
+ (*What are the measurements involved in flow rate?
+ tubeDiameter, motorspeed, mm per revolution,  *)
+  nat -> nat -> Program
+ | FlowRateConsistency => nat -> Program
+ | BatteryVoltage => nat -> Program
+ | BatteryChargeLevel => nat -> Program
+ | BatteryHealth => nat -> Program
+ | Temperature => nat -> Program
+end. 
+
+ 
+
+
+Definition getProgram {A} (p : Property) (e : Environment A) : (getProgramType p e). :=
+match p with
+ | FlowRate => _
+ | FlowRateConsistency => _
+ | BatteryVoltage => _
+ | BatteryChargeLevel => _
+ | BatteryHealth => _
+ | Temperature => _
+end
+ 
+ 
+  
 
 
  . 
