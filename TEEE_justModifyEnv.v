@@ -19,7 +19,9 @@ Inductive Measurement : Type :=
  | TubeDiameter
  | mmPerRevolution
  | MotorOn.
-
+Theorem measurement_dec : (forall x y:Measurement, {x = y} + {x <> y}). 
+Proof. decide equality.  Defined. 
+ 
 Inductive InterpolationMethod :Set :=
  | Linear
  | Quadratic.
@@ -64,7 +66,6 @@ Inductive Result (t : Types)  : Set:=
 
 Inductive Result : Set :=
  | result {t} : (TypesDenote t) -> Result. 
-
 
   (*
 Definition resType ( r : Result) : Types :=
@@ -146,6 +147,7 @@ Inductive EvalCalculation : Calculation -> Result -> Prop :=
 
 Inductive VarID :=
  | vnat : nat -> VarID
+ | vMeas : Measurement -> VarID
  | vReturn. 
 Require Import Coq.Classes.EquivDec.
 Theorem eq_dec_VarId : forall x y : VarID, {x = y} + {x <> y}.
@@ -161,6 +163,7 @@ Inductive Var :=
 
 Inductive Program :=
  | Calc : Types -> VarID ->  Calculation -> Program 
+ | Store : VarID -> Result -> Program
  | Delay : nat -> Program
  | Chain : Program -> Program -> Program
  | End.
@@ -206,9 +209,12 @@ Inductive evalProgram : (Program * State) -> State -> Prop:=
      evalProgram (Chain p1 p2, s1) s2'. 
      
 Notation "x '>>' y" := (Chain x y)  (at level 60, right associativity).
-Definition delayedMeasure (vid : VarID) (m : Measurement) (d : Time) : Program := 
-  Delay d >>
-  Calc (measurementTypes m) vid (calcMeasure m).
+
+Definition gen_measure (vid :VarID) (m : Measurement) : Program :=
+Calc (measurementTypes m) vid (calcMeasure m).
+ 
+Definition gen_delayedMeasure (vid : VarID) (m : Measurement) (d : Time) : Program := 
+  Delay d >> gen_measure vid m. 
   
 Inductive Property : Type :=
   | FlowRate : Property
@@ -218,34 +224,6 @@ Inductive Property : Type :=
   | BatteryHealth : Property
   | Temperature : Property.
 
-
-Class Environment A :={
-  env_measurable : A -> Measurement -> bool; 
-  env_measure (a : A) (m: Measurement) : (env_measurable a m) = true ->  (TypesDenote(measurementTypes m)) }.
-
-
-Inductive BasicEnvironment :=
- basicEnvironment.
-Definition basicMeasurable (m : Measurement) : bool :=
-match m with
- | MotorSpeed => true
- | BatteryVoltage_ => true
- | Temperature_ => true
- | MotorOn => true
- | _ => false
-end.
-Definition basicMeasure {m} (p : (basicMeasurable m) = true ) : 
-(TypesDenote (measurementTypes m)).  destruct m. 
-exact 1. inversion p.  exact 1. inversion p.  exact 1. inversion p.
-inversion p.   exact true. 
-Defined.
-
-Instance basicEnvironmentinstance : Environment BasicEnvironment :=
-{ env_measurable := fun _ => basicMeasurable;
-  env_measure := fun _ _ p => basicMeasure p
-}.
-
-Check measure. 
 
 (*
 https://coq.inria.fr/library/Coq.Lists.List.html
@@ -282,12 +260,13 @@ end.
 
 Definition compose {A} {B} {C} (fbc : B -> C) (fab : A ->B) : (A -> C) :=
  fun x : A => fbc (fab x). 
- Check compose. 
-Check nat. 
-Fixpoint tmap (ls : list Measurement) : Set  :=
+ Check compose.
+Check nat.
+ 
+Fixpoint tmap (A: Set) (ls : list Measurement) : Set  :=
 match ls with
- | nil => Program
- | cons x xs => (TypesDenote (measurementTypes x)) -> (tmap xs) 
+ | nil => A
+ | cons x xs => (TypesDenote (measurementTypes x)) -> (tmap A xs) 
 end. 
 Definition notb (b : bool) : bool :=
 match b with
@@ -295,17 +274,126 @@ match b with
  | false => true
 end. 
 
-Eval compute in (tmap (getNeededMeasurements FlowRate)). 
+Eval compute in (tmap Program (getNeededMeasurements FlowRate)). 
 
-Eval compute in ((compose notb (env_measurable BasicEnvironment ))). 
-Definition getProgramType {A} {a : A} (p : Property) (e : Environment A)  : Set :=
+
+Inductive MVPair :=
+ | mvp (m : Measurement): (TypesDenote (measurementTypes m) ) -> MVPair.
+Definition mvpair_getM (mp : MVPair) : Measurement :=
+match mp with
+ | mvp m x => m
+end. 
+
+ 
+ Check MVPair. 
+ Import ListNotations.
+ Import List.  
+
+Definition xor (A : Prop) (B: Prop) := (A \/ B) /\ ~(A /\ B).
+Check xor.  
+Class Environment  :={
+  env_assumptions :  list MVPair;  
+  env_measurables : list Measurement; 
+  env_measure : forall m, In m env_measurables ->  (TypesDenote(measurementTypes m)); 
+  exclusivity : forall m : Measurement, 
+    xor (In m (map mvpair_getM env_assumptions)) (In m env_measurables)}. 
+
+
+Definition basicMeasurable (m : Measurement) : bool :=
+match m with
+ | MotorSpeed => true
+ | BatteryVoltage_ => true
+ | Temperature_ => true
+ | MotorOn => true
+ | _ => false
+end.
+Definition linear := fun m : nat => m. 
+
+Definition basicAssumptions := [mvp MotorInterpolation linear;
+                                mvp BriefDischargeTest 1;
+                                mvp TubeDiameter 3;
+                                mvp mmPerRevolution 2].
+Definition basicMeasurables := [MotorSpeed; 
+                                BatteryVoltage_;
+                                Temperature_;
+                                MotorOn]. 
+
+Require Import Omega. 
+Theorem basicP :  forall m : Measurement, 
+
+    xor (In m (map mvpair_getM basicAssumptions)) (In m basicMeasurables).
+Proof. intros. unfold xor. simpl. destruct m; split; auto.
+unfold not.  intros.  destruct H. inversion H.  inversion H1. 
+inversion H1.  inversion H2.  inversion H2.  inversion H3.  inversion H3. 
+inversion H4. assumption.
+Admitted .
+Definition basicMeasure {m} (_ : (In m basicMeasurables)) : (TypesDenote(measurementTypes m)). destruct m; simpl in H; simpl. simpl in H.
+exact 1. 
+exfalso. inversion H. inversion H0.
+inversion H0.  inversion H1. inversion H1.  inversion H2.
+inversion H2.  inversion H3.  assumption.
+exact 2.  
+exfalso. inversion H. inversion H0.
+inversion H0.  inversion H1. inversion H1.  inversion H2.
+inversion H2.  inversion H3.  assumption.
+exact 3. 
+exfalso. inversion H. inversion H0.
+inversion H0.  inversion H1. inversion H1.  inversion H2.
+inversion H2.  inversion H3.  assumption. 
+exfalso. inversion H. inversion H0.
+inversion H0.  inversion H1. inversion H1.  inversion H2.
+inversion H2.  inversion H3.  assumption. 
+exact true.
+Defined. 
+
+Instance basicEnvironmentinstance : Environment :=
+{ env_assumptions := basicAssumptions;
+  env_measurables := basicMeasurables;
+  env_measure := @basicMeasure;
+  exclusivity := basicP
+}.
+
+
+Check measure. 
+
+Definition inb := in_dec measurement_dec.
+Check inb. 
+  
+(*
+Definition getProgramType (p : Property) (e : Environment): Set :=
 ( 
-tmap (filter (getNeededMeasurements p) (compose notb (env_measurable a)))
-).    
+tmap Program (filter (getNeededMeasurements p) (compose notb (env_measurable a)))
+).*)
+
+Definition gen_measureE (m : Measurement) (e : Environment) : Program.
+refine (match e with
+ | Build_Environment 
+   env_assumptions 
+   env_measurables 
+   env_measure 
+   exclusivity => if inb m env_measurables then
+     gen_measure (vMeas m) m
+      else Store (vMeas m) (result (measurementTypes m)
+   
+end)
+. gen_measure
+destruct e. 
+  :=
 
 
+Definition gen_flowRateProgram (e : Environment) : Program :=
 
-Definition getProgram {A} (p : Property) (e : Environment A) : (getProgramType p e) :=
+
+match p with
+ | FlowRate => _
+ | FlowRateConsistency => _
+ | BatteryVoltage => _
+ | BatteryChargeLevel => _
+ | BatteryHealth => _
+ | Temperature => _
+end
+
+Definition getProgram (p : Property) (e : Environment) : Program :=
 match p with
  | FlowRate => _
  | FlowRateConsistency => _
