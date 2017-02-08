@@ -53,8 +53,7 @@ Eval compute in (TypesDenote function).
 
  
 Definition measure (m : Measurement) : (TypesDenote (measurementTypes m)).
-Admitted.   
-
+Admitted. 
 
 Definition Time := nat. 
 (* The calculation language *)
@@ -365,23 +364,98 @@ Definition getProgramType (p : Property) (e : Environment): Set :=
 tmap Program (filter (getNeededMeasurements p) (compose notb (env_measurable a)))
 ).*)
 
-Definition gen_measureE (m : Measurement) (e : Environment) : Program.
-refine (match e with
- | Build_Environment 
-   env_assumptions 
-   env_measurables 
-   env_measure 
-   exclusivity => if inb m env_measurables then
+Definition get_env_measurables (e : Environment) :=
+match e with
+ | Build_Environment env_assumptions env_measurables env_measure exclusivity => env_measurables
+end. 
+Definition get_env_assumptions (e : Environment) :=
+match e with
+ | Build_Environment env_assumptions env_measurables env_measure exclusivity => env_assumptions
+end. 
+
+Theorem not_measuable_imp_assumption : forall m e, ~(In m (get_env_measurables e)) -> In m (map mvpair_getM (get_env_assumptions e)).
+Proof.  intro.  intro. destruct e.   unfold not.  intro. simpl.
+simpl in H.  
+specialize exclusivity0 with m.
+unfold xor in exclusivity0. destruct exclusivity0.
+unfold not in H1.  destruct H0.  assumption. 
+exfalso.  apply H.  assumption.  Qed.
+
+Theorem eq_dec_Measurement : forall x y : Measurement, {x =y} + {x <> y}.
+Proof. decide equality. Defined. 
+ (*If this is Qed and not Defined, nothing simplifies!! *)
+Fixpoint assLookup (m : Measurement) (ls : list MVPair) : option (TypesDenote (measurementTypes m)). refine (
+match ls with
+ | nil => None
+ | cons x ls' => match x with
+        | mvp m' v => if eq_dec_Measurement m m' then Some _ else assLookup m ls'
+end 
+end). 
+Proof. subst.  exact v. 
+Defined. 
+
+Require Import Coq.Program.Equality. 
+
+Theorem assLookupThm : forall e m, In m (map mvpair_getM (get_env_assumptions e)) -> 
+exists v, assLookup m (get_env_assumptions e) = Some v.
+Proof.  intros.  destruct e. simpl.  simpl in H.
+  specialize exclusivity0 with m. unfold xor in exclusivity0.
+  destruct exclusivity0. induction env_assumptions0.
+  simpl.  inversion H.
+  simpl. destruct a. 
+  destruct (eq_dec_Measurement m m0).  subst. 
+  simpl.
+  exists t. 
+  
+   simpl_eq.  reflexivity.
+  apply IHenv_assumptions0.
+  destruct H0.  simpl in H0.
+  destruct H0.  exfalso.  apply n.  auto.
+  left.  assumption. 
+  right.  assumption.
+  unfold not.  intros. destruct H2. 
+  apply H1.  split. 
+  simpl.  right. assumption.  assumption.
+  simpl in H.  destruct H.  exfalso. apply n. auto. 
+  assumption. 
+ Defined.
+
+Definition assumptionLookup (m : Measurement) (e : Environment)  (p : ~(In m (get_env_measurables e))) :
+TypesDenote (measurementTypes m). 
+Proof. apply not_measuable_imp_assumption in p.
+apply assLookupThm in p. 
+simpl in p. 
+destruct (assLookup m (get_env_assumptions e)) .
+exact t.   exfalso.
+inversion p. 
+inversion H. 
+Defined. 
+
+Definition gen_measureE (e : Environment) (m : Measurement)  : Program.
+refine ( if inb m (get_env_measurables e) then
      gen_measure (vMeas m) m
-      else Store (vMeas m) (result (measurementTypes m)
-   
-end)
-. gen_measure
-destruct e. 
-  :=
+      else Store (vMeas m) (@result (measurementTypes m) (assumptionLookup m e _))
+)
+. assumption. 
+Defined.
 
 
+
+Fixpoint concat_Program (ls : list Program) : Program :=
+match ls with
+ | nil => End
+ | cons End ls' => concat_Program ls'
+ | cons x ls' =>  x >> (concat_Program ls')
+end. 
+
+Definition gen_measureAll (e : Environment) (p : Property) :=
+concat_Program (map (gen_measureE e) (getNeededMeasurements p)). 
+
+ 
 Definition gen_flowRateProgram (e : Environment) : Program :=
+ gen_measureAll e FlowRate.
+ 
+Eval compute in (gen_flowRateProgram basicEnvironmentinstance). 
 
 
 match p with
