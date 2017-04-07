@@ -12,6 +12,7 @@
 *)
 
 (* The first step is to define what it is for which we would like to ask. Hence "nouns". *)
+Add LoadPath "/home/paul/Documents/coqs/protosynth/cpdt/src" as Cpdt.
 Require Export MyShortHand.
 
 (*Require Import String.*) 
@@ -24,11 +25,14 @@ Add LoadPath "C:\Users\Paul\Documents\coqs\dependent-crypto".
 Add LoadPath "C:\Users\Paul\Documents\coqs\cpdt\src". *)
 Add LoadPath "C:\Users\Paul\Documents\coqStuff\protosynth".
 Add LoadPath "/nfs/users/paulkline/Documents/coqs/protosynth/cpdt/src" .
-Require Export ProtoSynthDataTypes. 
-Require Export ProtoSynthDataTypeEqualities.
+Require Export ProtoSynthDataTypes.
+ 
+(* Require Export ProtoSynthDataTypeEqualities.
+ *)
 Require Export ProtoSynthProtocolDataTypes. 
 Require Export Coq.Lists.List.
-Require Export CpdtTactics.
+Add LoadPath "/home/paul/Documents/coqs/protosynth/cpdt/src" as Cpdt. 
+Require Export Cpdt.CpdtTactics.
 (*
 Require Import Coq.Program.Equality.
 Require Import Eqdep_dec.
@@ -799,7 +803,7 @@ end.
 
 Lemma endEval : forall st st' stm' n n', 
 (EndStatement, st, n) ⇒* (stm', st', n') -> False.
-Proof. intros. dependent induction H. inversion H. assumption.
+Proof. intros. dependent induction H. inversion H. eauto.
 Qed.
 
 
@@ -1201,8 +1205,10 @@ inv H1. dest st. dest p.      refl.
 Qed.
 Theorem noOneTouchesAction_m : forall stm stm' n n' st st', 
 (stm,st,n) ⇒* (stm',st',n') -> getAction st = getAction st'.
-Proof. intros. dependent induction H. eapply noOneTouchesAction. apply H.
-rewrite IHMultiStep_stmEval1. assumption. 
+Proof. intros. 
+ dependent induction H. eapply noOneTouchesAction. apply H.
+erewrite IHMultiStep_stmEval1. eapply IHMultiStep_stmEval2.  auto. auto.
+auto. auto.  
 Qed.
 
 Theorem sending : forall stm' m n n' st st', 

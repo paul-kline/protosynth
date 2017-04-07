@@ -9,9 +9,8 @@
 
 (* begin hide *)
 Require Import Arith List Omega.
-
+Add LoadPath "/home/paul/Documents/coqs/protosynth/cpdt/src" as Cpdt.
 Require Import Cpdt.CpdtTactics Cpdt.Coinductive.
-
 Set Implicit Arguments.
 Set Asymmetric Patterns.
 (* end hide *)
@@ -822,8 +821,10 @@ Lemma cassociativity1 : forall A B C (f : A -> comp B) (g : B -> comp C) r c,
   match goal with
     | [ H : Bnd _ _ = Bnd _ _ |- _ ] => injection H; clear H; intros; try subst
   end.
-  move H3 after A.
-  generalize dependent B0.
+  try (move H3 after A).
+  try (move H2 after A).
+  
+  generalize dependent B.
   do 2 intro.
   subst.
   crush.
@@ -839,8 +840,8 @@ Lemma cassociativity2 : forall A B C (f : A -> comp B) (g : B -> comp C) r c,
   match goal with
     | [ H : Bnd _ _ = Bnd _ _ |- _ ] => injection H; clear H; intros; try subst
   end.
-  move H3 after B.
-  generalize dependent B0.
+  move H2 after B.
+  generalize dependent B.
   do 2 intro.
   subst.
   crush.

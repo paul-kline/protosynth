@@ -1,4 +1,5 @@
 Add LoadPath "/users/paulkline/Documents/coqs/protosynth". 
+Add LoadPath "/home/paul/Documents/coqs/protosynth/cpdt/src" as Cpdt. 
 Require Import MyShortHand. 
 Require Export ProtoSynthDataTypes.
 Require Import ProtoSynthProtocolDataTypes.
@@ -34,8 +35,8 @@ Hint Resolve eq_dec_DescriptionR1 : eq_dec_db.
 Theorem eq_dec_Description : 
 forall d1 d2 : Description,
 {d1 = d2} + {d1 <> d2}. 
-Proof. intros. destruct d1, d2.   
-specialize eq_dec_attribute with a a0. intros. destruct H.
+Proof. intros. destruct d1, d2.    
+specialize eq_dec_attribute with a a0.  intros.  destruct H.
  specialize eq_dec_noun with n n0. intros.
 destruct H. left. subst. specialize eq_dec_DescriptionR1 with n0 a0 d0 d.
 intros. subst. reflexivity.
