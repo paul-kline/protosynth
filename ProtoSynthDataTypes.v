@@ -55,7 +55,9 @@ Inductive Requirement (d : Description) :=
 | requirement : ( (measurementDenote d) -> bool) -> Requirement d.
 Require Import FunctionalExtensionality. 
 Theorem eq_dec_f {A} {B} : forall (a b : (A -> B)), a =<> b.
-Proof. intros. Admitted.
+Proof. intros.
+specialize functional_extensionality with a b. intros.
+ Admitted.
 Hint Resolve eq_dec_f : eq_dec_db. 
 Theorem eq_dec_Requirement : forall d (x y : Requirement d), x =<> y.
 Proof. intros. 

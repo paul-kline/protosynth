@@ -94,14 +94,14 @@ Definition myrequirement1 := fun (x : nat) => (x > 7).
     if the requirement posed upon the value v has failed to be met.
     *)
 Fixpoint reduceUnresolved (d : Description) (v : measurementDenote d)
-(ls : RequestLS) : option RequestLS. refine match ls with
+(unresolved : RequestLS) : option RequestLS. refine match unresolved with
  | emptyRequestLS => Some emptyRequestLS
  | ConsRequestLS r x0 => match r with
       | requestItem dr reqment => if eq_dec_Description dr d then
           match reqment with
             | requirement _ f => match f _ with
-               | true => Some x0
-               | false => None (* give up *)
+               | true => Some x0 (*Do I need recursive call here? Is it possible to be in here twice? *)
+               | false => None (*Requirement not met. give up on everything *)
               end
           end
         else
@@ -113,14 +113,12 @@ Fixpoint reduceUnresolved (d : Description) (v : measurementDenote d)
  end. rewrite <- e in v. exact v. Defined. 
  
 
-
 Definition freeRequirement (d : Description): Requirement d:= 
  requirement d (fun _ => true).
 Definition neverRequirement (d : Description): Requirement d:= 
  requirement d (fun _ => false).
 Check neverRequirement.
- 
- 
+
  (* note that the rule is removed from the privacy policy. This is to prevent measurement deadlock
  situations. Everything not expressly in the privacy policy is rejected. Therefore, you can't ask
  for the same thing twice. *)
@@ -139,25 +137,27 @@ Check neverRequirement.
 
 (* Now that we know some measurement value, can we ease any requirements stated in the privacy policy? 
 Stay tuned to find out! *)
-Fixpoint reducePrivacy (d : Description) (v : (measurementDenote d)) (priv : PrivacyPolicy) : PrivacyPolicy.
-refine (
+Fixpoint reduceRule {theird myd: Description} (v : (measurementDenote theird)) (myRule : Rule myd) : (Rule myd). refine (
+match myRule with
+       | @rule _ your reqrment => if (eq_dec_Description theird your) then
+          (match reqrment with
+            | requirement _ f => if (f _) then (free myd)
+                               else  (never myd)
+          end)
+          else (* leave it alone! this isn't it.*) myRule
+       | multiReqAnd _ rule1 rule2 => multiReqAnd myd (_) (_)
+       | multiReqOr _ rule1 rule2 =>  multiReqOr myd (_) (_)
+       | _ => myRule
+       
+end). subst. exact v. exact (reduceRule theird myd v rule1). exact (reduceRule theird myd v rule2).
+ exact (reduceRule theird myd v rule1). exact (reduceRule theird myd v rule2).
+Defined.
+
+Fixpoint reducePrivacy (d : Description) (v : (measurementDenote d)) (priv : PrivacyPolicy) : PrivacyPolicy :=
 match priv with
  | EmptyPolicy => EmptyPolicy
- | @ConsPolicy dp rule_d pp' =>
-      match rule_d with
-       | @rule _ your reqrment => if (eq_dec_Description d your) then
-          (match reqrment with
-            | requirement _ f => if (f _) then ConsPolicy (free dp) (reducePrivacy d v pp')
-                               else ConsPolicy (never dp) (reducePrivacy d v pp')
-          end)
-          else (ConsPolicy (rule your reqrment) (reducePrivacy d v pp'))
-       | _ => @ConsPolicy dp rule_d (reducePrivacy d v pp')
-      end
-    
- end). subst. exact v. Defined.
-
-
-       
+ | @ConsPolicy dp rule_d pp' => @ConsPolicy dp (reduceRule v rule_d) (reducePrivacy d v pp')
+ end.
 
 Fixpoint varSubst' (t : Term) (ls : VarState) : option Const :=
 match t with

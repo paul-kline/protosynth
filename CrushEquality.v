@@ -74,7 +74,8 @@ Ltac not_eq := let nm1 := fresh "nEq" in (let nm2 := fresh "nEq" in  ((try right
      
 
 Tactic Notation "intro_equals" := intros; autounfold with unfoldEq; intros.
- Ltac eq_dec' name x y := assert (x =<> y) as name; auto with eq_dec_db.     
+
+Ltac eq_dec' name x y := assert (x =<> y) as name; auto with eq_dec_db.     
 Ltac dep_destruct_equality' name T := intro_equals;
  match goal with 
  | [ X : T,
@@ -133,10 +134,11 @@ match goal with
  end. 
 
 Tactic Notation "decidable" := solve [(left; subst; auto)| right; no; auto]. 
-Tactic Notation "crush_equal" := 
+Tactic Notation "crush_equal'" := 
 intro_equals; 
 try decide equality;
 solve [depEqualSolver; (decidable + not_eq) |  dep_equal; (decidable + not_eq)].
+
 
 Theorem eq_dec_List : forall A, equality A -> equality (list A). 
 Proof.  crush_equal. 

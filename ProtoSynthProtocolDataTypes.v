@@ -16,6 +16,34 @@ Inductive Const :=
  | constValue (d: Description) : (measurementDenote d) -> Const 
  | constRequest : Description -> Const
  | constStop : Const.
+
+Require Import Cpdt.CpdtTactics.
+Ltac crush_equal2 := intros; match goal with 
+ | [ |- ?x =<> ?y] => generalize dependent y; dependent induction x; intros; dep_destruct y
+ | [ |- equality ?A] => apply eqNotation; crush_equal2
+ end. 
+ 
+Ltac mostBasic x X:= idtac "working on"; idtac x;(match goal with 
+ | [t : ?T |- _] => match X with
+                     | context [t] => mostBasic t T
+                     | _ => fail 1
+                     end
+ | _ =>  
+  (* At this point I have x as not  a dependent type so we think.*)
+  (match goal with
+   | [ a : X, 
+     b : X |- _] => let nm := fresh "eq" in eq_dec' nm a b; destruct nm;
+                     [subst |
+                     idtac "second case"]
+   | [ a : X |- _] => fail 2 "no sub eq dec found needed" ;dep_destruct a
+   end)
+ end). 
+    
+Ltac neededEqDec := match goal with
+ | [ d : ?D |- ?left =<> ?right] => match goal with 
+      | [ |- context[d]] => idtac d; idtac D; mostBasic d D
+      end
+ end.
 Theorem eq_dec_Const : equality Const.
 intro_equals. 
 destruct x,y.
@@ -123,7 +151,7 @@ Defined.
 Hint Resolve eq_dec_VarState : eq_dec_db. 
  
 Inductive ProState :=
- (*  action <who am I?> privacyPol <things I want to ask for!> <Things I've asked for and am waiting for a response> tosend *)
+ (*  action _ <who am I?> privacyPol <things I want to ask for!> <Things I've asked for and am waiting for a response> tosend *)
  | proState : Action -> AllGood -> Participant ->  PrivacyPolicy -> RequestLS -> RequestLS -> list Description
       -> ProState.
 Theorem eq_dec_ProState : equality ProState.
