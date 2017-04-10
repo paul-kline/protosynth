@@ -104,7 +104,7 @@ Fixpoint reduceUnresolved (d : Description) (v : measurementDenote d)
                | false => None (*Requirement not met. give up on everything *)
               end
           end
-        else
+        else (*if eq_dec_Description is false..*)
           match reduceUnresolved d v x0 with 
             | Some some => Some (ConsRequestLS r some)
             | None => None
@@ -145,20 +145,29 @@ match myRule with
                                else  (never myd)
           end)
           else (* leave it alone! this isn't it.*) myRule
-       | multiReqAnd _ rule1 rule2 => multiReqAnd myd (_) (_)
-       | multiReqOr _ rule1 rule2 =>  multiReqOr myd (_) (_)
+      (* | multiReqAnd _ rule1 rule2 => multiReqAnd myd (_) (_)
+       | multiReqOr _ rule1 rule2 =>  multiReqOr myd (_) (_) *)
        | _ => myRule
        
-end). subst. exact v. exact (reduceRule theird myd v rule1). exact (reduceRule theird myd v rule2).
+end). subst. exact v.
+(* for mutli and/or *)
+(*
  exact (reduceRule theird myd v rule1). exact (reduceRule theird myd v rule2).
+ exact (reduceRule theird myd v rule1). exact (reduceRule theird myd v rule2).
+*)
 Defined.
 
+
+(**
+reducePrivacy is now just repeated application of reduceRule to all terms in the policy.*)
 Fixpoint reducePrivacy (d : Description) (v : (measurementDenote d)) (priv : PrivacyPolicy) : PrivacyPolicy :=
 match priv with
  | EmptyPolicy => EmptyPolicy
  | @ConsPolicy dp rule_d pp' => @ConsPolicy dp (reduceRule v rule_d) (reducePrivacy d v pp')
  end.
 
+(**
+We indicate the variable was not in the state by the None option.*)
 Fixpoint varSubst' (t : Term) (ls : VarState) : option Const :=
 match t with
  | variable vid => match ls with
@@ -170,7 +179,10 @@ match t with
                    end
  | const x => Some ( x)
 end.
- 
+
+(** 
+This is a much handier version that deconstructs the state for you.
+*)
 Definition varSubst (t : Term) (st : State ) : option Const :=
 match st with
  | state varst _ => varSubst' t varst
@@ -178,7 +190,8 @@ end.
 
 
 
-(* When we send a message, it gets appended to the end of the list. This makes receiving
+(** 
+When we send a message, it gets appended to the end of the list. This makes receiving
 in the correct order easier. *)
 Fixpoint sendOnNetwork (from : Participant) (to : Participant) (m : Const) (n : Network) : Network :=
  match n with
@@ -186,6 +199,9 @@ Fixpoint sendOnNetwork (from : Participant) (to : Participant) (m : Const) (n : 
  | cons n1 nls => cons n1 (sendOnNetwork from to m nls) 
 end. 
 
+(**
+Who are you expecting a message from? Who am I? and the network.
+This function finds the first message in the list that is from the expected party to me.*)
 Fixpoint receiveOnNetwork (from : Participant) (me : Participant) (n : Network) : option Const :=
  match n with
  | nil => None
@@ -197,13 +213,28 @@ Fixpoint receiveOnNetwork (from : Participant) (me : Participant) (n : Network) 
                       end
                   end
 end.
-  
+
+(**
+This is a handy check to see if the network is empty or not. Syntactic sugar. Tasty*)
 Definition net_isEmpty ( n : Network) : bool :=
  match n with
  | nil => true
  | cons x x0 => false
 end.
 
+(** This function gives us a new state to replace the passed in state. We are also
+given a Const value, which must be the result of a measurment. The state is modified
+in the following ways:
+1. reduceUnresolved is called with the given value. Recall that reduceUnresolved will optinally
+give a reduced list of unresolved RequestItems. If it gives us back none, we know some outstanding requirement
+has not been met. Therefore notice that here we propagate this information by including a No as the AllGood
+signal.  
+2. Whether or not we successfully have reducedUnresolved, we call reducePrivacy as well. Recall that this function
+softens the heart of the privacy policy, loosening up any restrictions tied to that value.
+OR: it hardens its heart. making the requirement 'never' if the value fails the requirement. It is evaluated here 
+
+Calling reducePrivacy when reduceUnresolved gives back 'none' seems supurfluous, and indeed it is but aids in proving.
+*)
 Definition reduceStateWithMeasurement (v : Const) (st : State) : State := 
  match v with
  | constValue d denotedVal => (match st with
@@ -222,6 +253,7 @@ Definition reduceStateWithMeasurement (v : Const) (st : State) : State :=
  | _ => st
  end.  
 
+
 (* Answered the question: "Can I comply with this request? "
  
  We need the Priv Pol back because in has been modified. we remove the 
@@ -239,7 +271,20 @@ Definition reduceStateWithMeasurement (v : Const) (st : State) : State :=
  in the third case from above. ie, "I need to see some credentials." what exactly must be met.
  
 *)
-
+(** 
+Actually...
+This function answers the question of how to respond to a mesurement request.
+We iterate through our privacy policy, if there is no rule for the Description, we indicate
+this by returning 'none'. This is meant to be isomorphic to the response when pattern matching 
+on a 'never' rule for a particular Description, but for some reason, I return a None. I'm not sure why.
+Let's continue.
+If we find a rule for this measurement request (Description), if it has a remaining rule that has not
+been simplified down to 'free' or 'never' (in otherwords, we haven't already received the value as a result
+of some other action), we return a request for the item we wish to know about to release the initially desired
+measurement and the requirement its value must meet along with it. If we find a 'free' rule attached to the 
+desired measurment value, we perform the measuring, and return no restriction (free) because it  feels right to do so. It is not used as all when a value is returned as the first in the pair. The reason why we return this supurfluous value in these cases is it simplifies the case we return with a counter request.
+In the case we encounter a 'never' rule, we return a constStop. 
+*)
 Fixpoint findandMeasureItem (pp : PrivacyPolicy) (d : Description) : option (Const*RequestItem) :=
 match pp with
  | EmptyPolicy => None
@@ -248,11 +293,16 @@ match pp with
        | @rule _ your reqrment => Some (constRequest your, requestItem your reqrment)
        | free _ => Some (constValue d (measure d), requestItem d (freeRequirement d) )
        | never _ => Some ( constStop, requestItem d (neverRequirement d)) (*don't matter *)
-       | multiReqAnd _ rule1 morerules => Some ( constStop, requestItem d (neverRequirement d)) (* TODO *)
+       (*| multiReqAnd _ rule1 morerules => Some ( constStop, requestItem d (neverRequirement d)) (* TODO *)
        | multiReqOr _ rule1 morerules => Some (constStop, requestItem d (neverRequirement d)) (* TODO *)
+      *)
       end
     else findandMeasureItem pp' d 
 end.
+
+(**
+If findandMeasureItem returns a constValue, it is, in fact, the result of the initial request (d=d0). 
+*)
 Theorem findAndMeasureItemL : forall pp d d0 val x, findandMeasureItem pp d = Some (constValue d0 val, x) -> d = d0.
 Proof. intros. induction pp.  inv H.
 destruct r. simpl in H. destruct (eq_dec_Description d1 d). subst. inv H.
@@ -260,26 +310,50 @@ apply IHpp. assumption.
 simpl in H. destruct (eq_dec_Description d1 d). subst. inv H. subst. refl.
 apply IHpp. assumption.
 simpl in H. destruct (eq_dec_Description d1 d). subst. inv H. apply IHpp. assumption.
+(* mutlAnd or case *)
+(*
 simpl in H.  destruct (eq_dec_Description d1 d). subst. inv H. apply IHpp. assumption.
 simpl in H.  destruct (eq_dec_Description d1 d). subst. inv H. apply IHpp. assumption.
+*)
 Qed.
 Hint Resolve findAndMeasureItemL.
  
+(** 
+This function removes all instances of a description from a privacyPolicy.
+Remember, we only want to allow someone to request something once. Therefore, this 
+function will be called on each description we receive as a request. In hindsight,
+PrivacyPolicy should be implemented as a Set.  
+*) 
 Fixpoint rmAllFromPolicy (pp : PrivacyPolicy) (d : Description) : PrivacyPolicy :=
 match pp with
  | EmptyPolicy => EmptyPolicy
  | @ConsPolicy dp r pp' => if (eq_dec_Description dp d) then rmAllFromPolicy pp' d
       else
       @ConsPolicy dp r (rmAllFromPolicy pp' d)
-end. 
+end.
+
+(**
+If findandMeasureItem returns None, we still removeAll occurances in the policy.
+Recall None means the item didn't exist in our privacy policy. We still call rmAllFromPolicy
+because it doesn't hurt anything, and aids in the proving. We of course stop in this case
+and throw on a never requirment because its fitting (though completely unnecessary).
+If we get back a some, we propagate the results. 
+The purpose of this function is to call findandMeasureItem and removeAll from the 
+privacy policy.
+*)  
 Fixpoint handleRequest' (pp : PrivacyPolicy) (d : Description) :=
  (match findandMeasureItem pp d with 
    | None => (rmAllFromPolicy pp d,constStop, requestItem d (neverRequirement d))
    | Some (mvalue,reqItem) => (rmAllFromPolicy pp d, mvalue, reqItem)
-  end). 
+  end).
+Check handleRequest'.  
 Definition snd3 {A B C : Type} (x : (A*B*C) ): B := match x with 
  | (_,b,_) => b
- end. 
+ end.
+ 
+(**
+In all calls to handleRequest', the privacy policy has the requested item removed.
+*) 
 Lemma removedFromPrivacyHelper : forall pp d, exists c ri, 
  handleRequest' pp d = (rmAllFromPolicy pp d,c,ri).
  Proof. intros. induction pp. simpl. eauto.
@@ -288,9 +362,11 @@ Lemma removedFromPrivacyHelper : forall pp d, exists c ri,
  eexists. eexists.     
   eauto.
   eexists. eexists. eauto.
+  (* multiand or cases *) 
+  (*
   eexists. eexists. eauto.
   eexists. eexists. eauto.
-  
+  *)
   destruct (findandMeasureItem pp d). destruct p. eexists. eexists. eauto.
   eexists. eexists. reflexivity.
   Qed.
@@ -333,14 +409,17 @@ Lemma removedFromPrivacyHelper2 : forall pp d pp' c ri,
  subst. inversion H; subst. reflexivity.
  subst. inversion H; subst. reflexivity.
  subst. inversion H; subst. reflexivity.
+ (* multi and or cases *)
+ (*
  subst. inversion H; subst. reflexivity.
- subst. inversion H; subst. reflexivity.
+ subst. inversion H; subst. reflexivity.*)
  destruct findandMeasureItem . destruct p.
  subst. inversion H; subst. reflexivity.
  subst. inversion H; subst. reflexivity.
  Qed.
  Hint Resolve removedFromPrivacyHelper2. 
 
+(** If an item has been removed, findAndMeasureItemL will never succeed.*)
 Theorem youCantFindit : forall pp d, findandMeasureItem (rmAllFromPolicy pp d) d = None.
 Proof. intros. induction pp. auto.
 simpl. destruct (eq_dec_Description d0 d). assumption.
@@ -350,7 +429,7 @@ Qed.
 
 Hint Resolve youCantFindit. 
 
-
+(** After handling a request, subsequest requests of that description will fail.*)
 Theorem removedFromPrivacy : forall pp d pp' c ri,
  handleRequest' pp d = (pp',c,ri) -> 
  findandMeasureItem pp' d = None.
@@ -378,6 +457,17 @@ Fixpoint handleRequest' (pp : PrivacyPolicy) (d : Description) :
      end
  end. 
  *)
+ 
+(**
+ The main purpose of this function is to 
+  1. open up the state
+  2. call handleRequest'
+  3. give us a new state with: 
+         a. the toSendMESSAGE variable set to the result of calling handleRequest'.
+         b. appended the new requirment to our unresolved state.
+         c. the reduced privacy policy
+   
+ *)
 Definition handleRequestST (st: State) (d: Description) := match st with
  | state vars prostate => match prostate with
      | proState a g p pp b unres dls => match(handleRequest' pp d) with 
@@ -387,11 +477,11 @@ Definition handleRequestST (st: State) (d: Description) := match st with
 end
 end. 
 
- (* ls is the list of DESCRIPTIONS requested from me. This function is used when it is
- your turn to send something, and tells whether or not you can send the measurement of the request. You may not be able to because you have nothing left to request. (nil). 
- Your privacy policy allows for you to send the requested measurement.
-  Possible reasons for failure:
- 1.   The request is an unsatifiable object from the privacy policy. 
+ (* ls is the list of DESCRIPTIONS requested from me. 
+   This function checks the head of the list to see if measuring the value
+   will succeed or not. In other words, privacy policy allows it FOR FREE. no 
+   counter request is needed. Otherwise constRequest would be in the middle. NOT
+   constValue. 
  *)
  Definition canSend (ls : list Description) (priv : PrivacyPolicy) : option Description :=
 (match ls with

@@ -80,11 +80,15 @@ Hint Resolve eq_dec_Requirement : eq_dec_db.
 Inductive Rule (mything : Description) :=  
 | rule  {your : Description} : (Requirement your) -> Rule mything
 | free : Rule mything
-| never : Rule mything
-| multiReqAnd : Rule mything ->Rule mything -> Rule mything
+| never : Rule mything.
+(*| multiReqAnd : Rule mything ->Rule mything -> Rule mything
 | multiReqOr : Rule mything -> Rule mything -> Rule mything.
+*)
 Theorem eq_dec_Rule : forall x, equality (Rule x).
-Proof.   intros.   intro_equals. 
+Proof.   
+
+
+intros. intro_equals. 
 destruct x.  
 destruct d;
 generalize dependent x0; 
@@ -92,6 +96,8 @@ induction y;
 intro_equals; 
 destruct x0; try first [decidable |  
 crush_equal].
+(* rest is for and and or case included *)
+(*
 specialize IHy1 with x0_1. 
 specialize IHy2 with x0_2.
 destruct IHy1.  subst. 
@@ -123,6 +129,7 @@ specialize IHy2 with x0_2.
 destruct IHy1.  subst. 
 destruct IHy2.  subst. decidable.
 crush_equal. decidable.
+*)
 Defined.
 Hint Resolve eq_dec_Rule : eq_dec_db. 
 (* simply a list of rules. *)

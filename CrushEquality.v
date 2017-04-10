@@ -134,7 +134,7 @@ match goal with
  end. 
 
 Tactic Notation "decidable" := solve [(left; subst; auto)| right; no; auto]. 
-Tactic Notation "crush_equal'" := 
+Tactic Notation "crush_equal" := 
 intro_equals; 
 try decide equality;
 solve [depEqualSolver; (decidable + not_eq) |  dep_equal; (decidable + not_eq)].
