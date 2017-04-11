@@ -303,7 +303,7 @@ end.
 (**
 If findandMeasureItem returns a constValue, it is, in fact, the result of the initial request (d=d0). 
 *)
-Theorem findAndMeasureItemL : forall pp d d0 val x, findandMeasureItem pp d = Some (constValue d0 val, x) -> d = d0.
+Theorem thm_findAndMeasureItemL : forall pp d d0 val x, findandMeasureItem pp d = Some (constValue d0 val, x) -> d = d0.
 Proof. intros. induction pp.  inv H.
 destruct r. simpl in H. destruct (eq_dec_Description d1 d). subst. inv H.
 apply IHpp. assumption.
@@ -316,7 +316,7 @@ simpl in H.  destruct (eq_dec_Description d1 d). subst. inv H. apply IHpp. assum
 simpl in H.  destruct (eq_dec_Description d1 d). subst. inv H. apply IHpp. assumption.
 *)
 Qed.
-Hint Resolve findAndMeasureItemL.
+Hint Resolve thm_findAndMeasureItemL.
  
 (** 
 This function removes all instances of a description from a privacyPolicy.
@@ -347,6 +347,17 @@ Fixpoint handleRequest' (pp : PrivacyPolicy) (d : Description) :=
    | Some (mvalue,reqItem) => (rmAllFromPolicy pp d, mvalue, reqItem)
   end).
 Check handleRequest'.  
+Lemma thm_handleRequestL : forall pp d pp' d2 v z, handleRequest' pp d = (pp',constValue d2 v,z) -> d = d2.
+Proof. intros. destruct pp.  simpl in H. inversion H. sh. 
+destruct (eq_dec_Description d0 d) eqn:hh. destruct r. 
+inversion H.  inversion H. auto. inversion H.
+destruct (findandMeasureItem pp d) eqn:hhh. destruct p. 
+inversion H. subst. 
+eapply thm_findAndMeasureItemL. eauto.
+inversion H. 
+Qed. 
+Hint Resolve thm_handleRequestL. 
+
 Definition snd3 {A B C : Type} (x : (A*B*C) ): B := match x with 
  | (_,b,_) => b
  end.
@@ -354,7 +365,7 @@ Definition snd3 {A B C : Type} (x : (A*B*C) ): B := match x with
 (**
 In all calls to handleRequest', the privacy policy has the requested item removed.
 *) 
-Lemma removedFromPrivacyHelper : forall pp d, exists c ri, 
+Lemma thm_removedFromPrivacyHelper : forall pp d, exists c ri, 
  handleRequest' pp d = (rmAllFromPolicy pp d,c,ri).
  Proof. intros. induction pp. simpl. eauto.
  simpl. destruct (eq_dec_Description d0 d).
@@ -370,7 +381,7 @@ Lemma removedFromPrivacyHelper : forall pp d, exists c ri,
   destruct (findandMeasureItem pp d). destruct p. eexists. eexists. eauto.
   eexists. eexists. reflexivity.
   Qed.
-
+Hint Resolve thm_removedFromPrivacyHelper.
 (*
 Lemma handleReqSameD : forall pp d d0  val x y,  (handleRequest' pp d) = (x, constValue d0 val,y) -> d0 = d.
 Proof. intros. destruct pp; intros.  simpl in H. inv H.
@@ -397,7 +408,7 @@ simpl. left.
   
   *)
   
-Lemma removedFromPrivacyHelper2 : forall pp d pp' c ri, 
+Lemma thm_removedFromPrivacyHelper2 : forall pp d pp' c ri, 
  handleRequest' pp d = (pp',c,ri) -> 
  pp' = (rmAllFromPolicy pp d).
  Proof.  intros.
@@ -417,26 +428,26 @@ Lemma removedFromPrivacyHelper2 : forall pp d pp' c ri,
  subst. inversion H; subst. reflexivity.
  subst. inversion H; subst. reflexivity.
  Qed.
- Hint Resolve removedFromPrivacyHelper2. 
+ Hint Resolve thm_removedFromPrivacyHelper2. 
 
 (** If an item has been removed, findAndMeasureItemL will never succeed.*)
-Theorem youCantFindit : forall pp d, findandMeasureItem (rmAllFromPolicy pp d) d = None.
+Theorem thm_youCantFindit : forall pp d, findandMeasureItem (rmAllFromPolicy pp d) d = None.
 Proof. intros. induction pp. auto.
 simpl. destruct (eq_dec_Description d0 d). assumption.
 simpl. destruct (eq_dec_Description d0 d). contradiction.
 assumption.
 Qed. 
 
-Hint Resolve youCantFindit. 
+Hint Resolve thm_youCantFindit. 
 
 (** After handling a request, subsequest requests of that description will fail.*)
-Theorem removedFromPrivacy : forall pp d pp' c ri,
+Theorem thm_removedFromPrivacy : forall pp d pp' c ri,
  handleRequest' pp d = (pp',c,ri) -> 
  findandMeasureItem pp' d = None.
  Proof. intros. assert (pp' = rmAllFromPolicy pp d). eauto.
   rewrite H0. eauto.
  Qed.
-Hint Resolve removedFromPrivacy. 
+Hint Resolve thm_removedFromPrivacy. 
 (*
 Fixpoint handleRequest' (pp : PrivacyPolicy) (d : Description) : 
 (PrivacyPolicy * Const * RequestItem):=
@@ -492,12 +503,22 @@ end.
      | _ => None
      end)
 end).
- (*
-Theorem canSendL : forall pp ls d, (canSend ls pp = Some d )-> (head ls) =Some  d.
-Proof. intros. destruct ls. inv H. rewrite <- H.
-simpl. destruct (handleRequest' pp d0). destruct p. destruct c.
-simpl.           
+ 
+(**
+This Theorem ensures that we are, in fact, returning the head of the 
+request list, if we canSend.
 *)
+Theorem thm_canSendL : forall pp ls d, (canSend ls pp = Some d )-> (head ls) =Some  d.
+Proof. intros. destruct ls. inv H. simpl in H.
+simpl.
+destruct (handleRequest' pp d0) eqn:hh.  destruct p. destruct c.
+inv H.
+ assert (d0 = d). eapply thm_handleRequestL.
+eauto. subst. auto.  inv H. inv H. 
+Qed. 
+Hint Resolve thm_canSendL.
+
+(** Simply sugar for call canSend. This one extracts the important bits from the state *)
 Definition canSendST (st : State) : option Description :=
 match st with
  | state vars prostate => match prostate with
@@ -505,12 +526,15 @@ match st with
                           end
 end.
 
-
+(**
+Sugar for assigning a value to a variable in a state.*)
 Definition assign (var : VarID) (val : Const) (st : State) :=
   match st with
  | state varls prostate => state ((var,val)::varls) prostate
 end. 
 
+(**
+Simply checks if it is my turn to send or not. *)
 Definition isMyTurn (st : State) : bool :=
 match st with
  | state vs ps => (match ps with
@@ -520,14 +544,26 @@ match st with
                                 end)
      end)
 end.
+
+(* Theorem isMyTurnTrue : forall st, isMyTurn st = true <-> gee
+ *)
+
+(**
+Simply checks to see if a queued up request exists.
+In other words, is someone waiting for something from me?
+*)
 Definition queuedRequestsExist (st : State) := 
 match st with
  | state vs ps => match ps with
        | proState _ _ _ _ _ _  nil => false
        | proState _ _ _ _ _ _ _ => true
         end
+ end.
 
- end. 
+(**
+Simply checks if a next desire exists. Checks if there ar more requests
+I would like to make of the other party.
+*)
 Definition existsNextDesire (st : State) :=
 match st with
  | state _ ps =>match ps with
@@ -538,6 +574,9 @@ match st with
             end
 end.
 
+(**
+This is a biggie. This function determines how to handle evaluation of a condition into bool or false.
+*)
 Fixpoint evalChoose (cond : Condition) (st: State) : bool :=
  (match st with
  | state varst prostate => (match prostate with
@@ -585,6 +624,7 @@ Fixpoint evalChoose (cond : Condition) (st: State) : bool :=
 end)
 .
 
+(* receive from any? Do I want this?*)
 Fixpoint receiveMess (n : Network) (p : Participant) : option Const :=
 match n with 
  | nil => None
@@ -596,6 +636,7 @@ match n with
                 end
 end.
 
+(** Removes the message from the networ, IF one exists. *)
 Fixpoint rmMess (n : Network) (p : Participant) : Network :=
  match n with 
  | nil => nil
@@ -606,16 +647,36 @@ Fixpoint rmMess (n : Network) (p : Participant) : Network :=
                     end 
                 end
 end.
- 
+Fixpoint existsMessageForMe (n : Network) (p : Participant) : Prop :=
+ match n with 
+ | nil => False
+ | cons m ls => match m with 
+                | networkMessage from to c => match eq_dec_Participant p to with 
+                    | left _ =>  True
+                    | right _ =>  (existsMessageForMe ls p)
+                    end 
+                end
+end.
+Require Import Omega. 
+Lemma thm_rmMessSmallerL : forall n p, existsMessageForMe n p  -> S (length  (rmMess n p))= length n. 
+Proof. intros. induction n. simpl in H.  tauto.   
+simpl.  destruct a. destruct (eq_dec_Participant p p1) eqn:hh. auto. 
+simpl.  
+simpl in H. rewrite hh in H. rewrite IHn.  auto. auto.
+Qed.
+Hint Resolve thm_rmMessSmallerL. 
+
+(** Receive, getting a message for me if there is one, None otherwise. 
+Upon successful receive, remove the message from the network.
+*)
 Fixpoint receiveN (n : Network) (p : Participant) : option (Const*Network) :=
 match (receiveMess n p) with 
  | None => None
  | Some c => Some (c,rmMess n p)
 end. 
 
-
 Require Import Omega. 
-Theorem receivingShrinks' : forall c n p, receiveMess n p = Some c -> 
+Theorem thm_receivingShrinks' : forall c n p, receiveMess n p = Some c -> 
 length n = length (rmMess n p) + 1.
 Proof. intros.
 induction n. inversion H.
@@ -625,31 +686,46 @@ simpl. simpl in H.
 destruct (eq_dec_Participant p p1). subst. inversion H; subst. omega.
    simpl.  rewrite IHn. auto. auto.
 Qed. 
-Hint Resolve receivingShrinks'.
+Hint Resolve thm_receivingShrinks'.
 
+Lemma thm_receiveN_receiveMess : forall c n p, 
+ receiveN n p = Some (c,rmMess n p) <-> receiveMess n p = Some c.
+Proof. intros. split; intros.   induction n; intros. inv H.
+simpl.  destruct a. destruct (eq_dec_Participant p p1) eqn:hh. 
+simpl in H. rewrite hh in H.  inv H.  auto.
+simpl in H.  rewrite hh in H. destruct (receiveMess n p).  inv H.  auto. 
+inv H. 
+(* other way. *)
+induction n.  inv H. 
+simpl. simpl in H.  destruct a. destruct (eq_dec_Participant p p1) eqn:hh. 
+inv H.  auto.
+simpl in H. destruct (receiveMess n p).  inv H.  auto. 
+inv H.
+Qed. 
+Hint Resolve thm_receiveN_receiveMess.
 
-(*
-
-Theorem receivingShrinks : forall n c p n', receiveN n p = Some (c,n') -> 
-length n = length n' + 1.
-Proof. intros. induction n. simpl. inversion H.
-simpl. intro. intro. intro.     destruct a.  destruct (eq_dec_Participant p p1).
-intros. 
- inversion H. subst. omega.
-destruct (receiveMess n p).
-intros. inversion H; subst.   
- intros. inversion H; subst.
-simpl. omega.     
-   auto.         
-unfold receiveN. simpl.  
-  intros  s. destruct n. simpl in H. inversion H.
-unfold receiveN in H. destruct p. simpl in H.   
-    induction n. intros. simpl in H. inversion H.
-intros.
-erewrite <- IHn. 
-    simpl. 
-auto. omega.```          
-*)
+Theorem thm_receiveN_NewNetworkrmMessage : forall c n n' p, receiveN n p = Some (c, n') -> n' = rmMess n p.
+Proof. intros.  destruct n.  simpl in H. inv H. simpl in H.
+destruct n.  destruct (eq_dec_Participant p p1) eqn:hh.  inv H.
+simpl. rewrite hh.  auto. 
+destruct (receiveMess n0 p).  inv H.  simpl. 
+rewrite hh.  auto. inv H. 
+Qed. 
+Hint Resolve thm_receiveN_NewNetworkrmMessage.
+Hint Rewrite thm_receiveN_NewNetworkrmMessage.     
+Theorem thm_receivingShrinks : forall n c p n', receiveN n p = Some (c,n') -> 
+length n = S (length n') .
+Proof. intros.
+intros. assert (receiveN n p = Some (c, n')). auto.   apply thm_receiveN_NewNetworkrmMessage in H. subst. 
+induction n.  inv H0. simpl. assert (receiveN (a :: n) p = Some (c, rmMess (a :: n) p)).  auto. 
+sh.  
+destruct a. sh. destruct (eq_dec_Participant p p1) eqn:hh. auto. 
+simpl.
+rewrite IHn.  auto. 
+destruct (receiveMess n p) eqn:hhh. apply thm_receiveN_receiveMess in hhh.
+inv H0. 
+auto. inv H0. 
+Qed.
 
 Definition fst3 {A B C : Type} (tripl : (A * B * C)) : A := match tripl with 
   (a,_,_) => a
@@ -668,29 +744,29 @@ Inductive isError : Statement -> Prop :=
 Hint Constructors isError. *)
 Print  reduceUnresolved. 
 
-
-
-
 Definition getMe (st: State) : Participant :=
  match st with
- | state _ prostate => match prostate with
-                        | proState _ _ p _ _ _ _ => p
-end
-
+ | state _ (proState _ _ p _ _ _ _) =>  p
 end.
 
+(**
+This function moves the next desired measurement into the unresolved
+list.
+*)
 Definition mvNextDesire (st : State) : State :=
 match st with
- | state vars ps =>match ps with
-            | proState a g b c wants e f =>(match wants with
+ | state vars (proState a g b c wants e f) =>(match wants with
                    | emptyRequestLS => state vars (proState a g b c 
                       emptyRequestLS e f)
                    | ConsRequestLS ri rest => state vars (proState a g b c rest
                       (ConsRequestLS ri e) f )
                   end) 
-            end
 end.
 
+(**
+This function takes the desired measurement and stores it in the queue of things
+I have been asked to measure.
+*)
 Definition storeRequest (d : Description) (st : State) : State :=
 match st with
  | state vs ps => match ps with
@@ -698,13 +774,17 @@ match st with
 end
 end. 
 
-Definition reducePrivacy_w_RequestST (d : Description) (st : State) : State :=
+(**
+Removes from privacy given a state. Just a wrapper funtion. *)
+Definition rm_f_Privacy_w_RequestST (d : Description) (st : State) : State :=
 match st with
- | state vs ps => match ps with
-      | proState x g x0 pp x2 x3 x4 => state vs (proState x g x0 (rmAllFromPolicy pp d) x2 x3 x4)
-     end
-end. 
+ | state vs (proState x g x0 pp x2 x3 x4) => 
+   state vs (proState x g x0 (rmAllFromPolicy pp d) x2 x3 x4)
+     
+end.
 
+(** Wrapper for removing the head of the queued up requests I have.
+*)
 Definition handleRmFstQueued (st : State) :=
 match st with
  | state vs ps => match ps with
@@ -713,41 +793,55 @@ match st with
 end
 end. 
 
+(*
 Fixpoint rmFromPP (pp : PrivacyPolicy) (d : Description) :=
 match pp with
  | EmptyPolicy => EmptyPolicy
  | @ConsPolicy dp x x0 => if (eq_dec_Description d dp) then  rmFromPP x0 d 
                                                        else  @ConsPolicy dp x (rmFromPP x0 d)
-end. 
+end.
+*) 
+
+(**
+Answers, what, if any is my counter request?
+*)
 Fixpoint getCounterReqItemFromPP (pp : PrivacyPolicy) (d : Description) : option RequestItem :=
 match pp with
  | EmptyPolicy => None
  | @ConsPolicy dp x x0 => if (eq_dec_Description d dp) then match x with
- | @rule _ dd  r => Some (requestItem dd r)
- | free _ => None
- | never _ => None
- | multiReqAnd _ _ x0 => None
- | multiReqOr _ _ x0 => None
-end 
-                                                       else  (getCounterReqItemFromPP x0 d)
+   | @rule _ dd  r => Some (requestItem dd r)
+   | free _ => None
+   | never _ => None
+ (*| multiReqAnd _ _ x0 => None
+   | multiReqOr _ _ x0 => None*)
+   end 
+                          else      
+                          (getCounterReqItemFromPP x0 d)
 end. 
+
+(** This function checks to see if a counter request is needed to release the
+description asked of me. If there is none, this is reported by returning none.
+If a counter is needed, the counter is added to the outstanding requests.
+*)
 Definition handlecp_ppUnresolved (d : Description)  (st : State) : option State := 
 match st with
- | state vs ps => match ps with
-    | proState x g x0 pp x2 x3 x4 => match  getCounterReqItemFromPP pp d with 
+ | state vs (proState x g x0 pp x2 x3 x4) => match  getCounterReqItemFromPP pp d with 
                                       | None => None
                                       | Some reqI => Some (state vs (proState x g x0 pp x2 (ConsRequestLS reqI x3) x4))
                                       end
-end
+
 end. 
 
-Definition handleSetAllGood (g : AllGood) (st : State) : State:=
+(**
+Setter for allGood Property
+*)
+Definition setAllGood (g : AllGood) (st : State) : State:=
 match st with
- | state var ps => match ps with
-          | proState x x0 x1 x2 x3 x4 x5 => state var (proState x g x1 x2 x3 x4 x5) 
-end
+ | state var (proState x x0 x1 x2 x3 x4 x5) => state var (proState x g x1 x2 x3 x4 x5) 
 end.
  
+(* This is the mapping of state effects from the Effect Inductive type.
+*)
 Definition handleEffect (e : Effect) (st : State) : option State :=
 match e with
  (*| effect_HandleRequest t => match (varSubst t st) with 
@@ -759,7 +853,7 @@ match e with
                               | _ => None 
                               end
  | effect_ReducePrivacyWithRequest t=> match (varSubst t st) with 
-                                        | Some (constRequest r) => Some (reducePrivacy_w_RequestST r st)
+                                        | Some (constRequest r) => Some (rm_f_Privacy_w_RequestST r st)
                                         | _ => None
                                         end
  | effect_ReduceStatewithMeasurement t => match (varSubst t st) with 
@@ -772,25 +866,24 @@ match e with
                                            | Some (constRequest d) => (handlecp_ppUnresolved d st)
                                            | _ => None
                                            end
- | effect_setAllGood x  => Some (handleSetAllGood x st)
+ | effect_setAllGood x  => Some (setAllGood x st)
 end. 
 
 
-Check measure. 
+Check measure.
+(** Getter *) 
 Definition getNextDesire (st : State) : option Description :=
 match st with
- | state _ ps =>match ps with
-            | proState _ _ _ _ wants _ _ =>(match wants with
-                             | emptyRequestLS => None
-                             | ConsRequestLS ri _ => (match ri with
-                                         | requestItem d x => Some d
-                                        end)
-
-                            end)
-            end
+ | state _ (proState _ _ _ _ wants _ _) =>
+  (match wants with
+     | emptyRequestLS => None
+     | ConsRequestLS (requestItem d x) _ =>  Some d
+   end)
+          
 end.
 
-Definition handleGetfstQueue (st : State) :=
+(** Getter for first unfulfilled description by me.*)
+Definition getfstQueueAsConst (st : State) :=
 match st with
  | state _ ps => match ps with
     | proState x g x0 x1 x2 x3 x4 => match x4 with
@@ -800,9 +893,11 @@ end
 end
 end.
 
+(**
+mapping from computations to actual actions. *)
 Definition handleCompute (comp : Computation) (st : State) : option Const :=
  match comp with
-  | compGetfstQueue => handleGetfstQueue st
+  | compGetfstQueue => getfstQueueAsConst st
   | compGetMessageToSend => match (canSendST st) with 
                               | Some d => Some (constValue d (measure d))
                               | None => None
@@ -891,11 +986,11 @@ match p with
  | APPRAISER => ATTESTER
 end.
 
-Lemma endEval : forall st st' stm' n n', 
+Lemma thm_endEval : forall st st' stm' n n', 
 (EndStatement, st, n) ⇒* (stm', st', n') -> False.
 Proof. intros. dependent induction H. inversion H. eauto.
 Qed.
-
+Hint Resolve thm_endEval.
 
 
 
@@ -1010,7 +1105,7 @@ match stm with
  | _ => 0
 end.
 
-Theorem onestepProtocolmaxAction_eq_minAction : forall st, 
+Theorem thm_onestepProtocolmaxAction_eq_minAction : forall st, 
 countMinNetworkActions (OneProtocolStep st) = (countMaxNetworkActions (OneProtocolStep st)).
 Proof. intros; compute; reflexivity.
 Qed.
@@ -1231,10 +1326,11 @@ match st with
 end
 end. 
 
-Lemma allGood : forall st, evalChoose IsAllGood st = true -> getAllGood st = Yes.
+Lemma thm_allGood : forall st, evalChoose IsAllGood st = true -> getAllGood st = Yes.
 Proof. intros. dest st. dest p. simpl in H. dest a0. simpl. auto.
 inv H. inv H.
 Qed.
+Hint Resolve thm_allGood.
 
 Theorem ifwillthenway : forall st, evalChoose ExistsNextDesire st = true ->exists c,  handleCompute compGetNextRequest st = Some c .
     Proof.
@@ -1381,10 +1477,10 @@ Qed.
 
 
 
-Lemma mkAtt_and_App_have_rev_actions : forall ppP ppT reqls, 
+Lemma thm_mkAtt_and_App_have_rev_actions : forall ppP ppT reqls, 
  reverse(getAction(mkAttesterState ppT)) = getAction(mkAppraiserState ppP reqls).
 Proof. intros; auto. Qed.
-
+Hint Resolve thm_mkAtt_and_App_have_rev_actions.
 Notation "x ⟱⟱  x'" := (DualMultiStep x x') (at level 35).
 Hint Constructors DualMultiStep.
 
