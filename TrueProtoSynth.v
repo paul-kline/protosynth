@@ -49,7 +49,7 @@ Require Import Coq.Arith.Peano_dec.
 Definition  des1 := (descriptor (pcrMR 1)). 
 Eval compute in (measurementDenote des1).
 Definition req1 : (Requirement des1 ).
-Search bool. 
+
 apply requirement. simpl. exact ((fun (x : nat) => Nat.leb x 7)).
 Defined.
 Definition req2 := 
@@ -916,7 +916,7 @@ Inductive stmEval : (Statement * State * Network) -> (Statement * State * Networ
               (SendStatement term f t, st, n) ⇒
                 (Skip, st, (sendOnNetwork f t v n))
    | E_SendStop : forall st n term f t v, (varSubst term st) = Some constStop ->  (SendStatement term f t, st, n) ⇒
-      (StopStatement, st, (sendOnNetwork f t v n))
+      (StopStatement,  st, (sendOnNetwork f t v n))
    | E_ReceiveStop : forall st n n' vid,
         receiveN n (getMe st) = Some (constStop,n')  ->
         (ReceiveStatement vid, st,n) ⇒ (StopStatement, assign vid constStop st, n')
@@ -955,13 +955,13 @@ Inductive stmEval : (Statement * State * Network) -> (Statement * State * Networ
    | E_ChainWait : forall st n st' n' stm1 stm2, 
        (stm1,st,n) ⇒ (Wait >> stm1,st',n') -> 
        (Chain stm1 stm2, st, n) ⇒ (Wait >> stm1 >> stm2,st',n')
-   | E_Skip : forall st n, (Skip, st, n)  ⇒ (Skip, st, n )
-   
+   (*| E_Skip : forall st n, (Skip, st, n)  ⇒ (Skip, st, n )
+   | E_SkipEnd : forall st n, (Skip, st, n) ⇒ (EndStatement, st, n )*)
    (*| E_End : forall st n, 
        (EndStatement, st, n) ⇒ (EndStatement, st, n)
    | E_Stop : forall st n, 
        (StopStatement, st, n) ⇒ (StopStatement, st, n)
-       *) 
+     *)   
    | E_KeepWaiting : forall st n stm, 
        receiveN n (getMe st) = None -> 
        (Wait >> stm, st, n) ⇒ (Wait >> stm, st, n) 
@@ -970,6 +970,7 @@ Inductive stmEval : (Statement * State * Network) -> (Statement * State * Networ
        (Wait, st, n) ⇒ (Wait, st, n) 
    where "x '⇒' x' " := (stmEval x x').
 Hint Constructors stmEval. 
+Ltac chain := (apply E_Chain) + (eapply E_Chain).
 
 Reserved Notation "x ⇒* x'"(at level 35). 
 Inductive MultiStep_stmEval : (Statement * State * Network) -> (Statement * State * Network) -> Prop := 
@@ -1001,8 +1002,10 @@ Definition proto_handleCanSend (st : State) :=
          Compute (variden 1) compGetfstQueue >>
          EffectStatement (effect_ReducePrivacyWithRequest (variable (variden 1))) >>
          EffectStatement effect_rmFstQueued >>
+         EffectStatement (effect_setAllGood Yes) >> (*all good here! *)
          EndStatement
-    ELSE (*Can't send and queued request exists *) 
+    ELSE (*Can't send and queued request exists *)
+      EffectStatement (effect_setAllGood No) >> (* no, this is bad! *) 
       SendStatement (const constStop) (getMe st) (notMe (getMe st)) >> 
       StopStatement (*Give up!*).
  
@@ -1010,9 +1013,11 @@ Definition proto_handleExistsNextDesire (st : State) :=
 Compute toSendMESSAGE compGetNextRequest >>
 EffectStatement effect_MvFirstDesire >> 
 SendStatement (variable toSendMESSAGE) (getMe st) (notMe (getMe st)) >> 
+EffectStatement (effect_setAllGood Yes) >>
 EndStatement.
 
 Definition proto_handleNoNextDesire (st : State) :=
+EffectStatement (effect_setAllGood Yes) >> (*all is well, just out! *)
 SendStatement (const constStop) (getMe st) (notMe (getMe st)) >> 
 StopStatement. 
 
