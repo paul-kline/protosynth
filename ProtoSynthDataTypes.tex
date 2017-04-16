@@ -1,0 +1,259 @@
+\documentclass[12pt]{report}
+\usepackage[]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\usepackage{coqdoc}
+\usepackage{amsmath,amssymb}
+\usepackage{url}
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This file has been automatically generated with the command
+%% coqdoc -latex ProtoSynthDataTypes.v 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\coqlibrary{ProtoSynthDataTypes}{Library }{ProtoSynthDataTypes}
+
+\begin{coqdoccode}
+\coqdocnoindent
+\coqdockw{Add} \coqdocvar{LoadPath} "/users/paulkline/Documents/coqs/protosynth".\coqdoceol
+\coqdocnoindent
+\coqdockw{Add} \coqdocvar{LoadPath} "/home/paul/Documents/coqs/protosynth/cpdt/src" \coqdockw{as} \coqdocvar{Cpdt}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Import} \coqdoclibrary{MyShortHand}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthDataTypes.Noun}{Noun}{\coqdocinductive{Noun}} : \coqdockw{Set}:=\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.VirusChecker}{VirusChecker}{\coqdocconstructor{VirusChecker}}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.PCR}{PCR}{\coqdocconstructor{PCR}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthDataTypes.eq dec Noun}{eq\_dec\_Noun}{\coqdoclemma{eq\_dec\_Noun}} : \coqdocdefinition{equality} \coqref{ProtoSynthDataTypes.Noun}{\coqdocinductive{Noun}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_Noun} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthDataTypes.Attribute}{Attribute}{\coqdocinductive{Attribute}} : \coqdockw{Set} :=\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.Name}{Name}{\coqdocconstructor{Name}} : \coqref{ProtoSynthDataTypes.Attribute}{\coqdocinductive{Attribute}}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.Hash}{Hash}{\coqdocconstructor{Hash}} : \coqref{ProtoSynthDataTypes.Attribute}{\coqdocinductive{Attribute}}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.Index}{Index}{\coqdocconstructor{Index}} : \coqexternalref{nat}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocinductive{nat}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthDataTypes.Attribute}{\coqdocinductive{Attribute}}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.Version}{Version}{\coqdocconstructor{Version}} : \coqref{ProtoSynthDataTypes.Attribute}{\coqdocinductive{Attribute}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthDataTypes.eq dec Attribute}{eq\_dec\_Attribute}{\coqdoclemma{eq\_dec\_Attribute}} : \coqdocdefinition{equality} \coqref{ProtoSynthDataTypes.Attribute}{\coqdocinductive{Attribute}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}. \coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_Attribute} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthDataTypes.DescriptionR}{DescriptionR}{\coqdocinductive{DescriptionR}} : \coqref{ProtoSynthDataTypes.Noun}{\coqdocinductive{Noun}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthDataTypes.Attribute}{\coqdocinductive{Attribute}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdockw{Set} :=\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.pcrMR}{pcrMR}{\coqdocconstructor{pcrMR}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{n}, \coqref{ProtoSynthDataTypes.DescriptionR}{\coqdocinductive{DescriptionR}} \coqref{ProtoSynthDataTypes.PCR}{\coqdocconstructor{PCR}} (\coqref{ProtoSynthDataTypes.Index}{\coqdocconstructor{Index}} \coqdocvariable{n})\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.virusCheckerNameR}{virusCheckerNameR}{\coqdocconstructor{virusCheckerNameR}} : \coqref{ProtoSynthDataTypes.DescriptionR}{\coqdocinductive{DescriptionR}} \coqref{ProtoSynthDataTypes.VirusChecker}{\coqdocconstructor{VirusChecker}} \coqref{ProtoSynthDataTypes.Name}{\coqdocconstructor{Name}}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.virusCheckerVersionR}{virusCheckerVersionR}{\coqdocconstructor{virusCheckerVersionR}} : \coqref{ProtoSynthDataTypes.DescriptionR}{\coqdocinductive{DescriptionR}} \coqref{ProtoSynthDataTypes.VirusChecker}{\coqdocconstructor{VirusChecker}} \coqref{ProtoSynthDataTypes.Version}{\coqdocconstructor{Version}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthDataTypes.eq dec DescriptionR}{eq\_dec\_DescriptionR}{\coqdoclemma{eq\_dec\_DescriptionR}} \{\coqdocvar{n}\} \{\coqdocvar{a}\}:  \coqdocdefinition{equality} (\coqref{ProtoSynthDataTypes.DescriptionR}{\coqdocinductive{DescriptionR}} \coqdocvariable{n} \coqdocvariable{a}).\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_DescriptionR} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_DescriptionR}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthDataTypes.Description}{Description}{\coqdocinductive{Description}} : \coqdockw{Set} :=\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.descriptor}{descriptor}{\coqdocconstructor{descriptor}} \{\coqdocvar{n} : \coqref{ProtoSynthDataTypes.Noun}{\coqdocinductive{Noun}}\} \{\coqdocvar{a} : \coqref{ProtoSynthDataTypes.Attribute}{\coqdocinductive{Attribute}}\} : \coqref{ProtoSynthDataTypes.DescriptionR}{\coqdocinductive{DescriptionR}} \coqdocvariable{n} \coqdocvariable{a} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthDataTypes.Description}{\coqdocinductive{Description}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthDataTypes.eq dec Description}{eq\_dec\_Description}{\coqdoclemma{eq\_dec\_Description}} : \coqdocdefinition{equality} \coqref{ProtoSynthDataTypes.Description}{\coqdocinductive{Description}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_Description} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Definition} \coqdef{ProtoSynthDataTypes.measurementDenote}{measurementDenote}{\coqdocdefinition{measurementDenote}} (\coqdocvar{d}: \coqref{ProtoSynthDataTypes.Description}{\coqdocinductive{Description}}) :=\coqdoceol
+\coqdocnoindent
+\coqdockw{match} \coqdocvariable{d} \coqdockw{with}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqref{ProtoSynthDataTypes.descriptor}{\coqdocconstructor{descriptor}} \coqdocvar{r} \ensuremath{\Rightarrow} (\coqdockw{match} \coqdocvar{r} \coqdockw{with}\coqdoceol
+\coqdocindent{2.00em}
+\ensuremath{|} \coqref{ProtoSynthDataTypes.pcrMR}{\coqdocconstructor{pcrMR}} \coqdocvar{n} \ensuremath{\Rightarrow} \coqexternalref{nat}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocinductive{nat}}\coqdoceol
+\coqdocindent{2.00em}
+\ensuremath{|} \coqref{ProtoSynthDataTypes.virusCheckerNameR}{\coqdocconstructor{virusCheckerNameR}} \ensuremath{\Rightarrow} \coqexternalref{nat}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocinductive{nat}}\coqdoceol
+\coqdocindent{2.00em}
+\ensuremath{|} \coqref{ProtoSynthDataTypes.virusCheckerVersionR}{\coqdocconstructor{virusCheckerVersionR}} \ensuremath{\Rightarrow} \coqexternalref{nat}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocinductive{nat}}\coqdoceol
+\coqdocindent{2.00em}
+\coqdockw{end})\coqdoceol
+\coqdocnoindent
+\coqdockw{end}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthDataTypes.Requirement}{Requirement}{\coqdocinductive{Requirement}} (\coqdocvar{d} : \coqref{ProtoSynthDataTypes.Description}{\coqdocinductive{Description}}) :=\coqdoceol
+\coqdocnoindent
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.requirement}{requirement}{\coqdocconstructor{requirement}} : \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqref{ProtoSynthDataTypes.measurementDenote}{\coqdocdefinition{measurementDenote}} \coqdocvar{d}\coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqexternalref{bool}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocinductive{bool}}\coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthDataTypes.Requirement}{\coqdocinductive{Requirement}} \coqdocvar{d}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Import} \coqexternalref{}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Logic.FunctionalExtensionality}{\coqdoclibrary{FunctionalExtensionality}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthDataTypes.eq dec f}{eq\_dec\_f}{\coqdoclemma{eq\_dec\_f}} \{\coqdocvar{A}\} \{\coqdocvar{B}\} : \coqdockw{\ensuremath{\forall}} (\coqdocvar{a} \coqdocvar{b} : (\coqdocvariable{A} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdocvariable{B})), \coqdocvariable{a} \coqdocnotation{=<>} \coqdocvariable{b}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{specialize} \coqexternalref{functional extensionality}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Logic.FunctionalExtensionality}{\coqdoclemma{functional\_extensionality}} \coqdockw{with} \coqdocvar{a} \coqdocvar{b}. \coqdoctac{intros}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdocvar{Admitted}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_f} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthDataTypes.eq dec Requirement}{eq\_dec\_Requirement}{\coqdoclemma{eq\_dec\_Requirement}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{d} (\coqdocvar{x} \coqdocvar{y} : \coqref{ProtoSynthDataTypes.Requirement}{\coqdocinductive{Requirement}} \coqdocvariable{d}), \coqdocvariable{x} \coqdocnotation{=<>} \coqdocvariable{y}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{d}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{d}; \coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_Requirement} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthDataTypes.Rule}{Rule}{\coqdocinductive{Rule}} (\coqdocvar{mything} : \coqref{ProtoSynthDataTypes.Description}{\coqdocinductive{Description}}) :=  \coqdoceol
+\coqdocnoindent
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.rule}{rule}{\coqdocconstructor{rule}}  \{\coqdocvar{your} : \coqref{ProtoSynthDataTypes.Description}{\coqdocinductive{Description}}\} : \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqref{ProtoSynthDataTypes.Requirement}{\coqdocinductive{Requirement}} \coqdocvariable{your}\coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthDataTypes.Rule}{\coqdocinductive{Rule}} \coqdocvar{mything}\coqdoceol
+\coqdocnoindent
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.free}{free}{\coqdocconstructor{free}} : \coqref{ProtoSynthDataTypes.Rule}{\coqdocinductive{Rule}} \coqdocvar{mything}\coqdoceol
+\coqdocnoindent
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.never}{never}{\coqdocconstructor{never}} : \coqref{ProtoSynthDataTypes.Rule}{\coqdocinductive{Rule}} \coqdocvar{mything}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthDataTypes.eq dec Rule}{eq\_dec\_Rule}{\coqdoclemma{eq\_dec\_Rule}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{x}, \coqdocdefinition{equality} (\coqref{ProtoSynthDataTypes.Rule}{\coqdocinductive{Rule}} \coqdocvariable{x}).\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdoctac{intros}. \coqdocvar{intro\_equals}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{x}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{d};\coqdoceol
+\coqdocnoindent
+\coqdoctac{generalize} \coqdoctac{dependent} \coqdocvar{x0}; \coqdoceol
+\coqdocnoindent
+\coqdoctac{induction} \coqdocvar{y};\coqdoceol
+\coqdocnoindent
+\coqdocvar{intro\_equals}; \coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{x0}; \coqdoctac{try} \coqdoctac{first} [\coqdocvar{decidable} \ensuremath{|}  \coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}].\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_Rule} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthDataTypes.PrivacyPolicy}{PrivacyPolicy}{\coqdocinductive{PrivacyPolicy}} :=\coqdoceol
+\coqdocnoindent
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.EmptyPolicy}{EmptyPolicy}{\coqdocconstructor{EmptyPolicy}} : \coqref{ProtoSynthDataTypes.PrivacyPolicy}{\coqdocinductive{PrivacyPolicy}}\coqdoceol
+\coqdocnoindent
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.ConsPolicy}{ConsPolicy}{\coqdocconstructor{ConsPolicy}} \{\coqdocvar{d} :\coqref{ProtoSynthDataTypes.Description}{\coqdocinductive{Description}}\}: \coqdoceol
+\coqdocindent{2.00em}
+\coqref{ProtoSynthDataTypes.Rule}{\coqdocinductive{Rule}} \coqdocvariable{d} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocindent{2.00em}
+\coqref{ProtoSynthDataTypes.PrivacyPolicy}{\coqdocinductive{PrivacyPolicy}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthDataTypes.PrivacyPolicy}{\coqdocinductive{PrivacyPolicy}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthDataTypes.eq dec PrivacyPolicy}{eq\_dec\_PrivacyPolicy}{\coqdoclemma{eq\_dec\_PrivacyPolicy}} : \coqdocdefinition{equality} \coqref{ProtoSynthDataTypes.PrivacyPolicy}{\coqdocinductive{PrivacyPolicy}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{intro\_equals}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{generalize} \coqdoctac{dependent} \coqdocvar{x}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{induction} \coqdocvar{y}; \coqdoctac{try}\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal} + \coqdocvar{decidable}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{intros}. \coqdoctac{destruct} \coqdocvar{x}; \coqdocvar{decidable}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{intros}. \coqdoctac{destruct} \coqdocvar{x}. \coqdocvar{decidable}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{specialize} \coqdocvar{IHy} \coqdockw{with} \coqdocvar{x}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{destruct} \coqdocvar{IHy}. \coqdoctac{subst}. \coqdocvar{crush\_equal}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_PrivacyPolicy} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthDataTypes.Action}{Action}{\coqdocinductive{Action}} : \coqdockw{Set} :=\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.ASend}{ASend}{\coqdocconstructor{ASend}} : \coqref{ProtoSynthDataTypes.Action}{\coqdocinductive{Action}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.AReceive}{AReceive}{\coqdocconstructor{AReceive}} : \coqref{ProtoSynthDataTypes.Action}{\coqdocinductive{Action}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthDataTypes.eq dec Action}{eq\_dec\_Action}{\coqdoclemma{eq\_dec\_Action}} : \coqdocdefinition{equality} \coqref{ProtoSynthDataTypes.Action}{\coqdocinductive{Action}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_Action} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthDataTypes.RequestItem}{RequestItem}{\coqdocinductive{RequestItem}} : \coqdockw{Set} :=\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.requestItem}{requestItem}{\coqdocconstructor{requestItem}} (\coqdocvar{d} : \coqref{ProtoSynthDataTypes.Description}{\coqdocinductive{Description}}) : \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqref{ProtoSynthDataTypes.Requirement}{\coqdocinductive{Requirement}} \coqdocvariable{d}\coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthDataTypes.RequestItem}{\coqdocinductive{RequestItem}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthDataTypes.eq dec RequestItem}{eq\_dec\_RequestItem}{\coqdoclemma{eq\_dec\_RequestItem}} : \coqdocdefinition{equality} \coqref{ProtoSynthDataTypes.RequestItem}{\coqdocinductive{RequestItem}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{intro\_equals}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{generalize} \coqdoctac{dependent} \coqdocvar{x}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{induction} \coqdocvar{y};  \coqdoctac{intros}. \coqdoctac{destruct} \coqdocvar{x}; \coqdoctac{try} \coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_RequestItem} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthDataTypes.RequestLS}{RequestLS}{\coqdocinductive{RequestLS}} : \coqdockw{Set} :=\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.emptyRequestLS}{emptyRequestLS}{\coqdocconstructor{emptyRequestLS}} : \coqref{ProtoSynthDataTypes.RequestLS}{\coqdocinductive{RequestLS}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.ConsRequestLS}{ConsRequestLS}{\coqdocconstructor{ConsRequestLS}} : \coqref{ProtoSynthDataTypes.RequestItem}{\coqdocinductive{RequestItem}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthDataTypes.RequestLS}{\coqdocinductive{RequestLS}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthDataTypes.RequestLS}{\coqdocinductive{RequestLS}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthDataTypes.eq dec RequestLS}{eq\_dec\_RequestLS}{\coqdoclemma{eq\_dec\_RequestLS}} : \coqdocdefinition{equality} \coqref{ProtoSynthDataTypes.RequestLS}{\coqdocinductive{RequestLS}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_RequestLS} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthDataTypes.Role}{Role}{\coqdocinductive{Role}} : \coqdockw{Set} :=\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.Appraiser}{Appraiser}{\coqdocconstructor{Appraiser}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthDataTypes.Attester}{Attester}{\coqdocconstructor{Attester}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthDataTypes.eq dec Role}{eq\_dec\_Role}{\coqdoclemma{eq\_dec\_Role}} : \coqdocdefinition{equality} \coqref{ProtoSynthDataTypes.Role}{\coqdocinductive{Role}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\end{coqdoccode}
+\end{document}

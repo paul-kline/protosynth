@@ -1,0 +1,1000 @@
+\documentclass[12pt]{report}
+\usepackage[]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\usepackage{coqdoc}
+\usepackage{amsmath,amssymb}
+\usepackage{url}
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This file has been automatically generated with the command
+%% coqdoc -latex TrueProtoSynth2.v 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\coqlibrary{TrueProtoSynth2}{Library }{TrueProtoSynth2}
+
+\begin{coqdoccode}
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Add} \coqdocvar{LoadPath} "/home/paul/Documents/coqs/protosynth".\coqdoceol
+\coqdocnoindent
+\coqdockw{Add} \coqdocvar{LoadPath} "/home/paul/Documents/coqs/protosynth/cpdt/src" \coqdockw{as} \coqdocvar{Cpdt}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Import} \coqdoclibrary{MyShortHand}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Add} \coqdocvar{LoadPath} "C:\symbol{92}Users\symbol{92}Paul\symbol{92}Documents\symbol{92}coqStuff\symbol{92}protosynth".\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Import} \coqdoclibrary{ProtoSynthDataTypes}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Import} \coqdoclibrary{ProtoSynthProtocolDataTypes}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Import} \coqexternalref{}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Lists.List}{\coqdoclibrary{Coq.Lists.List}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require}  \coqdockw{Export} \coqdoclibrary{TrueProtoSynth}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Check} \coqdocdefinition{des1}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.eval1}{eval1}{\coqdoclemma{eval1}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{st} \coqdocvar{v} (\coqdocvar{n}: \coqdocdefinition{Network}) \coqdocvar{a} \coqdocvar{allg} \coqdocvar{part} \coqdocvar{pp} \coqdocvar{rls} \coqdocvar{unres} \coqdocvar{l},\coqdoceol
+\coqdocnoindent
+\coqdocvariable{st} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocconstructor{state} \coqdocvariable{v} (\coqdocconstructor{proState} \coqdocvariable{a} \coqdocvariable{allg} \coqdocvariable{part} \coqdocvariable{pp} \coqdocvariable{rls} \coqdocvariable{unres} \coqdocvariable{l}) \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{IsAllGood} \coqdocvariable{st}         \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}\coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} \coqdocvariable{st}     \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{QueuedRequestsExist} \coqdocvariable{st}\coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}\coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{CanSend} \coqdocvariable{st}            \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\exists}}} \coqdocvar{d}  \coqdocvar{p0}\coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{,}}   \coqdoceol
+\coqdocindent{0.50em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{EndStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocconstructor{state} (\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{variden} 1\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocconstructor{constRequest} \coqdocvariable{d}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:list scope:x '::' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{::}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{toSendMESSAGE}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocconstructor{constValue} \coqdocvariable{d} (\coqdocdefinition{measure} \coqdocvariable{d})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:list scope:x '::' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{::}} \coqdocvariable{v}) (\coqdocconstructor{proState} \coqdocvariable{a} \coqdocconstructor{Yes} \coqdocvariable{part} (\coqdocdefinition{rmAllFromPolicy} \coqdocvariable{p0} \coqdocvariable{d}) \coqdocvariable{rls} \coqdocvariable{unres} (\coqexternalref{tail}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Lists.List}{\coqdocabbreviation{tail}} \coqdocvariable{l})) \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocdefinition{sendOnNetwork} (\coqdocdefinition{getMe} \coqdocvariable{st}) (\coqdocdefinition{notMe} (\coqdocdefinition{getMe} \coqdocvariable{st})) (\coqdocconstructor{constValue} \coqdocvariable{d} (\coqdocdefinition{measure} \coqdocvariable{d})) \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{intros}. \coqdoctac{destruct} \coqdocvar{st}. \coqdocvar{s}. \coqdocvar{dest} \coqdocvar{p}. \coqdoctac{destruct} (\coqdocdefinition{canSend} \coqdocvar{l0} \coqdocvar{p0}) \coqdocvar{eqn}:\coqdocvar{hh}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{l0}. \coqdocvar{inv} \coqdocvar{hh}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} (\coqdocdefinition{handleRequest'} \coqdocvar{p0} \coqdocvar{d0}) \coqdocvar{eqn}:\coqdocvar{hhh}. \coqdoctac{destruct} \coqdocvar{p1}. \coqdoctac{destruct} \coqdocvar{c} \coqdocvar{eqn}:\coqdocvar{cc}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdoctac{eexists}. \coqdoctac{eexists}. \coqdocvar{proto}. \coqdocvar{proto}. \coqdocvar{proto}. \coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdoctac{auto}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdocvar{s}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{apply} \coqdocconstructor{E\_Compute}. \coqdoctac{auto}. \coqdocvar{s}. \coqdoctac{rewrite} \coqdocvar{hhh}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdocvar{s}. \coqdoctac{apply} \coqdocconstructor{E\_Send}. \coqdocvar{s}. \coqdoctac{auto}. \coqdocvar{nono}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{apply} \coqdocconstructor{E\_Compute}. \coqdocvar{s}. \coqdocvar{dest} \coqdocvar{l0}. \coqdoctac{simpl} \coqdoctac{in} \coqdocvar{hh}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{apply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{apply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdocvar{s}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{apply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{apply} \coqdoclemma{thm\_canSendL} \coqdoctac{in} \coqdocvar{hh}. \coqdoctac{simpl} \coqdoctac{in} \coqdocvar{hh}. \coqdocvar{inv} \coqdocvar{hh}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{apply} \coqdoclemma{thm\_handleRequestL} \coqdoctac{in} \coqdocvar{hhh}. \coqdoctac{subst}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{inv} \coqdocvar{H}. \coqdocvar{refl}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdoctac{eexists}. \coqdoctac{eexists}. \coqdocvar{proto}. \coqdocvar{proto}. \coqdocvar{proto}. \coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdoctac{auto}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdocvar{s}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{apply} \coqdocconstructor{E\_Compute}. \coqdocvar{s}. \coqdoctac{auto}. \coqdocvar{s}. \coqdoctac{rewrite} \coqdocvar{hhh}. \coqdocvar{sh}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{rewrite} \coqdocvar{hhh} \coqdoctac{in} \coqdocvar{hh}. \coqdoctac{rewrite} \coqdocvar{hhh} \coqdoctac{in} \coqdocvar{H3}. \coqdocvar{inv} \coqdocvar{H3}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{apply} \coqdocconstructor{E\_Send}. \coqdoctac{simpl}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Show} \coqdocvar{Existentials}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{Existential} 5 := \coqdocvar{c}. \coqdoctac{subst}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{nono}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{apply} \coqdocconstructor{E\_Compute}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{simpl}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{apply} \coqdocconstructor{E\_Effect}. \coqdoctac{simpl}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{apply} \coqdocconstructor{E\_Effect}. \coqdoctac{simpl}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{subst}. \coqdocvar{sh}. \coqdoctac{rewrite} \coqdocvar{hhh} \coqdoctac{in} \coqdocvar{H3}. \coqdocvar{inv} \coqdocvar{H3}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{sh}. \coqdoctac{rewrite} \coqdocvar{hhh} \coqdoctac{in} \coqdocvar{H3}. \coqdocvar{inv} \coqdocvar{H3}. \coqdocvar{sh}. \coqdoctac{rewrite} \coqdocvar{hh} \coqdoctac{in} \coqdocvar{H3}. \coqdocvar{inv} \coqdocvar{H3}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{Unshelve}. \coqdoctac{auto}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.eval2}{eval2}{\coqdoclemma{eval2}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{v} \coqdocvar{p} \coqdocvar{n}, \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{IsAllGood} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})           \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}\coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})      \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{QueuedRequestsExist} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}) \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}\coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{CanSend} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})             \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}   \coqdoceol
+\coqdocnoindent
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{StopStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocdefinition{setAllGood} \coqdocconstructor{No}  (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}) \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{sendOnNetwork} (\coqdocdefinition{getMe} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})) (\coqdocdefinition{notMe} (\coqdocdefinition{getMe} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}))) \coqdocconstructor{constStop} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{))}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdocvar{dest} \coqdocvar{p}. \coqdoctac{unfold} \coqdocdefinition{OneProtocolStep}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleIsMyTurnToSend}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{simpl}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{apply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}. \coqdoctac{auto}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleCanSend}. \coqdocvar{s}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{s}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{apply} \coqdocconstructor{E\_Effect}. \coqdoctac{simpl}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdoctac{simpl}. \coqdoctac{apply} \coqdocconstructor{E\_ChainBad}. \coqdoctac{eapply} \coqdocconstructor{E\_SendStop}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.ifwillthenway}{ifwillthenway}{\coqdoclemma{ifwillthenway}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{st}, \coqdocdefinition{evalChoose} \coqdocconstructor{ExistsNextDesire} \coqdocvariable{st} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}\coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\exists}}} \coqdocvar{c}\coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{,}}  \coqdocdefinition{handleCompute} \coqdocconstructor{compGetNextRequest} \coqdocvariable{st} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{Some}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{Some}} \coqdocvariable{c} .\coqdoceol
+\coqdocindent{2.00em}
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{destruct} \coqdocvar{st}.\coqdoceol
+\coqdocindent{2.00em}
+\coqdoctac{simpl}. \coqdoctac{destruct} \coqdocvar{p}. \coqdoctac{destruct} \coqdocvar{r}. \coqdoctac{simpl} \coqdoctac{in} \coqdocvar{H}. \coqdocvar{inv} \coqdocvar{H}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{simpl} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{destruct} \coqdocvar{r}. \coqdoctac{\ensuremath{\exists}} (\coqdocconstructor{constRequest} \coqdocvar{d}). \coqdoctac{auto}.\coqdoceol
+\coqdocindent{2.00em}
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.eval3}{eval3}{\coqdoclemma{eval3}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{v} \coqdocvar{p} \coqdocvar{n}, \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{IsAllGood} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})           \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}\coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})      \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{QueuedRequestsExist} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}) \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}\coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{ExistsNextDesire} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})    \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}   \coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\exists}}} \coqdocvar{r}\coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{,}}\coqdoceol
+\coqdocnoindent
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{EndStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocdefinition{mvNextDesire} (\coqdocdefinition{assign} \coqdocconstructor{toSendMESSAGE} \coqdocvariable{r} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}))\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{sendOnNetwork} (\coqdocdefinition{getMe} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})) (\coqdocdefinition{notMe} (\coqdocdefinition{getMe} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}))) \coqdocvariable{r} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{))}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{destruct} \coqdocvar{p}. \coqdoctac{destruct} \coqdocvar{r}. \coqdocvar{sh}. \coqdocvar{inv} \coqdocvar{H2}. \coqdoctac{destruct} \coqdocvar{r}. \coqdoctac{unfold} \coqdocdefinition{OneProtocolStep}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eexists}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleIsMyTurnToSend}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{apply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleCantSend}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleExistsNextDesire}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{apply} \coqdocconstructor{E\_Compute}. \coqdocvar{s}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{r}. \coqdocvar{refl}. \coqdocvar{s}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdocvar{chain}. \coqdoctac{apply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdocvar{chain}. \coqdocvar{s}. \coqdoctac{apply} \coqdocconstructor{E\_Send}. \coqdocvar{s}. \coqdocvar{refl}. \coqdocvar{nono}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdocvar{chain}. \coqdocvar{s}. \coqdoctac{apply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}. \coqdoctac{destruct} \coqdocvar{a0}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{sh}. \coqdocvar{inv} \coqdocvar{H}. \coqdocvar{sh}. \coqdocvar{inv} \coqdocvar{H}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.eval4}{eval4}{\coqdoclemma{eval4}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{v} \coqdocvar{p} \coqdocvar{n}, \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{IsAllGood} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})           \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}\coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})      \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{QueuedRequestsExist} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}) \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}\coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{ExistsNextDesire} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})    \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{StopStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{sendOnNetwork} (\coqdocdefinition{getMe} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})) (\coqdocdefinition{notMe} (\coqdocdefinition{getMe} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}))) \coqdocconstructor{constStop} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{))}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{unfold} \coqdocdefinition{OneProtocolStep}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleIsMyTurnToSend}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{p}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdocvar{s}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdocvar{s}. \coqdoctac{apply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleCantSend}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleNoNextDesire}. \coqdocvar{chain}. \coqdoctac{apply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdoctac{apply} \coqdocconstructor{E\_ChainBad}. \coqdoctac{destruct} \coqdocvar{a0}. \coqdocvar{s}. \coqdocvar{sh}. \coqdoctac{apply} \coqdocconstructor{E\_SendStop}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{sh}. \coqdocvar{inv} \coqdocvar{H}. \coqdocvar{sh}. \coqdocvar{inv} \coqdocvar{H}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.eval5}{eval5}{\coqdoclemma{eval5}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{v} \coqdocvar{p} \coqdocvar{n} \coqdocvar{d} \coqdocvar{c}, \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})      \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{receiveN} \coqdocvariable{n} (\coqdocdefinition{getMe} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})) \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{Some}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{Some}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{constValue} \coqdocvariable{d} \coqdocvariable{c}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{tail}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Lists.List}{\coqdocabbreviation{tail}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\exists}}} \coqdocvar{pp'}\coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{,}}\coqdoceol
+\coqdocnoindent
+\coqdocdefinition{reduceStateWithMeasurement} (\coqdocconstructor{constValue} \coqdocvariable{d} \coqdocvariable{c}) (\coqdocdefinition{assign} \coqdocconstructor{receivedMESSAGE} (\coqdocconstructor{constValue} \coqdocvariable{d} \coqdocvariable{c}) (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})) \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocvariable{pp'} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{EndStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{assign} \coqdocconstructor{receivedMESSAGE} (\coqdocconstructor{constValue} \coqdocvariable{d} \coqdocvariable{c}) (\coqdocdefinition{reduceStateWithMeasurement} (\coqdocconstructor{constValue} \coqdocvariable{d} \coqdocvariable{c})(\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})) \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqexternalref{tail}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Lists.List}{\coqdocabbreviation{tail}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{unfold} \coqdocdefinition{OneProtocolStep}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{intros}. \coqdoctac{destruct} \coqdocvar{p}. \coqdoctac{destruct} (\coqdocdefinition{reduceUnresolved} \coqdocvar{d} \coqdocvar{c} \coqdocvar{r0}) \coqdocvar{eqn}:\coqdocvar{hh}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{destruct} \coqdocvar{a}. \coqdocvar{sh}. \coqdocvar{inv} \coqdocvar{H}. \coqdoctac{destruct} \coqdocvar{a0}. \coqdocvar{sh}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eexists}. \coqdoctac{intros}. \coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleNotMyTurnToSend}. \coqdocvar{chain}. \coqdoctac{apply} \coqdocconstructor{E\_Receive}. \coqdocvar{s}. \coqdoctac{rewrite} \coqdocvar{H0}. \coqdoctac{auto}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdocvar{nono}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdocvar{s}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdocvar{sh}. \coqdocvar{chain}. \coqdoctac{eapply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}. \coqdoctac{rewrite} \coqdocvar{hh}. \coqdoctac{rewrite} \coqdocvar{hh} \coqdoctac{in} \coqdocvar{H1}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{sh}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdoctac{eexists}. \coqdoctac{intros}. \coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleNotMyTurnToSend}. \coqdocvar{chain}. \coqdoctac{apply} \coqdocconstructor{E\_Receive}. \coqdocvar{s}. \coqdoctac{rewrite} \coqdocvar{H0}. \coqdoctac{auto}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdocvar{nono}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdocvar{s}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdocvar{sh}. \coqdocvar{chain}. \coqdoctac{eapply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}. \coqdoctac{rewrite} \coqdocvar{hh}. \coqdoctac{rewrite} \coqdocvar{hh} \coqdoctac{in} \coqdocvar{H1}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{sh}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdoctac{eexists}. \coqdoctac{intros}. \coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleNotMyTurnToSend}. \coqdocvar{chain}. \coqdoctac{apply} \coqdocconstructor{E\_Receive}. \coqdocvar{s}. \coqdoctac{rewrite} \coqdocvar{H0}. \coqdoctac{auto}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdocvar{nono}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdocvar{s}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdocvar{sh}. \coqdocvar{chain}. \coqdoctac{eapply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}. \coqdoctac{rewrite} \coqdocvar{hh}. \coqdoctac{rewrite} \coqdocvar{hh} \coqdoctac{in} \coqdocvar{H1}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{sh}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdoctac{eexists}. \coqdoctac{intros}. \coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleNotMyTurnToSend}. \coqdocvar{chain}. \coqdoctac{apply} \coqdocconstructor{E\_Receive}. \coqdocvar{s}. \coqdoctac{rewrite} \coqdocvar{H0}. \coqdoctac{auto}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdocvar{nono}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdocvar{s}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdocvar{sh}. \coqdocvar{chain}. \coqdoctac{eapply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}. \coqdoctac{rewrite} \coqdocvar{hh}. \coqdoctac{rewrite} \coqdocvar{hh} \coqdoctac{in} \coqdocvar{H1}. \coqdocvar{refl}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdocvar{Unshelve}. \coqdoctac{exact} (\coqdocconstructor{state} \coqdocvar{v} (\coqdocconstructor{proState} \coqdocconstructor{AReceive} \coqdocconstructor{Yes} \coqdocvar{p} \coqdocvar{p0} \coqdocvar{r} \coqdocvar{r0} \coqdocvar{l}) ) .\coqdoceol
+\coqdocnoindent
+\coqdoctac{exact} (\coqdocconstructor{state} \coqdocvar{v} (\coqdocconstructor{proState} \coqdocconstructor{AReceive} \coqdocconstructor{Yes} \coqdocvar{p} \coqdocvar{p0} \coqdocvar{r} \coqdocvar{r0} \coqdocvar{l}) ) .\coqdoceol
+\coqdocnoindent
+\coqdoctac{exact} (\coqdocconstructor{state} \coqdocvar{v} (\coqdocconstructor{proState} \coqdocconstructor{AReceive} \coqdocconstructor{Yes} \coqdocvar{p} \coqdocvar{p0} \coqdocvar{r} \coqdocvar{r0} \coqdocvar{l}) ) .\coqdoceol
+\coqdocnoindent
+\coqdoctac{exact} (\coqdocconstructor{state} \coqdocvar{v} (\coqdocconstructor{proState} \coqdocconstructor{AReceive} \coqdocconstructor{Yes} \coqdocvar{p} \coqdocvar{p0} \coqdocvar{r} \coqdocvar{r0} \coqdocvar{l}) ) .\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.eval6}{eval6}{\coqdoclemma{eval6}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{v} \coqdocvar{p} \coqdocvar{n} \coqdocvar{r}, \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})      \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{receiveN} \coqdocvariable{n} (\coqdocdefinition{getMe} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})) \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{Some}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{Some}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{constRequest} \coqdocvariable{r}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{tail}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Lists.List}{\coqdocabbreviation{tail}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{EndStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{storeRequest} \coqdocvariable{r} (\coqdocdefinition{assign} \coqdocconstructor{receivedMESSAGE} (\coqdocconstructor{constRequest} \coqdocvariable{r}) (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}))\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqexternalref{tail}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Lists.List}{\coqdocabbreviation{tail}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{unfold} \coqdocdefinition{OneProtocolStep}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleNotMyTurnToSend}. \coqdocvar{chain}. \coqdoctac{apply} \coqdocconstructor{E\_Receive}. \coqdoctac{rewrite} \coqdocvar{H0}. \coqdocvar{refl}. \coqdocvar{nono}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdocvar{s}. \coqdoctac{destruct} \coqdocvar{p}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdocvar{s}. \coqdoctac{destruct} \coqdocvar{p}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{p}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdocvar{chain}. \coqdoctac{apply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.eval7}{eval7}{\coqdoclemma{eval7}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{v} \coqdocvar{p} \coqdocvar{n}, \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})      \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{receiveN} \coqdocvariable{n} (\coqdocdefinition{getMe} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})) \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{Some}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{Some}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{constStop}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{tail}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Lists.List}{\coqdocabbreviation{tail}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{StopStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}  \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{assign} \coqdocconstructor{receivedMESSAGE} \coqdocconstructor{constStop} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqexternalref{tail}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Lists.List}{\coqdocabbreviation{tail}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{unfold} \coqdocdefinition{OneProtocolStep}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleNotMyTurnToSend}. \coqdoctac{apply} \coqdocconstructor{E\_ChainBad}. \coqdoctac{apply} \coqdocconstructor{E\_ReceiveStop}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.eval8}{eval8}{\coqdoclemma{eval8}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{v} \coqdocvar{p} \coqdocvar{n}, \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})      \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{receiveN} \coqdocvariable{n} (\coqdocdefinition{getMe} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})) \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{None}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{None}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{Wait} \coqdocnotation{>>} \coqdocnotation{(}\coqdocdefinition{proto\_handleNotMyTurnToSend} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})\coqdocnotation{)}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}   \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{unfold} \coqdocdefinition{OneProtocolStep}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{intros}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdoctac{apply} \coqdocconstructor{E\_ChainWait}. \coqdoctac{apply} \coqdocconstructor{E\_ReceiveWait}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eval1} \coqdocvar{eval2} \coqdocvar{eval3} \coqdocvar{eval4} \coqdocvar{eval5} \coqdocvar{eval6} \coqdocvar{eval7} \coqdocvar{eval8}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Reserved Notation} " x '⟱'  x'"\coqdoceol
+\coqdocindent{9.00em}
+(\coqdoctac{at} \coqdockw{level} 40).\coqdoceol
+\coqdocnoindent
+\coqdockw{Definition} \coqdef{TrueProtoSynth2.DualState}{DualState}{\coqdocdefinition{DualState}} : \coqdockw{Type} := (\coqexternalref{:type scope:x '*' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocinductive{Statement}\coqexternalref{:type scope:x '*' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{\ensuremath{\times}}}\coqdocinductive{State}\coqexternalref{:type scope:x '*' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x '*' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{\ensuremath{\times}}} \coqexternalref{:type scope:x '*' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocinductive{Statement}\coqexternalref{:type scope:x '*' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{\ensuremath{\times}}} \coqdocinductive{State}\coqexternalref{:type scope:x '*' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)*}} \coqdocdefinition{Network}).\coqdoceol
+\coqdocnoindent
+\coqdockw{Print} \coqref{TrueProtoSynth2.DualState}{\coqdocdefinition{DualState}}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{Inductive} \coqdef{TrueProtoSynth2.DualEval}{DualEval}{\coqdocinductive{DualEval}} : \coqref{TrueProtoSynth2.DualState}{\coqdocdefinition{DualState}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{TrueProtoSynth2.DualState}{\coqdocdefinition{DualState}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdockw{Prop} :=\coqdoceol
+\coqdocindent{0.50em}
+\coqdoceol
+\coqdocindent{8.50em}
+\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdef{TrueProtoSynth2.duLeft}{duLeft}{\coqdocconstructor{duLeft}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{leftSTM} \coqdocvar{leftState} \coqdocvar{rightSTM} \coqdocvar{rightState} \coqdocvar{n} \coqdocvar{leftState'} \coqdocvar{n'},\coqdoceol
+\coqdocindent{3.00em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocvariable{leftSTM} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{leftState}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{EndStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{leftState'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocindent{3.00em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{((}}\coqdocvariable{leftSTM}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{leftState}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocvariable{rightSTM}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{rightState}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqref{TrueProtoSynth2.::x 'xE2x9FxB1' x}{\coqdocnotation{⟱}}\coqdoceol
+\coqdocindent{7.50em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} (\coqdocdefinition{rever} \coqdocvariable{leftState'})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocdefinition{rever} \coqdocvariable{leftState'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),(}}\coqdocvariable{rightSTM}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{rightState}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}\coqdoceol
+\coqdocindent{3.50em}
+\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdef{TrueProtoSynth2.duRight}{duRight}{\coqdocconstructor{duRight}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{leftSTM} \coqdocvar{leftState} \coqdocvar{rightSTM} \coqdocvar{rightState} \coqdocvar{rightState'} \coqdocvar{n} \coqdocvar{n'},\coqdoceol
+\coqdocindent{3.00em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocvariable{rightSTM} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{rightState}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{EndStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{rightState'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}\coqdoceol
+\coqdocindent{3.00em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{((}}\coqdocvariable{leftSTM}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{leftState}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocvariable{rightSTM}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{rightState}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqref{TrueProtoSynth2.::x 'xE2x9FxB1' x}{\coqdocnotation{⟱}}\coqdoceol
+\coqdocindent{6.00em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{((}}\coqdocvariable{leftSTM}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{leftState}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} (\coqdocdefinition{rever} \coqdocvariable{rightState'})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocdefinition{rever} \coqdocvariable{rightState'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}\coqdoceol
+\coqdocindent{3.00em}
+\coqdoceol
+\coqdocindent{1.00em}
+\coqdoceol
+\coqdocindent{3.00em}
+\coqdoceol
+\coqdocindent{3.00em}
+\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdef{TrueProtoSynth2.duFinishLeftFirst}{duFinishLeftFirst}{\coqdocconstructor{duFinishLeftFirst}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{stmL} \coqdocvar{stL} \coqdocvar{stL'} \coqdocvar{stmR} \coqdocvar{stR} \coqdocvar{stR'} \coqdocvar{n} \coqdocvar{n'} \coqdocvar{n'{}'},\coqdoceol
+\coqdocindent{3.00em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocvariable{stmL} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{stL}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{StopStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{stL'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}\coqdoceol
+\coqdocindent{3.00em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocvariable{stmR}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{stR}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}  \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{StopStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{stR'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n'{}'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocindent{3.00em}
+\coqref{TrueProtoSynth2.DualEval}{\coqdocinductive{DualEval}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{((}}\coqdocvariable{stmL}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{stL}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocvariable{stmR}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{stR}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{((}}\coqdocconstructor{StopStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{stL'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{StopStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{stR'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n'{}'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdef{TrueProtoSynth2.duFinishRightFirst}{duFinishRightFirst}{\coqdocconstructor{duFinishRightFirst}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{stmL} \coqdocvar{stL} \coqdocvar{stL'} \coqdocvar{stmR} \coqdocvar{stR} \coqdocvar{stR'} \coqdocvar{n} \coqdocvar{n'} \coqdocvar{n'{}'},\coqdoceol
+\coqdocindent{3.00em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocvariable{stmR}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{stR}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}  \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{StopStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{stR'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocindent{3.00em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocvariable{stmL} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{stL}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{StopStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{stL'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n'{}'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocindent{3.00em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{((}}\coqdocvariable{stmL}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{stL}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocvariable{stmR}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{stR}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqref{TrueProtoSynth2.::x 'xE2x9FxB1' x}{\coqdocnotation{⟱}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{((}}\coqdocconstructor{StopStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{stL'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{StopStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{stR'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n'{}'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}\coqdoceol
+\coqdocindent{3.50em}
+\coqdockw{where} \coqdef{TrueProtoSynth2.::x 'xE2x9FxB1' x}{"}{"}x '⟱' x' " := (\coqref{TrueProtoSynth2.DualEval}{\coqdocinductive{DualEval}} \coqdocvar{x} \coqdocvar{x'}).\coqdoceol
+\coqdocindent{3.00em}
+\coqdockw{Hint Constructors} \coqref{TrueProtoSynth2.DualEval}{\coqdocinductive{DualEval}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Print} \coqdocinductive{MultiStep\_stmEval}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{TrueProtoSynth2.DualMultiStep}{DualMultiStep}{\coqdocinductive{DualMultiStep}} :  \coqref{TrueProtoSynth2.DualState}{\coqdocdefinition{DualState}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{TrueProtoSynth2.DualState}{\coqdocdefinition{DualState}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdockw{Prop} :=\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{TrueProtoSynth2.dualmultistep id}{dualmultistep\_id}{\coqdocconstructor{dualmultistep\_id}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{ds} \coqdocvar{ds'}, \coqdocvariable{ds} \coqref{TrueProtoSynth2.::x 'xE2x9FxB1' x}{\coqdocnotation{⟱}}  \coqdocvariable{ds'} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{TrueProtoSynth2.DualMultiStep}{\coqdocinductive{DualMultiStep}} \coqdocvariable{ds} \coqdocvariable{ds'} \coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{TrueProtoSynth2.dualmultistep step}{dualmultistep\_step}{\coqdocconstructor{dualmultistep\_step}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{ds1} \coqdocvar{ds1'} \coqdocvar{ds2} \coqdocvar{ds2'}, \coqdoceol
+\coqdocindent{2.00em}
+\coqdocvariable{ds1} \coqref{TrueProtoSynth2.::x 'xE2x9FxB1' x}{\coqdocnotation{⟱}}  \coqdocvariable{ds1'} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}\coqdoceol
+\coqdocindent{2.00em}
+\coqdocvariable{ds2} \coqref{TrueProtoSynth2.::x 'xE2x9FxB1' x}{\coqdocnotation{⟱}}  \coqdocvariable{ds2'} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}\coqdoceol
+\coqdocindent{2.00em}
+\coqref{TrueProtoSynth2.DualMultiStep}{\coqdocinductive{DualMultiStep}} \coqdocvariable{ds1} \coqdocvariable{ds2'}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Notation} \coqdef{TrueProtoSynth2.::x 'xE2x9FxB1*' x}{"}{"}x ⟱* y" := (\coqref{TrueProtoSynth2.DualMultiStep}{\coqdocinductive{DualMultiStep}} \coqdocvar{x} \coqdocvar{y}) (\coqdoctac{at} \coqdockw{level} 60).\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.thm DualMultiStepOneProtocolStep}{thm\_DualMultiStepOneProtocolStep}{\coqdoclemma{thm\_DualMultiStepOneProtocolStep}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{initReqs} \coqdocvar{ppApp} \coqdocvar{ppAtt}, \coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\exists}}} \coqdocvar{stL} \coqdocvar{stR}\coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{,}} \coqdoceol
+\coqdocnoindent
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{((}}\coqdocdefinition{OneProtocolStep} (\coqdocdefinition{mkAppraiserState} \coqdocvariable{ppApp} \coqdocvariable{initReqs})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocdefinition{mkAppraiserState} \coqdocvariable{ppApp} \coqdocvariable{initReqs}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}}  \coqdoceol
+\coqdocindent{0.50em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} (\coqdocdefinition{mkAttesterState} \coqdocvariable{ppAtt})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocdefinition{mkAttesterState} \coqdocvariable{ppAtt}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqexternalref{nil}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{nil}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdoceol
+\coqdocindent{0.50em}
+\coqref{TrueProtoSynth2.::x 'xE2x9FxB1*' x}{\coqdocnotation{⟱*}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{((}}\coqdocconstructor{StopStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{stL}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),(}}\coqdocconstructor{StopStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{stR}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqexternalref{nil}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{nil}}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{intros}. \coqdoctac{eexists}. \coqdoctac{eexists}. \coqdockw{Check} \coqref{TrueProtoSynth2.eval1}{\coqdoclemma{eval1}}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{unfold} \coqdocdefinition{mkAttesterState}. \coqdoctac{unfold} \coqdocdefinition{mkAppraiserState}. \coqdoctac{unfold} \coqdocdefinition{mkState}. \coqdocvar{sh}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdocvar{remember} (\coqdocconstructor{state} \coqexternalref{nil}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{nil}}\coqdoceol
+\coqdocindent{3.00em}
+(\coqdocconstructor{proState} \coqdocconstructor{ASend} \coqdocconstructor{Yes} \coqdocconstructor{APPRAISER} \coqdocvar{ppApp} \coqdocvar{initReqs} \coqdocconstructor{emptyRequestLS} \coqexternalref{nil}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{nil}})) \coqdockw{as} \coqdocvar{stL}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdocvar{remember} (\coqdocconstructor{state} \coqexternalref{nil}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{nil}}\coqdoceol
+\coqdocindent{3.00em}
+(\coqdocconstructor{proState} \coqdocconstructor{AReceive} \coqdocconstructor{Yes} \coqdocconstructor{ATTESTER} \coqdocvar{ppAtt} \coqdocconstructor{emptyRequestLS} \coqdocconstructor{emptyRequestLS} \coqexternalref{nil}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{nil}})) \coqdockw{as} \coqdocvar{stR}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} (\coqdocdefinition{evalChoose} \coqdocconstructor{IsAllGood} \coqdocvar{stL}) \coqdocvar{eqn}:\coqdocvar{allgood}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Check} \coqref{TrueProtoSynth2.eval1}{\coqdoclemma{eval1}}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{assert} (\coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} \coqdocvar{stL} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}}). \coqdoctac{rewrite} \coqdocvar{HeqstL}. \coqdocvar{s}. \coqdoctac{auto}.\coqdoceol
+\coqdocindent{1.00em}
+\coqdockw{Check} \coqref{TrueProtoSynth2.eval1}{\coqdoclemma{eval1}}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} (\coqdocdefinition{evalChoose} \coqdocconstructor{QueuedRequestsExist} \coqdocvar{stL}) \coqdocvar{eqn}:\coqdocvar{quedReq}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Check} \coqref{TrueProtoSynth2.eval1}{\coqdoclemma{eval1}}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} (\coqdocdefinition{evalChoose} \coqdocconstructor{CanSend} \coqdocvar{stL}) \coqdocvar{eqn}:\coqdocvar{cansend}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eapply} \coqref{TrueProtoSynth2.dualmultistep step}{\coqdocconstructor{dualmultistep\_step}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdoctac{specialize} \coqref{TrueProtoSynth2.eval1}{\coqdoclemma{eval1}}; \coqdoctac{intros}. \coqdockw{Abort}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.onlyEffect effects}{onlyEffect\_effects}{\coqdoclemma{onlyEffect\_effects}} : \coqdockw{\ensuremath{\forall}} (\coqdocvar{stm} \coqdocvar{stm'}: \coqdocinductive{Statement}) (\coqdocvar{st} \coqdocvar{st'}: \coqdocinductive{State}) (\coqdocvar{n} \coqdocvar{n'} : \coqdocdefinition{Network}),\coqdoceol
+\coqdocindent{0.50em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocvariable{stm}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocvariable{stm'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{st'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}  \coqdoceol
+\coqdocindent{0.50em}
+\coqdocdefinition{getProState} \coqdocvariable{st} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocdefinition{getProState} \coqdocvariable{st'} \coqexternalref{:type scope:x 'x5C/' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\lor}}} \coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\exists}}} \coqdocvar{e}\coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{,}} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqdocdefinition{headStatement} \coqdocvariable{stm}\coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocconstructor{EffectStatement} \coqdocvariable{e}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{intro}. \coqdoctac{induction} \coqdocvar{stm} ; \coqdoctac{try} (\coqdoctac{intros}; \coqdoctac{inversion} \coqdocvar{H}; \coqdoctac{left}; \coqdoctac{reflexivity}).\coqdoceol
+\coqdocnoindent
+\coqdoctac{intros}. \coqdoctac{simpl}. \coqdoctac{left}. \coqdoctac{inversion} \coqdocvar{H}. \coqdoctac{subst}. \coqdoctac{destruct} \coqdocvar{st}. \coqdoctac{auto}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{st}; \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{intros}. \coqdoctac{right}. \coqdoctac{\ensuremath{\exists}} \coqdocvar{e}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{intros}. \coqdoctac{left}. \coqdoctac{inversion} \coqdocvar{H}; \coqdoctac{subst};   \coqdoctac{destruct} \coqdocvar{st}; \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{intros}; \coqdoctac{left}; \coqdoctac{destruct} \coqdocvar{st}; \coqdoctac{inversion} \coqdocvar{H}; \coqdoctac{subst}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{simpl}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{intros}; \coqdoctac{inversion} \coqdocvar{H}; \coqdoctac{subst}. \coqdoctac{eapply} \coqdocvar{IHstm1}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eauto}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eapply} \coqdocvar{IHstm1}; \coqdoctac{eauto}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eapply} \coqdocvar{IHstm1}; \coqdoctac{eauto}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eapply} \coqdocvar{IHstm1}; \coqdoctac{constructor};  \coqdoctac{eauto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{onlyEffect\_effects}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.receiveAlwaysFinishes}{receiveAlwaysFinishes}{\coqdoclemma{receiveAlwaysFinishes}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{vars} \coqdocvar{prst} \coqdocvar{n} \coqdocvar{m} \coqdocvar{n'}, \coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} (\coqdocconstructor{state} \coqdocvariable{vars} \coqdocvariable{prst}) \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocindent{0.50em}
+\coqdocdefinition{receiveN} \coqdocvariable{n} (\coqdocdefinition{getMe} (\coqdocconstructor{state} \coqdocvariable{vars} \coqdocvariable{prst})) \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{Some}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{Some}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocvariable{m}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocindent{0.50em}
+\coqdocvariable{m} \coqexternalref{:type scope:x '<>' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\not=}}} \coqdocconstructor{constStop} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}  \coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\exists}}} \coqdocvar{prst'}\coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{,}}\coqdoceol
+\coqdocindent{0.50em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} (\coqdocconstructor{state} \coqdocvariable{vars} \coqdocvariable{prst})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{state} \coqdocvariable{vars} \coqdocvariable{prst}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{EndStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{state} (\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{receivedMESSAGE}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{m}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}\coqexternalref{:list scope:x '::' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{::}}\coqdocvariable{vars}) \coqdocvariable{prst'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{destruct} \coqdocvar{m}, \coqdocvar{prst}. \coqdoctac{destruct} (\coqdocdefinition{reduceUnresolved} \coqdocvar{d} \coqdocvar{m} \coqdocvar{r0}) \coqdocvar{eqn}:\coqdocvar{unres}. \coqdoctac{eexists}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdocvar{c}. \coqdoctac{unfold} \coqdocdefinition{OneProtocolStep}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{proto}. \coqdocvar{step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleNotMyTurnToSend}. \coqdocvar{c}. \coqdocvar{c}. \coqdoctac{apply} \coqdocvar{H0}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdocvar{proto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdocvar{c}. \coqdocvar{c}. \coqdoctac{simpl}. \coqdoctac{rewrite} \coqdocvar{unres}. \coqdoctac{reflexivity}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdoctac{eexists}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdocvar{c}. \coqdoctac{unfold} \coqdocdefinition{OneProtocolStep}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{proto}. \coqdocvar{step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleNotMyTurnToSend}. \coqdocvar{c}. \coqdocvar{c}. \coqdoctac{apply} \coqdocvar{H0}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdocvar{proto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdocvar{c}. \coqdocvar{c}. \coqdoctac{simpl}. \coqdoctac{rewrite} \coqdocvar{unres}. \coqdoctac{reflexivity}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdoctac{eexists}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdocvar{c}. \coqdoctac{unfold} \coqdocdefinition{OneProtocolStep}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{proto}. \coqdocvar{step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleNotMyTurnToSend}. \coqdocvar{c}. \coqdocvar{c}. \coqdoctac{apply} \coqdocvar{H0}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdocvar{proto}. \coqdoctac{simpl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{step}. \coqdocvar{proto}. \coqdocvar{c}. \coqdocvar{c}. \coqdocvar{c}. \coqdoctac{reflexivity}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{nono} \coqdocvar{H1}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Lemma} \coqdef{TrueProtoSynth2.mkAtt and App have rev actions}{mkAtt\_and\_App\_have\_rev\_actions}{\coqdoclemma{mkAtt\_and\_App\_have\_rev\_actions}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{ppP} \coqdocvar{ppT} \coqdocvar{reqls}, \coqdoceol
+\coqdocindent{0.50em}
+\coqdocdefinition{reverse}(\coqdocdefinition{getAction}(\coqdocdefinition{mkAttesterState} \coqdocvariable{ppT})) \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocdefinition{getAction}(\coqdocdefinition{mkAppraiserState} \coqdocvariable{ppP} \coqdocvariable{reqls}).\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}; \coqdoctac{auto}. \coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Notation} \coqdef{TrueProtoSynth2.::x 'xE2x9FxB1xE2x9FxB1' x}{"}{"}x ⟱⟱  x'" := (\coqref{TrueProtoSynth2.DualMultiStep}{\coqdocinductive{DualMultiStep}} \coqdocvar{x} \coqdocvar{x'}) (\coqdoctac{at} \coqdockw{level} 35).\coqdoceol
+\coqdocemptyline
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.proto1}{proto1}{\coqdoclemma{proto1}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{st} \coqdocvar{n}, \coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} \coqdocvariable{st} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocindent{0.50em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒}  \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{proto\_handleIsMyTurnToSend} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{constructor}; \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.proto0}{proto0}{\coqdoclemma{proto0}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{st} \coqdocvar{n}, \coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} \coqdocvariable{st} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocindent{0.50em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{proto\_handleNotMyTurnToSend} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{constructor}; \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.proto11}{proto11}{\coqdoclemma{proto11}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{st} \coqdocvar{n}, \coqdocdefinition{evalChoose} \coqdocconstructor{IsAllGood} \coqdocvariable{st} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocindent{0.50em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{proto\_handleIsMyTurnToSend} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{EffectStatement} (\coqdocconstructor{effect\_setAllGood} \coqdocconstructor{Unset}) \coqdocnotation{>>}\coqdoceol
+\coqdocindent{2.50em}
+\coqdocnotation{(}\coqdocnotation{IFS} \coqdocconstructor{QueuedRequestsExist} \coqdocnotation{THEN} \coqdocdefinition{proto\_handleCanSend} \coqdocvariable{st}\coqdoceol
+\coqdocindent{3.00em}
+\coqdocnotation{ELSE} \coqdocdefinition{proto\_handleCantSend} \coqdocvariable{st}\coqdocnotation{)}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleIsMyTurnToSend}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{unfold} \coqdocdefinition{proto\_handleCanSend}. \coqdoctac{eapply} \coqdocconstructor{E\_ChooseTrue}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.onlySendOrReceiveChangesNetwork}{onlySendOrReceiveChangesNetwork}{\coqdoclemma{onlySendOrReceiveChangesNetwork}} : \coqdockw{\ensuremath{\forall}} (\coqdocvar{stm} \coqdocvar{stm'}: \coqdocinductive{Statement}) (\coqdocvar{st} \coqdocvar{st'}: \coqdocinductive{State}) (\coqdocvar{n} \coqdocvar{n'} : \coqdocdefinition{Network}),\coqdoceol
+\coqdocindent{0.50em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocvariable{stm}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocvariable{stm'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{st'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocindent{0.50em}
+\coqdocvariable{n} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocvariable{n'} \coqexternalref{:type scope:x 'x5C/' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\lor}}}\coqdoceol
+\coqdocindent{0.50em}
+\coqexternalref{:type scope:x 'x5C/' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\exists}}} \coqdocvar{t} \coqdocvar{p1} \coqdocvar{p2}\coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{,}} \coqdocdefinition{headStatement} \coqdocvariable{stm} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocconstructor{SendStatement} \coqdocvariable{t} \coqdocvariable{p1} \coqdocvariable{p2}\coqexternalref{:type scope:x 'x5C/' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x 'x5C/' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\lor}}}\coqdoceol
+\coqdocindent{0.50em}
+\coqexternalref{:type scope:x 'x5C/' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\exists}}} \coqdocvar{vid}\coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{,}} \coqdocdefinition{headStatement} \coqdocvariable{stm} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocconstructor{ReceiveStatement} \coqdocvariable{vid}\coqexternalref{:type scope:x 'x5C/' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}}\coqdoceol
+\coqdocindent{0.50em}
+.\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{Proof}. \coqdoctac{intro}; \coqdoctac{induction} \coqdocvar{stm}; \coqdoctac{intros}; \coqdoctac{try} (\coqdoctac{right}; \coqdoctac{left}; \coqdoctac{\ensuremath{\exists}} \coqdocvar{t}; \coqdoctac{\ensuremath{\exists}} \coqdocvar{p}; \coqdoctac{\ensuremath{\exists}} \coqdocvar{p0}; \coqdoctac{reflexivity}) ||\coqdoceol
+\coqdocindent{0.50em}
+(\coqdoctac{try} (\coqdoctac{left}; \coqdoctac{inversion} \coqdocvar{H}; \coqdoctac{subst}; \coqdoctac{reflexivity})).\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{inversion} \coqdocvar{H}; \coqdoctac{subst}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{right}. \coqdoctac{right}; \coqdoctac{\ensuremath{\exists}} \coqdocvar{v}; \coqdoctac{auto}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{left}; \coqdoctac{reflexivity}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{right}; \coqdoctac{right}; \coqdoctac{\ensuremath{\exists}} \coqdocvar{v}; \coqdoctac{auto}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{inversion} \coqdocvar{H}; \coqdoctac{subst}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{eauto}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{eauto}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{eauto}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{eauto}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.receiveTurnAlwaysFinishes}{receiveTurnAlwaysFinishes}{\coqdoclemma{receiveTurnAlwaysFinishes}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{st} \coqdocvar{n},  \coqdoceol
+\coqdocindent{0.50em}
+\coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} \coqdocvariable{st} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}  \coqdoceol
+\coqdocindent{0.50em}
+\coqdocdefinition{receiveN} \coqdocvariable{n} (\coqdocdefinition{getMe} \coqdocvariable{st}) \coqexternalref{:type scope:x '<>' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\not=}}} \coqexternalref{None}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{None}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\exists}}} \coqdocvar{st'} \coqdocvar{n'}\coqexternalref{:type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{,}} \coqdoceol
+\coqdocindent{0.50em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{EndStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{st'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x 'x5C/' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\lor}}}\coqdoceol
+\coqdocindent{0.50em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{StopStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{st'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{destruct} (\coqdocdefinition{receiveN} \coqdocvar{n} (\coqdocdefinition{getMe} \coqdocvar{st})) \coqdocvar{eqn}:\coqdocvar{recstat}. \coqdoctac{destruct} \coqdocvar{p}. \coqdoctac{destruct} \coqdocvar{c}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{st}. \coqdoctac{destruct} \coqdocvar{p}. \coqdoctac{destruct} (\coqdocdefinition{reduceUnresolved} \coqdocvar{d} \coqdocvar{m} \coqdocvar{r0}) \coqdocvar{eqn}:\coqdocvar{hh}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{eexists}. \coqdoctac{eexists}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{left}. \coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdoctac{constructor}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{auto}.\coqdoceol
+\coqdocindent{4.00em}
+\coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleNotMyTurnToSend}. \coqdoctac{constructor}. \coqdoctac{constructor}. \coqdoctac{constructor}.\coqdoceol
+\coqdocindent{4.00em}
+\coqdoctac{apply} \coqdocvar{recstat}. \coqdocvar{nono}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdocvar{c}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdocvar{s}. \coqdoctac{auto}. \coqdocvar{s}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{apply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{rewrite} \coqdocvar{hh}. \coqdocvar{refl}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdoctac{eexists}. \coqdoctac{eexists}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{left}. \coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdoctac{constructor}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{auto}.\coqdoceol
+\coqdocindent{4.00em}
+\coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleNotMyTurnToSend}. \coqdoctac{constructor}. \coqdoctac{constructor}. \coqdoctac{constructor}.\coqdoceol
+\coqdocindent{4.00em}
+\coqdoctac{apply} \coqdocvar{recstat}. \coqdocvar{nono}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdocvar{c}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseTrue}. \coqdocvar{s}. \coqdoctac{auto}. \coqdocvar{s}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{apply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{rewrite} \coqdocvar{hh}. \coqdocvar{refl}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{st}. \coqdoctac{destruct} \coqdocvar{p}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eexists}. \coqdoctac{eexists}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{left}. \coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdoctac{constructor}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{auto}.\coqdoceol
+\coqdocindent{4.00em}
+\coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleNotMyTurnToSend}. \coqdoctac{constructor}. \coqdoctac{constructor}. \coqdoctac{constructor}.\coqdoceol
+\coqdocindent{4.00em}
+\coqdoctac{apply} \coqdocvar{recstat}. \coqdocvar{nono}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdocvar{c}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdocvar{s}. \coqdoctac{auto}. \coqdocvar{s}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdocvar{c}. \coqdoctac{eapply} \coqdocconstructor{E\_ChooseTrue}. \coqdocvar{s}. \coqdocvar{refl}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdoctac{apply} \coqdocconstructor{E\_Chain}. \coqdoctac{apply} \coqdocconstructor{E\_Effect}. \coqdocvar{s}. \coqdocvar{refl}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{st}. \coqdoctac{destruct} \coqdocvar{p}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eexists}. \coqdoctac{eexists}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdoctac{right}. \coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdoctac{constructor}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{auto}.\coqdoceol
+\coqdocindent{0.50em}
+\coqdocvar{c}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleNotMyTurnToSend}.\coqdoceol
+\coqdocindent{5.00em}
+\coqdoctac{constructor}. \coqdoctac{eapply} \coqdocconstructor{E\_ReceiveStop}. \coqdoctac{apply} \coqdocvar{recstat}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{nono} \coqdocvar{H0}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Fixpoint} \coqdef{TrueProtoSynth2.mostRecentFromMe}{mostRecentFromMe}{\coqdocdefinition{mostRecentFromMe}} (\coqdocvar{st} : \coqdocinductive{State}) (\coqdocvar{n} : \coqdocdefinition{Network}) : \coqexternalref{bool}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocinductive{bool}} :=\coqdoceol
+\coqdocnoindent
+\coqdockw{match} \coqdocvariable{n} \coqdockw{with}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqexternalref{nil}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{nil}} \ensuremath{\Rightarrow} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqexternalref{cons}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{cons}} \coqdocvar{m} \coqexternalref{nil}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{nil}} \ensuremath{\Rightarrow} \coqdockw{match} \coqdocvar{m} \coqdockw{with}\coqdoceol
+\coqdocindent{2.00em}
+\ensuremath{|} \coqdocconstructor{networkMessage} \coqdocvar{f} \coqdocvar{\_} \coqdocvar{\_} \ensuremath{\Rightarrow} \coqdockw{if} (\coqdoclemma{eq\_dec\_Participant} \coqdocvar{f} (\coqdocdefinition{getMe} \coqdocvariable{st})) \coqdockw{then} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqdockw{else} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}}\coqdoceol
+\coqdocindent{2.00em}
+\coqdockw{end}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqexternalref{cons}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{cons}} \coqdocvar{\_} \coqdocvar{ls} \ensuremath{\Rightarrow} \coqref{TrueProtoSynth2.mostRecentFromMe}{\coqdocdefinition{mostRecentFromMe}} \coqdocvariable{st} \coqdocvar{ls}\coqdoceol
+\coqdocnoindent
+\coqdockw{end}.\coqdoceol
+\coqdocemptyline
+\coqdocemptyline
+\coqdocindent{0.50em}
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.evalSendTurn}{evalSendTurn}{\coqdoclemma{evalSendTurn}} : \coqdockw{\ensuremath{\forall}}  \coqdocvar{st} \coqdocvar{n}, \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} \coqdocvariable{st}\coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} \coqdocvariable{st} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{proto\_handleIsMyTurnToSend} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{intros}; \coqdoctac{unfold} \coqdocdefinition{OneProtocolStep}; \coqdoctac{constructor}; \coqdoctac{assumption}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{evalSendTurn}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.evalReceiveTurn}{evalReceiveTurn}{\coqdoclemma{evalReceiveTurn}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{st} \coqdocvar{n}, \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} \coqdocvariable{st}\coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} \coqdocvariable{st} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{proto\_handleNotMyTurnToSend} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}; \coqdoctac{unfold} \coqdocdefinition{OneProtocolStep}; \coqdoctac{constructor}; \coqdoctac{assumption}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{evalReceiveTurn}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.eval myTurnToSend queuedRequest}{eval\_myTurnToSend\_queuedRequest}{\coqdoclemma{eval\_myTurnToSend\_queuedRequest}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{st} \coqdocvar{n}, \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqdocdefinition{evalChoose} \coqdocconstructor{QueuedRequestsExist} \coqdocvariable{st}\coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}\coqdoceol
+\coqdocnoindent
+\coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqdocdefinition{evalChoose} \coqdocconstructor{IsAllGood} \coqdocvariable{st}\coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}  \coqdoceol
+\coqdocindent{0.50em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{proto\_handleIsMyTurnToSend} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqdoceol
+\coqdocnoindent
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{proto\_handleCanSend} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocdefinition{setAllGood} \coqdocconstructor{Unset} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{unfold} \coqdocdefinition{proto\_handleIsMyTurnToSend}. \coqdoctac{eapply} \coqdocconstructor{multistep\_step}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{cca}. \coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdocvar{c}. \coqdoctac{eapply} \coqdocconstructor{E\_Chain}. \coqdocvar{cca}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdocvar{s}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{s}. \coqdoctac{eapply} \coqdocconstructor{E\_ChooseTrue}. \coqdoctac{destruct} \coqdocvar{st}. \coqdoctac{destruct} \coqdocvar{p}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eval\_myTurnToSend\_queuedRequest}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.eval myTurnToSend NOqueuedRequest}{eval\_myTurnToSend\_NOqueuedRequest}{\coqdoclemma{eval\_myTurnToSend\_NOqueuedRequest}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{st} \coqdocvar{n}, \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqdocdefinition{evalChoose} \coqdocconstructor{QueuedRequestsExist} \coqdocvariable{st}\coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}\coqdoceol
+\coqdocindent{0.50em}
+\coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqdocdefinition{evalChoose} \coqdocconstructor{IsAllGood} \coqdocvariable{st}\coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}  \coqdoceol
+\coqdocnoindent
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{proto\_handleIsMyTurnToSend} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqdoceol
+\coqdocnoindent
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{proto\_handleCantSend} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocdefinition{setAllGood} \coqdocconstructor{Unset} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}; \coqdoctac{unfold} \coqdocdefinition{proto\_handleIsMyTurnToSend}. \coqdoctac{eapply} \coqdocconstructor{multistep\_step}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{cca}. \coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdocvar{c}. \coqdoctac{eapply} \coqdocconstructor{E\_Chain}. \coqdocvar{cca}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{c}. \coqdocvar{s}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{s}. \coqdoctac{eapply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{destruct} \coqdocvar{st}. \coqdoctac{destruct} \coqdocvar{p}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eval\_myTurnToSend\_NOqueuedRequest}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.eval existsNextDesire}{eval\_existsNextDesire}{\coqdoclemma{eval\_existsNextDesire}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{st} \coqdocvar{n}, \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqdocdefinition{evalChoose} \coqdocconstructor{ExistsNextDesire} \coqdocvariable{st}\coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqdocdefinition{evalChoose} \coqdocconstructor{IsAllGood} \coqdocvariable{st}\coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}  \coqdoceol
+\coqdocnoindent
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{proto\_handleCantSend} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒}\coqdoceol
+\coqdocindent{0.50em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{proto\_handleExistsNextDesire} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}\coqdoceol
+\coqdocnoindent
+.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}; \coqdoctac{unfold} \coqdocdefinition{proto\_handleIsMyTurnToSend}. \coqdocvar{cca}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eval\_existsNextDesire}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Print} \coqdocdefinition{OneProtocolStep}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.eval NoNextDesire}{eval\_NoNextDesire}{\coqdoclemma{eval\_NoNextDesire}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{st} \coqdocvar{n}, \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqdocdefinition{evalChoose} \coqdocconstructor{ExistsNextDesire} \coqdocvariable{st}\coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{proto\_handleCantSend} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒} \coqdoceol
+\coqdocindent{0.50em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{proto\_handleNoNextDesire} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}\coqdoceol
+\coqdocnoindent
+.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}; \coqdoctac{unfold} \coqdocdefinition{proto\_handleIsMyTurnToSend}; \coqdoctac{constructor}; \coqdoctac{assumption}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eval\_NoNextDesire}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.sendTurnHelper}{sendTurnHelper}{\coqdoclemma{sendTurnHelper}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{st}, \coqdocdefinition{isMyTurn} \coqdocvariable{st} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} \coqdocvariable{st} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{true}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{true}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{intros}. \coqdoctac{destruct} \coqdocvar{st}. \coqdoctac{destruct} \coqdocvar{p}. \coqdoctac{auto}. \coqdockw{Qed}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{sendTurnHelper}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.varSubstConst}{varSubstConst}{\coqdoclemma{varSubstConst}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{st} \coqdocvar{c}, \coqdocdefinition{varSubst} (\coqdocconstructor{const} \coqdocvariable{c}) \coqdocvariable{st} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{Some}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{Some}} \coqdocvariable{c}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{destruct} \coqdocvar{st}. \coqdoctac{destruct} \coqdocvar{v}. \coqdoctac{auto}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{varSubstConst}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Hint Unfold} \coqdocdefinition{OneProtocolStep}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Unfold} \coqdocdefinition{proto\_handleCanSend}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Unfold} \coqdocdefinition{proto\_handleCantSend}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Unfold} \coqdocdefinition{proto\_handleNoNextDesire}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Unfold} \coqdocdefinition{proto\_handleIsMyTurnToSend}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Unfold} \coqdocdefinition{proto\_handleNotMyTurnToSend}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Unfold} \coqdocdefinition{proto\_handleExistsNextDesire}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.sendOnNetworkAppends}{sendOnNetworkAppends}{\coqdoclemma{sendOnNetworkAppends}} : \coqdockw{\ensuremath{\forall}}  \coqdocvar{f} \coqdocvar{t} \coqdocvar{c} \coqdocvar{n}, \coqexternalref{length}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Lists.List}{\coqdocabbreviation{length}} (\coqdocdefinition{sendOnNetwork} \coqdocvariable{f} \coqdocvariable{t} \coqdocvariable{c} \coqdocvariable{n}) \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{length}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Lists.List}{\coqdocabbreviation{length}} \coqdocvariable{n} \coqexternalref{:nat scope:x '+' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Peano}{\coqdocnotation{+}} 1.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{induction} \coqdocvar{n}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{simpl}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{sendOnNetworkAppends}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Import} \coqexternalref{}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.omega.Omega}{\coqdoclibrary{Omega}}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.receiveWhenStop}{receiveWhenStop}{\coqdoclemma{receiveWhenStop}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{n} \coqdocvar{vid} \coqdocvar{v} \coqdocvar{p} \coqdocvar{n'},\coqdoceol
+\coqdocnoindent
+\coqdocdefinition{receiveN} \coqdocvariable{n} (\coqdocdefinition{getMe} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})) \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{Some}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{Some}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{constStop}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}\coqdoceol
+\coqdocnoindent
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{ReceiveStatement} \coqdocvariable{vid}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒}\coqdoceol
+\coqdocnoindent
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{StopStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocdefinition{assign} \coqdocvariable{vid} \coqdocconstructor{constStop} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{eapply} \coqdocconstructor{E\_ReceiveStop}. \coqdoctac{assumption}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.oneStepProtoStopsWhenTold}{oneStepProtoStopsWhenTold}{\coqdoclemma{oneStepProtoStopsWhenTold}} :\coqdockw{\ensuremath{\forall}} \coqdocvar{v} \coqdocvar{p} \coqdocvar{n} \coqdocvar{n'}, \coqdocdefinition{evalChoose} \coqdocconstructor{IsMyTurntoSend} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}) \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{false}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{false}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{receiveN} \coqdocvariable{n} (\coqdocdefinition{getMe} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})) \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{Some}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{Some}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{constStop}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocnoindent
+\coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocdefinition{OneProtocolStep} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}) \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{),}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒*} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{StopStatement}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocdefinition{assign} \coqdocconstructor{receivedMESSAGE} \coqdocconstructor{constStop} (\coqdocconstructor{state} \coqdocvariable{v} \coqdocvariable{p})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}}\coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} .\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{eapply} \coqdocconstructor{multistep\_step}. \coqdoctac{constructor}. \coqdoctac{apply} \coqdocconstructor{E\_ChooseFalse}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{constructor}. \coqdoctac{constructor}. \coqdoctac{apply} \coqref{TrueProtoSynth2.receiveWhenStop}{\coqdoclemma{receiveWhenStop}}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Definition} \coqdef{TrueProtoSynth2.getPrivacy}{getPrivacy}{\coqdocdefinition{getPrivacy}} (\coqdocvar{st} : \coqdocinductive{State}) : \coqdocinductive{PrivacyPolicy} :=\coqdoceol
+\coqdocnoindent
+\coqdockw{match} \coqdocvariable{st} \coqdockw{with}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdocconstructor{state} \coqdocvar{\_} \coqdocvar{ps} \ensuremath{\Rightarrow} \coqdockw{match} \coqdocvar{ps} \coqdockw{with}\coqdoceol
+\coqdocindent{2.00em}
+\ensuremath{|} \coqdocconstructor{proState} \coqdocvar{\_} \coqdocvar{\_} \coqdocvar{\_} \coqdocvar{pp} \coqdocvar{\_} \coqdocvar{\_} \coqdocvar{\_} \ensuremath{\Rightarrow} \coqdocvar{pp}\coqdoceol
+\coqdocnoindent
+\coqdockw{end}\coqdoceol
+\coqdocnoindent
+\coqdockw{end}.\coqdoceol
+\coqdocnoindent
+\coqdockw{SearchAbout} \coqdocinductive{PrivacyPolicy}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.isRemovedFromPrivacyhandleST}{isRemovedFromPrivacyhandleST}{\coqdoclemma{isRemovedFromPrivacyhandleST}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{st} \coqdocvar{d}, \coqdoceol
+\coqdocnoindent
+\coqdocdefinition{findandMeasureItem} (\coqref{TrueProtoSynth2.getPrivacy}{\coqdocdefinition{getPrivacy}} (\coqdocdefinition{handleRequestST} \coqdocvariable{st} \coqdocvariable{d})) \coqdocvariable{d} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{None}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{None}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{destruct} \coqdocvar{st}. \coqdoctac{simpl}. \coqdoctac{destruct} \coqdocvar{p}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{p0}. \coqdoctac{simpl}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{simpl}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} (\coqdoclemma{eq\_dec\_Description} \coqdocvar{d0} \coqdocvar{d}). \coqdoctac{destruct} \coqdocvar{r1}; \coqdoctac{simpl}; \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} (\coqdocdefinition{findandMeasureItem} \coqdocvar{p0} \coqdocvar{d}). \coqdoctac{destruct} \coqdocvar{p1}. \coqdoctac{simpl}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{r1};\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} (\coqdoclemma{eq\_dec\_Description} \coqdocvar{d0} \coqdocvar{d}); \coqdocvar{contradiction} || \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{simpl}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{r1};\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} (\coqdoclemma{eq\_dec\_Description} \coqdocvar{d0} \coqdocvar{d}); \coqdocvar{contradiction} || \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{isRemovedFromPrivacyhandleST}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.isRemovedFromPrivacy}{isRemovedFromPrivacy}{\coqdoclemma{isRemovedFromPrivacy}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{st} \coqdocvar{st'} \coqdocvar{n} \coqdocvar{t} \coqdocvar{d}, \coqdoceol
+\coqdocindent{1.00em}
+\coqdocdefinition{varSubst} \coqdocvariable{t} \coqdocvariable{st} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{Some}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{Some}} (\coqdocconstructor{constRequest} \coqdocvariable{d}) \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocindent{1.00em}
+\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{EffectStatement} (\coqdocconstructor{effect\_ReducePrivacyWithRequest} \coqdocvariable{t})\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqdocnotation{⇒} \coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{(}}\coqdocconstructor{Skip}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}} \coqdocvariable{st'}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{,}}\coqdocvariable{n}\coqexternalref{:core scope:'(' x ',' x ',' '..' ',' x ')'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdoceol
+\coqdocindent{1.00em}
+\coqdocdefinition{findandMeasureItem} (\coqref{TrueProtoSynth2.getPrivacy}{\coqdocdefinition{getPrivacy}} \coqdocvariable{st'}) \coqdocvariable{d} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{None}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{None}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intros}. \coqdoctac{inversion} \coqdocvar{H0}; \coqdoctac{subst}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{simpl} \coqdoctac{in} \coqdocvar{H2}. \coqdoctac{rewrite} \coqdocvar{H} \coqdoctac{in} \coqdocvar{H2}. \coqdoctac{inversion} \coqdocvar{H2}. \coqdoctac{subst}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{TrueProtoSynth2.x}{x}{\coqdoclemma{x}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{d} \coqdocvar{st}, \coqdocdefinition{findandMeasureItem} (\coqref{TrueProtoSynth2.getPrivacy}{\coqdocdefinition{getPrivacy}} (\coqdocdefinition{rm\_f\_Privacy\_w\_RequestST} \coqdocvariable{d} \coqdocvariable{st})) \coqdocvariable{d} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqexternalref{None}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{None}}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{intros}. \coqdoctac{destruct} \coqdocvar{st}. \coqdoctac{simpl}. \coqdoctac{destruct} \coqdocvar{p}. \coqdoctac{simpl}. \coqdoctac{auto}. \coqdockw{Qed}. \coqdoctac{apply} \coqref{TrueProtoSynth2.x}{\coqdoclemma{x}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocemptyline
+\end{coqdoccode}
+\end{document}

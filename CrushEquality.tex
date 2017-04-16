@@ -1,0 +1,256 @@
+\documentclass[12pt]{report}
+\usepackage[]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\usepackage{coqdoc}
+\usepackage{amsmath,amssymb}
+\usepackage{url}
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This file has been automatically generated with the command
+%% coqdoc -latex CrushEquality.v 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\coqlibrary{CrushEquality}{Library }{CrushEquality}
+
+\begin{coqdoccode}
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Import} \coqexternalref{}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Classes.EquivDec}{\coqdoclibrary{Coq.Classes.EquivDec}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Export} \coqexternalref{}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Program.Equality}{\coqdoclibrary{Coq.Program.Equality}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Export} \coqexternalref{}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Logic.Eqdep\_dec}{\coqdoclibrary{Eqdep\_dec}}.\coqdoceol
+\coqdocemptyline
+\coqdocindent{0.50em}
+\coqdocvar{Create} \coqdocvar{HintDb} \coqdocvar{eq\_dec\_db}.\coqdoceol
+\end{coqdoccode}
+IMPORTANT:
+You MUST add each proof of equality to the eq\_dec\_db database
+(Hint Resolve <lemma\_name> : eq\_dec\_db.)
+
+
+
+
+We're going to be writing this a lot, so let's short hand it.
+\begin{coqdoccode}
+\coqdocnoindent
+\coqdockw{Notation} \coqdef{CrushEquality.::x '=<>' x}{"}{"}x =<> y" := (\coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{\{}}\coqdocvar{x} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocvar{y}\coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{\}}} \coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{+}} \coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{\{}}\coqdocvar{x} \coqexternalref{:type scope:x '<>' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\not=}}} \coqdocvar{y}\coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{\}}}) (\coqdoctac{at} \coqdockw{level} 100).\coqdoceol
+\coqdocemptyline
+\end{coqdoccode}
+
+
+We define a short hand for equality
+\begin{coqdoccode}
+\coqdocnoindent
+\coqdockw{Definition} \coqdef{CrushEquality.equality}{equality}{\coqdocdefinition{equality}} (\coqdocvar{A} :\coqdockw{Type}) := \coqdockw{\ensuremath{\forall}} \coqdocvar{x} \coqdocvar{y} : \coqdocvariable{A}, \coqdocvariable{x} \coqref{CrushEquality.::x '=<>' x}{\coqdocnotation{=<>}} \coqdocvariable{y}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Unfold} \coqref{CrushEquality.equality}{\coqdocdefinition{equality}} : \coqdocvar{unfoldEq}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Lemma} \coqdef{CrushEquality.eqNotation}{eqNotation}{\coqdoclemma{eqNotation}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{A}, \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqdockw{\ensuremath{\forall}} \coqdocvar{x} \coqdocvar{y} : \coqdocvariable{A}, (\coqdocvariable{x} \coqref{CrushEquality.::x '=<>' x}{\coqdocnotation{=<>}} \coqdocvariable{y})\coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqref{CrushEquality.equality}{\coqdocdefinition{equality}} \coqdocvariable{A}\coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intro}. \coqdocvar{autounfold} \coqdockw{with} \coqdocvar{unfoldEq}. \coqdoctac{intros}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eqNotation} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Lemma} \coqdef{CrushEquality.eqNotation2}{eqNotation2}{\coqdoclemma{eqNotation2}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{A}, \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqref{CrushEquality.equality}{\coqdocdefinition{equality}} \coqdocvariable{A}\coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}  \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqdockw{\ensuremath{\forall}} \coqdocvar{x} \coqdocvar{y} : \coqdocvariable{A}, (\coqdocvariable{x} \coqref{CrushEquality.::x '=<>' x}{\coqdocnotation{=<>}} \coqdocvariable{y})\coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} .\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdoctac{intro}. \coqdocvar{autounfold} \coqdockw{with} \coqdocvar{unfoldEq}. \coqdoctac{intros}. \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eqNotation2} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\end{coqdoccode}
+
+
+The above was soooo necessary for proving x =<> y. otherwise auto can't figure out matching goal for it because it's stupid. Try 
+Print HintDb eq\_dec\_db to see that otherwise it doesn't work properly.\begin{coqdoccode}
+\coqdocemptyline
+\end{coqdoccode}
+This will eliminate an existT in a Hypothesis.
+\begin{coqdoccode}
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{kill\_existT'} := \coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} [ \coqdocvar{H} : \coqdockw{context}[\coqexternalref{existT}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocconstructor{existT}}] \ensuremath{\vdash} \coqdocvar{\_} ] \ensuremath{\Rightarrow} \coqdoctac{apply} \coqexternalref{inj pair2 eq dec}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Logic.Eqdep\_dec}{\coqdoclemma{inj\_pair2\_eq\_dec}} \coqdoctac{in} \coqdocvar{H}\coqdoceol
+\coqdocnoindent
+\coqdockw{end}.\coqdoceol
+\coqdocemptyline
+\end{coqdoccode}
+
+
+Why is this next bit necessary you ask? Not sure, but repeat hangs forever. Therefore we use 'do' instead and apply kill existT' at most 5 times.\symbol{92}
+\begin{coqdoccode}
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{kill\_existT} := \coqdoctac{first} [ \coqdoctac{do} 5 \coqdocvar{kill\_existT'} \coqdoceol
+\coqdocindent{13.00em}
+\ensuremath{|} \coqdoctac{do} 4 \coqdocvar{kill\_existT'} \coqdoceol
+\coqdocindent{13.00em}
+\ensuremath{|} \coqdoctac{do} 3 \coqdocvar{kill\_existT'} \coqdoceol
+\coqdocindent{13.00em}
+\ensuremath{|} \coqdoctac{do} 2  \coqdocvar{kill\_existT'} \coqdoceol
+\coqdocindent{13.00em}
+\ensuremath{|} \coqdocvar{kill\_existT'}].\coqdoceol
+\end{coqdoccode}
+This helps us solve the case of not equals.
+\begin{coqdoccode}
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{not\_eq} := \coqdockw{let} \coqdocvar{nm1} := \coqdoctac{fresh} "nEq" \coqdoctac{in} (\coqdockw{let} \coqdocvar{nm2} := \coqdoctac{fresh} "nEq" \coqdoctac{in}  ((\coqdoctac{try} \coqdoctac{right}); \coqdoctac{unfold} \coqexternalref{not}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocdefinition{not}}; \coqdoctac{intros} \coqdocvar{nm1}; \coqdoctac{inversion} \coqdocvar{nm1} \coqdockw{as} [\coqdocvar{nm2}];\coqdoceol
+\coqdocindent{2.50em}
+(\coqdoctac{try} \coqdocvar{kill\_existT}); \coqdoctac{auto} \coqdockw{with} \coqdocvar{eq\_dec\_db})).\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Tactic Notation} "intro\_equals" := \coqdoctac{intros}; \coqdocvar{autounfold} \coqdockw{with} \coqdocvar{unfoldEq}; \coqdoctac{intros}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{eq\_dec'} \coqdocvar{name} \coqdocvar{x} \coqdocvar{y} := \coqdoctac{assert} (\coqdocvar{x} \coqref{CrushEquality.::x '=<>' x}{\coqdocnotation{=<>}} \coqdocvar{y}) \coqdockw{as} \coqdocvar{name}; \coqdoctac{auto} \coqdockw{with} \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{dep\_destruct\_equality'} \coqdocvar{name} \coqdocvar{T} := \coqdocvar{intro\_equals};\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} [ \coqdocvar{X} : \coqdocvar{T},\coqdoceol
+\coqdocindent{2.50em}
+\coqdocvar{Y} : \coqdocvar{T} \ensuremath{\vdash} \coqdocvar{\_}] \ensuremath{\Rightarrow} \coqdocvar{eq\_dec'} \coqdocvar{name} \coqdocvar{X} \coqdocvar{Y} \coqdockw{end}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{dep\_destruct\_equality} \coqdocvar{name} := \coqdocvar{intro\_equals};\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} [ \coqdocvar{x} : ?\coqdocvar{X},\coqdoceol
+\coqdocindent{2.50em}
+\coqdocvar{y} : ?\coqdocvar{X}\coqdoceol
+\coqdocindent{3.50em}
+\ensuremath{\vdash} \coqdocvar{\_} \coqref{CrushEquality.::x '=<>' x}{\coqdocnotation{=<>}} \coqdocvar{\_} ] \ensuremath{\Rightarrow} \coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocindent{5.50em}
+\ensuremath{|} [ \coqdocvar{H} : \coqdocvar{x} \coqref{CrushEquality.::x '=<>' x}{\coqdocnotation{=<>}} \coqdocvar{y} \ensuremath{\vdash} \coqdocvar{\_}] \ensuremath{\Rightarrow} \coqdoctac{fail} 1\coqdoceol
+\coqdocindent{5.50em}
+\ensuremath{|} \coqdocvar{\_} \ensuremath{\Rightarrow}  \coqdocvar{dep\_destruct\_equality'} \coqdocvar{name} \coqdocvar{X}\coqdoceol
+\coqdocindent{5.50em}
+\coqdockw{end} \coqdoceol
+\coqdocindent{3.50em}
+\coqdockw{end}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Add} \coqdocvar{LoadPath} "/home/paul/Documents/coqs/protosynth/cpdt/src" \coqdockw{as} \coqdocvar{Cpdt}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Import} \coqdoclibrary{Cpdt.CpdtTactics}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "depEqualSolver" := (\coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} [\coqdocvar{x} : ?\coqdocvar{T},\coqdoceol
+\coqdocindent{2.00em}
+\coqdocvar{y} : ?\coqdocvar{T}\coqdoceol
+\coqdocindent{5.00em}
+\ensuremath{\vdash} \coqdocvar{\_} ] \ensuremath{\Rightarrow} (\coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocindent{9.50em}
+\ensuremath{|} [ \ensuremath{\vdash} \coqdocvar{x} \coqref{CrushEquality.::x '=<>' x}{\coqdocnotation{=<>}} \coqdocvar{y} ] \ensuremath{\Rightarrow} \coqdoctac{destruct} \coqdocvar{x}, \coqdocvar{y}\coqdoceol
+\coqdocindent{9.50em}
+\ensuremath{|} \coqdocvar{\_} \ensuremath{\Rightarrow} \coqdoctac{idtac} "no need for pre-destruction"\coqdoceol
+\coqdocindent{9.00em}
+\coqdockw{end}); \coqdoctac{repeat} (\coqdockw{let} \coqdocvar{nm} := \coqdoctac{fresh} "name" \coqdoctac{in} \coqdoceol
+\coqdocindent{10.50em}
+(\coqdocvar{dep\_destruct\_equality} \coqdocvar{nm}; \coqdoceol
+\coqdocindent{11.00em}
+\coqdocvar{dep\_destruct} \coqdocvar{nm}; \coqdoctac{subst}; \coqdoctac{auto} \coqdockw{with} \coqdocvar{eq\_dec\_db}) \coqdoceol
+\coqdocindent{9.50em}
+); \coqdoctac{try} \coqdocvar{not\_eq}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdocvar{\_} \ensuremath{\Rightarrow} \coqdoctac{fail} "no two same types in assumptions"\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{end}).\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{jmeq} := \coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocindent{0.50em}
+[ \coqdocvar{H} : ?\coqdocvar{T1} \coqexternalref{::x 'x7E=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Program.Equality}{\coqdocnotation{\~{}=}} ?\coqdocvar{T2} \ensuremath{\vdash} \coqdocvar{\_}] \ensuremath{\Rightarrow} \coqdoctac{apply} \coqexternalref{JMeq eq}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Logic.JMeq}{\coqdocaxiom{JMeq\_eq}} \coqdoctac{in} \coqdocvar{H}; \coqdoctac{auto}\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{end}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{jmeq\_more} := \coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocindent{0.50em}
+[ \coqdocvar{jmeq} : ?\coqdocvar{T1} \coqexternalref{::x 'x7E=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Program.Equality}{\coqdocnotation{\~{}=}} ?\coqdocvar{T2} \ensuremath{\vdash} \coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{\{}}?\coqdocvar{x} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} ?\coqdocvar{T2}\coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{\}}} \coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{+}} \coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{\{}}?\coqdocvar{x} \coqexternalref{:type scope:x '<>' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\not=}}} ?\coqdocvar{T2}\coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{\}}} ] \ensuremath{\Rightarrow} \coqdoctac{apply} \coqexternalref{JMeq eq}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Logic.JMeq}{\coqdocaxiom{JMeq\_eq}} \coqdoctac{in} \coqdocvar{jmeq};\coqdoctac{auto}\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{end}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{destruct\_equality} := \coqdocvar{intro\_equals}; \coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocindent{0.50em}
+[ \coqdocvar{x} : ?\coqdocvar{T},\coqdoceol
+\coqdocindent{1.50em}
+\coqdocvar{y} : ?\coqdocvar{T} \ensuremath{\vdash} \coqdocvar{\_}] \ensuremath{\Rightarrow} \coqdoctac{destruct} (\coqref{CrushEquality.equality}{\coqdocdefinition{equality}} \coqdocvar{T})\coqdoceol
+\coqdocindent{1.50em}
+\coqdockw{end}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{case\_equals'} \coqdocvar{name}:= \coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocindent{0.50em}
+[ \coqdocvar{x} : ?\coqdocvar{T},\coqdoceol
+\coqdocindent{1.50em}
+\coqdocvar{y} : ?\coqdocvar{T} \ensuremath{\vdash} \coqdocvar{\_}] \ensuremath{\Rightarrow}  \coqdoctac{assert} (\coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{\{}}\coqdocvar{x} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocvar{y}\coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{\}}} \coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{+}} \coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{\{}}\coqdocvar{x} \coqexternalref{:type scope:x '<>' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\not=}}} \coqdocvar{y}\coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{\}}}) \coqdockw{as} \coqdocvar{name}; \coqdoctac{auto} \coqdockw{with} \ensuremath{\times}\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{end}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "case\_equals" := \coqdockw{let} \coqdocvar{name} := \coqdoctac{fresh} "equals" \coqdoctac{in} \coqdocvar{case\_equals'} \coqdocvar{name}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "no" := (\coqdoctac{unfold} \coqexternalref{not}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocdefinition{not}}; \coqdockw{let} \coqdocvar{nm} := \coqdoctac{fresh} "H" \coqdoctac{in} \coqdoctac{intro} \coqdocvar{nm}; \coqdoctac{inversion} \coqdocvar{nm}).\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{dep\_equal} := \coqdocvar{intro\_equals};\coqdoceol
+\coqdocnoindent
+\coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocindent{0.50em}
+[ \coqdocvar{x} : ?\coqdocvar{T},\coqdoceol
+\coqdocindent{1.50em}
+\coqdocvar{y} : ?\coqdocvar{T} \ensuremath{\vdash} \coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{\{}}?\coqdocvar{x} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} ?\coqdocvar{y}\coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{\}}} \coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{+}} \coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{\{}}?\coqdocvar{x} \coqexternalref{:type scope:x '<>' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\not=}}} ?\coqdocvar{y}\coqexternalref{:type scope:'x7B' x 'x7D' '+' 'x7B' x 'x7D'}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Specif}{\coqdocnotation{\}}} ] \ensuremath{\Rightarrow} \coqdocvar{dep\_destruct} \coqdocvar{x}; \coqdocvar{dep\_destruct} \coqdocvar{y};\coqdoceol
+\coqdocindent{1.50em}
+(\coqdoctac{try} (\coqdockw{let} \coqdocvar{eqName} := \coqdoctac{fresh} "equals" \coqdoctac{in} (\coqdocvar{case\_equals'} \coqdocvar{eqName}; \coqdoctac{destruct} \coqdocvar{eqName}))) ;\coqdoceol
+\coqdocindent{1.50em}
+(\coqdoctac{solve}  [(\coqdoctac{left}; \coqdoctac{subst}; \coqdoctac{auto})| \coqdoctac{right}; \coqdockw{no}; \coqdoctac{auto}]) + \coqdocvar{jmeq} + \coqdoctac{idtac} "jmeq tactic failed. Destruct so that your types match!"\coqdoceol
+\coqdocindent{2.00em}
+\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{end}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Tactic Notation} "decidable" := \coqdoctac{solve} [(\coqdoctac{left}; \coqdoctac{subst}; \coqdoctac{auto})| \coqdoctac{right}; \coqdockw{no}; \coqdoctac{auto}].\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "crush\_equal" := \coqdoceol
+\coqdocnoindent
+\coqdocvar{intro\_equals}; \coqdoceol
+\coqdocnoindent
+\coqdoctac{try} \coqdocvar{decide} \coqdocvar{equality};\coqdoceol
+\coqdocnoindent
+\coqdoctac{solve} [\coqdocvar{depEqualSolver}; (\coqdocvar{decidable} + \coqdocvar{not\_eq}) \ensuremath{|}  \coqdocvar{dep\_equal}; (\coqdocvar{decidable} + \coqdocvar{not\_eq})].\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{CrushEquality.eq dec List}{eq\_dec\_List}{\coqdoclemma{eq\_dec\_List}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{A}, \coqref{CrushEquality.equality}{\coqdocdefinition{equality}} \coqdocvariable{A} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{CrushEquality.equality}{\coqdocdefinition{equality}} (\coqexternalref{list}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocinductive{list}} \coqdocvariable{A}).\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}. \coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_List} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{CrushEquality.eq dec Pair}{eq\_dec\_Pair}{\coqdoclemma{eq\_dec\_Pair}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{A} \coqdocvar{B}, \coqref{CrushEquality.equality}{\coqdocdefinition{equality}} \coqdocvariable{A} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{CrushEquality.equality}{\coqdocdefinition{equality}} \coqdocvariable{B} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{CrushEquality.equality}{\coqdocdefinition{equality}} (\coqdocvariable{A}\coqexternalref{:type scope:x '*' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{\ensuremath{\times}}}\coqdocvariable{B}).\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_Pair} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{CrushEquality.eq dec ListPair}{eq\_dec\_ListPair}{\coqdoclemma{eq\_dec\_ListPair}} : \coqdockw{\ensuremath{\forall}} \coqdocvar{A} \coqdocvar{B}, \coqref{CrushEquality.equality}{\coqdocdefinition{equality}} \coqdocvariable{A} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{CrushEquality.equality}{\coqdocdefinition{equality}} \coqdocvariable{B} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{CrushEquality.equality}{\coqdocdefinition{equality}} (\coqexternalref{list}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocinductive{list}}(\coqdocvariable{A}\coqexternalref{:type scope:x '*' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{\ensuremath{\times}}}\coqdocvariable{B})).\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_ListPair} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\end{coqdoccode}
+\end{document}

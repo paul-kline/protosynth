@@ -1,0 +1,376 @@
+\documentclass[12pt]{report}
+\usepackage[]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\usepackage{coqdoc}
+\usepackage{amsmath,amssymb}
+\usepackage{url}
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This file has been automatically generated with the command
+%% coqdoc -latex ProtoSynthProtocolDataTypes.v 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\coqlibrary{ProtoSynthProtocolDataTypes}{Library }{ProtoSynthProtocolDataTypes}
+
+\begin{coqdoccode}
+\coqdocnoindent
+\coqdockw{Add} \coqdocvar{LoadPath} "/users/paulkline/Documents/coqs/protosynth".\coqdoceol
+\coqdocnoindent
+\coqdockw{Add} \coqdocvar{LoadPath} "/home/paul/Documents/coqs/protosynth/cpdt/src" \coqdockw{as} \coqdocvar{Cpdt}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Import} \coqdoclibrary{MyShortHand}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Import} \coqdoclibrary{ProtoSynthDataTypes}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthProtocolDataTypes.VarID}{VarID}{\coqdocinductive{VarID}} :=\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.receivedMESSAGE}{receivedMESSAGE}{\coqdocconstructor{receivedMESSAGE}} : \coqref{ProtoSynthProtocolDataTypes.VarID}{\coqdocinductive{VarID}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.toSendMESSAGE}{toSendMESSAGE}{\coqdocconstructor{toSendMESSAGE}} : \coqref{ProtoSynthProtocolDataTypes.VarID}{\coqdocinductive{VarID}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.variden}{variden}{\coqdocconstructor{variden}} : \coqexternalref{nat}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocinductive{nat}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.VarID}{\coqdocinductive{VarID}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthProtocolDataTypes.eq dec VarID}{eq\_dec\_VarID}{\coqdoclemma{eq\_dec\_VarID}} : \coqdocdefinition{equality} \coqref{ProtoSynthProtocolDataTypes.VarID}{\coqdocinductive{VarID}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_VarID} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthProtocolDataTypes.Const}{Const}{\coqdocinductive{Const}} :=\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.constValue}{constValue}{\coqdocconstructor{constValue}} (\coqdocvar{d}: \coqdocinductive{Description}) : \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqdocdefinition{measurementDenote} \coqdocvariable{d}\coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Const}{\coqdocinductive{Const}} \coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.constRequest}{constRequest}{\coqdocconstructor{constRequest}} : \coqdocinductive{Description} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Const}{\coqdocinductive{Const}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.constStop}{constStop}{\coqdocconstructor{constStop}} : \coqref{ProtoSynthProtocolDataTypes.Const}{\coqdocinductive{Const}}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Import} \coqdoclibrary{Cpdt.CpdtTactics}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{crush\_equal2} := \coqdoctac{intros}; \coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} [ \ensuremath{\vdash} ?\coqdocvar{x} \coqdocnotation{=<>} ?\coqdocvar{y}] \ensuremath{\Rightarrow} \coqdoctac{generalize} \coqdoctac{dependent} \coqdocvar{y}; \coqdoctac{dependent} \coqdoctac{induction} \coqdocvar{x}; \coqdoctac{intros}; \coqdocvar{dep\_destruct} \coqdocvar{y}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} [ \ensuremath{\vdash} \coqdocdefinition{equality} ?\coqdocvar{A}] \ensuremath{\Rightarrow} \coqdoctac{apply} \coqdoclemma{eqNotation}; \coqdocvar{crush\_equal2}\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{end}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{mostBasic} \coqdocvar{x} \coqdocvar{X}:= \coqdoctac{idtac} "working on"; \coqdoctac{idtac} \coqdocvar{x};(\coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} [\coqdocvar{t} : ?\coqdocvar{T} \ensuremath{\vdash} \coqdocvar{\_}] \ensuremath{\Rightarrow} \coqdockw{match} \coqdocvar{X} \coqdockw{with}\coqdoceol
+\coqdocindent{10.50em}
+\ensuremath{|} \coqdockw{context} [\coqdocvar{t}] \ensuremath{\Rightarrow} \coqdocvar{mostBasic} \coqdocvar{t} \coqdocvar{T}\coqdoceol
+\coqdocindent{10.50em}
+\ensuremath{|} \coqdocvar{\_} \ensuremath{\Rightarrow} \coqdoctac{fail} 1\coqdoceol
+\coqdocindent{10.50em}
+\coqdockw{end}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdocvar{\_} \ensuremath{\Rightarrow}  \coqdoceol
+\coqdocindent{1.00em}
+\coqdoceol
+\coqdocindent{1.00em}
+(\coqdockw{match} \coqdockw{goal} \coqdockw{with}\coqdoceol
+\coqdocindent{1.50em}
+\ensuremath{|} [ \coqdocvar{a} : \coqdocvar{X}, \coqdoceol
+\coqdocindent{2.50em}
+\coqdocvar{b} : \coqdocvar{X} \ensuremath{\vdash} \coqdocvar{\_}] \ensuremath{\Rightarrow} \coqdockw{let} \coqdocvar{nm} := \coqdoctac{fresh} "eq" \coqdoctac{in} \coqdocvar{eq\_dec'} \coqdocvar{nm} \coqdocvar{a} \coqdocvar{b}; \coqdoctac{destruct} \coqdocvar{nm};\coqdoceol
+\coqdocindent{10.50em}
+[\coqdoctac{subst} \ensuremath{|}\coqdoceol
+\coqdocindent{10.50em}
+\coqdoctac{idtac} "second case"]\coqdoceol
+\coqdocindent{1.50em}
+\ensuremath{|} [ \coqdocvar{a} : \coqdocvar{X} \ensuremath{\vdash} \coqdocvar{\_}] \ensuremath{\Rightarrow} \coqdoctac{fail} 2 "no sub eq dec found needed" ;\coqdocvar{dep\_destruct} \coqdocvar{a}\coqdoceol
+\coqdocindent{1.50em}
+\coqdockw{end})\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{end}).\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{neededEqDec} := \coqdockw{match} \coqdockw{goal} \coqdockw{with}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} [ \coqdocvar{d} : ?\coqdocvar{D} \ensuremath{\vdash} ?\coqdoctac{left} \coqdocnotation{=<>} ?\coqdoctac{right}] \ensuremath{\Rightarrow} \coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocindent{3.00em}
+\ensuremath{|} [ \ensuremath{\vdash} \coqdockw{context}[\coqdocvar{d}]] \ensuremath{\Rightarrow} \coqdoctac{idtac} \coqdocvar{d}; \coqdoctac{idtac} \coqdocvar{D}; \coqdocvar{mostBasic} \coqdocvar{d} \coqdocvar{D}\coqdoceol
+\coqdocindent{3.00em}
+\coqdockw{end}\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{end}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthProtocolDataTypes.eq dec Const}{eq\_dec\_Const}{\coqdoclemma{eq\_dec\_Const}} : \coqdocdefinition{equality} \coqref{ProtoSynthProtocolDataTypes.Const}{\coqdocinductive{Const}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{intro\_equals}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{x},\coqdocvar{y}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{dep\_destruct\_equality} \coqdocvar{nm}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{nm}. \coqdoctac{subst}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{dep\_destruct\_equality} \coqdocvar{nm2}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{d0}; \coqdoctac{try} \coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdoctac{destruct} \coqdocvar{d}; \coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{decidable}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{decidable}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{decidable}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{decidable}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{decidable}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{decidable}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_Const} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthProtocolDataTypes.Term}{Term}{\coqdocinductive{Term}} :=\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.variable}{variable}{\coqdocconstructor{variable}} : \coqref{ProtoSynthProtocolDataTypes.VarID}{\coqdocinductive{VarID}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Term}{\coqdocinductive{Term}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.const}{const}{\coqdocconstructor{const}} : \coqref{ProtoSynthProtocolDataTypes.Const}{\coqdocinductive{Const}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Term}{\coqdocinductive{Term}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthProtocolDataTypes.eq dec Term}{eq\_dec\_Term}{\coqdoclemma{eq\_dec\_Term}} : \coqdocdefinition{equality} \coqref{ProtoSynthProtocolDataTypes.Term}{\coqdocinductive{Term}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_Term} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthProtocolDataTypes.Condition}{Condition}{\coqdocinductive{Condition}} :=\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.IsMyTurntoSend}{IsMyTurntoSend}{\coqdocconstructor{IsMyTurntoSend}} : \coqref{ProtoSynthProtocolDataTypes.Condition}{\coqdocinductive{Condition}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.QueuedRequestsExist}{QueuedRequestsExist}{\coqdocconstructor{QueuedRequestsExist}} : \coqref{ProtoSynthProtocolDataTypes.Condition}{\coqdocinductive{Condition}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.ExistsNextDesire}{ExistsNextDesire}{\coqdocconstructor{ExistsNextDesire}} : \coqref{ProtoSynthProtocolDataTypes.Condition}{\coqdocinductive{Condition}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.CanSend}{CanSend}{\coqdocconstructor{CanSend}} :  \coqref{ProtoSynthProtocolDataTypes.Condition}{\coqdocinductive{Condition}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.IsSend}{IsSend}{\coqdocconstructor{IsSend}} :  \coqref{ProtoSynthProtocolDataTypes.Condition}{\coqdocinductive{Condition}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.IsMeasurement}{IsMeasurement}{\coqdocconstructor{IsMeasurement}} : \coqref{ProtoSynthProtocolDataTypes.Term}{\coqdocinductive{Term}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Condition}{\coqdocinductive{Condition}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.IsRequest}{IsRequest}{\coqdocconstructor{IsRequest}} : \coqref{ProtoSynthProtocolDataTypes.Term}{\coqdocinductive{Term}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Condition}{\coqdocinductive{Condition}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.IsStop}{IsStop}{\coqdocconstructor{IsStop}} : \coqref{ProtoSynthProtocolDataTypes.Term}{\coqdocinductive{Term}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Condition}{\coqdocinductive{Condition}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.IsAllGood}{IsAllGood}{\coqdocconstructor{IsAllGood}} : \coqref{ProtoSynthProtocolDataTypes.Condition}{\coqdocinductive{Condition}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthProtocolDataTypes.eq dec Condition}{eq\_dec\_Condition}{\coqdoclemma{eq\_dec\_Condition}} : \coqdocdefinition{equality} \coqref{ProtoSynthProtocolDataTypes.Condition}{\coqdocinductive{Condition}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_Condition} : \coqdocvar{eq\_dec\_Condition}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthProtocolDataTypes.AllGood}{AllGood}{\coqdocinductive{AllGood}} :=\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.Yes}{Yes}{\coqdocconstructor{Yes}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.No}{No}{\coqdocconstructor{No}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.Unset}{Unset}{\coqdocconstructor{Unset}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthProtocolDataTypes.eq dec AllGood}{eq\_dec\_AllGood}{\coqdoclemma{eq\_dec\_AllGood}} : \coqdocdefinition{equality} \coqref{ProtoSynthProtocolDataTypes.AllGood}{\coqdocinductive{AllGood}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_AllGood} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthProtocolDataTypes.Computation}{Computation}{\coqdocinductive{Computation}} := \coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.compGetMessageToSend}{compGetMessageToSend}{\coqdocconstructor{compGetMessageToSend}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.compGetNextRequest}{compGetNextRequest}{\coqdocconstructor{compGetNextRequest}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.compGetfstQueue}{compGetfstQueue}{\coqdocconstructor{compGetfstQueue}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthProtocolDataTypes.eq dec Computation}{eq\_dec\_Computation}{\coqdoclemma{eq\_dec\_Computation}} : \coqdocdefinition{equality} \coqref{ProtoSynthProtocolDataTypes.Computation}{\coqdocinductive{Computation}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_Computation} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthProtocolDataTypes.Effect}{Effect}{\coqdocinductive{Effect}} :=\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.effect StoreRequest}{effect\_StoreRequest}{\coqdocconstructor{effect\_StoreRequest}} : \coqref{ProtoSynthProtocolDataTypes.Term}{\coqdocinductive{Term}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Effect}{\coqdocinductive{Effect}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.effect ReduceStatewithMeasurement}{effect\_ReduceStatewithMeasurement}{\coqdocconstructor{effect\_ReduceStatewithMeasurement}} : \coqref{ProtoSynthProtocolDataTypes.Term}{\coqdocinductive{Term}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Effect}{\coqdocinductive{Effect}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.effect ReducePrivacyWithRequest}{effect\_ReducePrivacyWithRequest}{\coqdocconstructor{effect\_ReducePrivacyWithRequest}} : \coqref{ProtoSynthProtocolDataTypes.Term}{\coqdocinductive{Term}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Effect}{\coqdocinductive{Effect}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.effect MvFirstDesire}{effect\_MvFirstDesire}{\coqdocconstructor{effect\_MvFirstDesire}} :  \coqref{ProtoSynthProtocolDataTypes.Effect}{\coqdocinductive{Effect}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.effect rmFstQueued}{effect\_rmFstQueued}{\coqdocconstructor{effect\_rmFstQueued}} : \coqref{ProtoSynthProtocolDataTypes.Effect}{\coqdocinductive{Effect}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.effect cp ppUnresolved}{effect\_cp\_ppUnresolved}{\coqdocconstructor{effect\_cp\_ppUnresolved}} : \coqref{ProtoSynthProtocolDataTypes.Term}{\coqdocinductive{Term}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Effect}{\coqdocinductive{Effect}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.effect setAllGood}{effect\_setAllGood}{\coqdocconstructor{effect\_setAllGood}} : \coqref{ProtoSynthProtocolDataTypes.AllGood}{\coqdocinductive{AllGood}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Effect}{\coqdocinductive{Effect}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthProtocolDataTypes.eq dec Effect}{eq\_dec\_Effect}{\coqdoclemma{eq\_dec\_Effect}} : \coqdocdefinition{equality} \coqref{ProtoSynthProtocolDataTypes.Effect}{\coqdocinductive{Effect}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_Effect} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthProtocolDataTypes.Participant}{Participant}{\coqdocinductive{Participant}} :=\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.ATTESTER}{ATTESTER}{\coqdocconstructor{ATTESTER}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.APPRAISER}{APPRAISER}{\coqdocconstructor{APPRAISER}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthProtocolDataTypes.eq dec Participant}{eq\_dec\_Participant}{\coqdoclemma{eq\_dec\_Participant}} : \coqdocdefinition{equality} \coqref{ProtoSynthProtocolDataTypes.Participant}{\coqdocinductive{Participant}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_Participant} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthProtocolDataTypes.Statement}{Statement}{\coqdocinductive{Statement}} :=\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.SendStatement}{SendStatement}{\coqdocconstructor{SendStatement}} : \coqref{ProtoSynthProtocolDataTypes.Term}{\coqdocinductive{Term}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Participant}{\coqdocinductive{Participant}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Participant}{\coqdocinductive{Participant}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Statement}{\coqdocinductive{Statement}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.ReceiveStatement}{ReceiveStatement}{\coqdocconstructor{ReceiveStatement}} : \coqref{ProtoSynthProtocolDataTypes.VarID}{\coqdocinductive{VarID}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Statement}{\coqdocinductive{Statement}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.EffectStatement}{EffectStatement}{\coqdocconstructor{EffectStatement}} : \coqref{ProtoSynthProtocolDataTypes.Effect}{\coqdocinductive{Effect}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Statement}{\coqdocinductive{Statement}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.Compute}{Compute}{\coqdocconstructor{Compute}} : \coqref{ProtoSynthProtocolDataTypes.VarID}{\coqdocinductive{VarID}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Computation}{\coqdocinductive{Computation}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Statement}{\coqdocinductive{Statement}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.Assignment}{Assignment}{\coqdocconstructor{Assignment}} : \coqref{ProtoSynthProtocolDataTypes.VarID}{\coqdocinductive{VarID}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Term}{\coqdocinductive{Term}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Statement}{\coqdocinductive{Statement}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.Choose}{Choose}{\coqdocconstructor{Choose}} : \coqref{ProtoSynthProtocolDataTypes.Condition}{\coqdocinductive{Condition}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Statement}{\coqdocinductive{Statement}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Statement}{\coqdocinductive{Statement}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Statement}{\coqdocinductive{Statement}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.Chain}{Chain}{\coqdocconstructor{Chain}} : \coqref{ProtoSynthProtocolDataTypes.Statement}{\coqdocinductive{Statement}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Statement}{\coqdocinductive{Statement}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Statement}{\coqdocinductive{Statement}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.StopStatement}{StopStatement}{\coqdocconstructor{StopStatement}} : \coqref{ProtoSynthProtocolDataTypes.Statement}{\coqdocinductive{Statement}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.EndStatement}{EndStatement}{\coqdocconstructor{EndStatement}} : \coqref{ProtoSynthProtocolDataTypes.Statement}{\coqdocinductive{Statement}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.Skip}{Skip}{\coqdocconstructor{Skip}} : \coqref{ProtoSynthProtocolDataTypes.Statement}{\coqdocinductive{Statement}}\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.Wait}{Wait}{\coqdocconstructor{Wait}} : \coqref{ProtoSynthProtocolDataTypes.Statement}{\coqdocinductive{Statement}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthProtocolDataTypes.eq dec Statement}{eq\_dec\_Statement}{\coqdoclemma{eq\_dec\_Statement}} : \coqdocdefinition{equality} \coqref{ProtoSynthProtocolDataTypes.Statement}{\coqdocinductive{Statement}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_Statement} : \coqdocvar{eq\_dec\_Statement}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Notation} \coqdef{ProtoSynthProtocolDataTypes.::'IFS' x 'THEN' x 'ELSE' x}{"}{"}'IFS' x 'THEN' y 'ELSE' z" := (\coqref{ProtoSynthProtocolDataTypes.Choose}{\coqdocconstructor{Choose}} \coqdocvar{x} \coqdocvar{y} \coqdocvar{z})(\coqdoctac{at} \coqdockw{level} 80, \coqdoctac{right} \coqdockw{associativity}).\coqdoceol
+\coqdocnoindent
+\coqdockw{Notation} \coqdef{ProtoSynthProtocolDataTypes.::x '>>' x}{"}{"}x '>>' y" := (\coqref{ProtoSynthProtocolDataTypes.Chain}{\coqdocconstructor{Chain}} \coqdocvar{x} \coqdocvar{y})  (\coqdoctac{at} \coqdockw{level} 60, \coqdoctac{right} \coqdockw{associativity}).\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Definition} \coqdef{ProtoSynthProtocolDataTypes.VarState}{VarState}{\coqdocdefinition{VarState}} := \coqexternalref{list}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocinductive{list}} (\coqref{ProtoSynthProtocolDataTypes.VarID}{\coqdocinductive{VarID}}\coqexternalref{:type scope:x '*' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocnotation{\ensuremath{\times}}}\coqref{ProtoSynthProtocolDataTypes.Const}{\coqdocinductive{Const}}).\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthProtocolDataTypes.eq dec VarState}{eq\_dec\_VarState}{\coqdoclemma{eq\_dec\_VarState}} : \coqdocdefinition{equality} \coqref{ProtoSynthProtocolDataTypes.VarState}{\coqdocdefinition{VarState}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_VarState} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthProtocolDataTypes.ProState}{ProState}{\coqdocinductive{ProState}} :=\coqdoceol
+\coqdocindent{0.50em}
+\coqdoceol
+\coqdocindent{0.50em}
+\ensuremath{|} \coqdef{ProtoSynthProtocolDataTypes.proState}{proState}{\coqdocconstructor{proState}} : \coqdocinductive{Action} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.AllGood}{\coqdocinductive{AllGood}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Participant}{\coqdocinductive{Participant}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}}  \coqdocinductive{PrivacyPolicy} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdocinductive{RequestLS} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdocinductive{RequestLS} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqexternalref{list}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocinductive{list}} \coqdocinductive{Description}\coqdoceol
+\coqdocindent{3.00em}
+\coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.ProState}{\coqdocinductive{ProState}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthProtocolDataTypes.eq dec ProState}{eq\_dec\_ProState}{\coqdoclemma{eq\_dec\_ProState}} : \coqdocdefinition{equality} \coqref{ProtoSynthProtocolDataTypes.ProState}{\coqdocinductive{ProState}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_ProState} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthProtocolDataTypes.State}{State}{\coqdocinductive{State}} :=\coqdoceol
+\coqdocindent{0.50em}
+\coqdef{ProtoSynthProtocolDataTypes.state}{state}{\coqdocconstructor{state}} : \coqref{ProtoSynthProtocolDataTypes.VarState}{\coqdocdefinition{VarState}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.ProState}{\coqdocinductive{ProState}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.State}{\coqdocinductive{State}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthProtocolDataTypes.eq dec State}{eq\_dec\_State}{\coqdoclemma{eq\_dec\_State}} : \coqdocdefinition{equality} \coqref{ProtoSynthProtocolDataTypes.State}{\coqdocinductive{State}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_State} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdef{ProtoSynthProtocolDataTypes.NetworkMessage}{NetworkMessage}{\coqdocinductive{NetworkMessage}} :=\coqdoceol
+\coqdocindent{0.50em}
+\coqdef{ProtoSynthProtocolDataTypes.networkMessage}{networkMessage}{\coqdocconstructor{networkMessage}} : \coqref{ProtoSynthProtocolDataTypes.Participant}{\coqdocinductive{Participant}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Participant}{\coqdocinductive{Participant}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.Const}{\coqdocinductive{Const}} \coqexternalref{:type scope:x '->' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqref{ProtoSynthProtocolDataTypes.NetworkMessage}{\coqdocinductive{NetworkMessage}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthProtocolDataTypes.eq dec NetworkMessage}{eq\_dec\_NetworkMessage}{\coqdoclemma{eq\_dec\_NetworkMessage}} : \coqdocdefinition{equality} \coqref{ProtoSynthProtocolDataTypes.NetworkMessage}{\coqdocinductive{NetworkMessage}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_NetworkMessage} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Definition} \coqdef{ProtoSynthProtocolDataTypes.Network}{Network}{\coqdocdefinition{Network}} := \coqexternalref{list}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocinductive{list}} \coqref{ProtoSynthProtocolDataTypes.NetworkMessage}{\coqdocinductive{NetworkMessage}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdef{ProtoSynthProtocolDataTypes.eq dec Network}{eq\_dec\_Network}{\coqdoclemma{eq\_dec\_Network}} : \coqdocdefinition{equality} \coqref{ProtoSynthProtocolDataTypes.Network}{\coqdocdefinition{Network}}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{crush\_equal}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Defined}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Hint Resolve} \coqdocvar{eq\_dec\_Network} : \coqdocvar{eq\_dec\_db}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Definition} \coqdef{ProtoSynthProtocolDataTypes.mkState}{mkState}{\coqdocdefinition{mkState}} (\coqdocvar{a} : \coqdocinductive{Action}) (\coqdocvar{p} : \coqref{ProtoSynthProtocolDataTypes.Participant}{\coqdocinductive{Participant}}) (\coqdocvar{pp} : \coqdocinductive{PrivacyPolicy}) (\coqdocvar{rls} : \coqdocinductive{RequestLS}) : \coqref{ProtoSynthProtocolDataTypes.State}{\coqdocinductive{State}}:=\coqdoceol
+\coqdocindent{0.50em}
+\coqref{ProtoSynthProtocolDataTypes.state}{\coqdocconstructor{state}} \coqexternalref{nil}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{nil}} (\coqref{ProtoSynthProtocolDataTypes.proState}{\coqdocconstructor{proState}} \coqdocvariable{a} \coqref{ProtoSynthProtocolDataTypes.Yes}{\coqdocconstructor{Yes}} \coqdocvariable{p} \coqdocvariable{pp} \coqdocvariable{rls} \coqdocconstructor{emptyRequestLS} \coqexternalref{nil}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Datatypes}{\coqdocconstructor{nil}}).\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Definition} \coqdef{ProtoSynthProtocolDataTypes.mkAppraiserState}{mkAppraiserState}{\coqdocdefinition{mkAppraiserState}} (\coqdocvar{pp} : \coqdocinductive{PrivacyPolicy}) (\coqdocvar{rls} : \coqdocinductive{RequestLS}) : \coqref{ProtoSynthProtocolDataTypes.State}{\coqdocinductive{State}} :=\coqdoceol
+\coqdocindent{0.50em}
+\coqref{ProtoSynthProtocolDataTypes.mkState}{\coqdocdefinition{mkState}} \coqdocconstructor{ASend} \coqref{ProtoSynthProtocolDataTypes.APPRAISER}{\coqdocconstructor{APPRAISER}} \coqdocvariable{pp} \coqdocvariable{rls}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Definition} \coqdef{ProtoSynthProtocolDataTypes.mkAttesterState}{mkAttesterState}{\coqdocdefinition{mkAttesterState}} (\coqdocvar{pp} : \coqdocinductive{PrivacyPolicy}) : \coqref{ProtoSynthProtocolDataTypes.State}{\coqdocinductive{State}} := \coqdoceol
+\coqdocindent{0.50em}
+\coqref{ProtoSynthProtocolDataTypes.mkState}{\coqdocdefinition{mkState}} \coqdocconstructor{AReceive} \coqref{ProtoSynthProtocolDataTypes.ATTESTER}{\coqdocconstructor{ATTESTER}} \coqdocvariable{pp} \coqdocconstructor{emptyRequestLS}.\coqdoceol
+\end{coqdoccode}
+\end{document}

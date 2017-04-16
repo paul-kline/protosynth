@@ -1,0 +1,183 @@
+\documentclass[12pt]{report}
+\usepackage[]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\usepackage{coqdoc}
+\usepackage{amsmath,amssymb}
+\usepackage{url}
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This file has been automatically generated with the command
+%% coqdoc -latex MyShortHand.v 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\coqlibrary{MyShortHand}{Library }{MyShortHand}
+
+\begin{coqdoccode}
+\coqdocemptyline
+\end{coqdoccode}
+*this is the title
+
+
+here are some comments
+ \begin{coqdoccode}
+\coqdocemptyline
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Tactic Notation} "inv" \coqdocvar{hyp}(\coqdocvar{H}) := \coqdoctac{inversion} \coqdocvar{H}; \coqdoctac{subst}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "cca" := \coqdoctac{repeat} \coqdoctac{constructor}; \coqdoctac{assumption}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "nono" := \coqdoctac{unfold} \coqexternalref{not}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocdefinition{not}}; \coqdockw{let} \coqdocvar{nm} := \coqdoctac{fresh} "X" \coqdoctac{in} \coqdoctac{intro} \coqdocvar{nm}; \coqdoctac{inversion} \coqdocvar{nm}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "nono" \coqdocvar{hyp}(\coqdocvar{H}) :=  \coqdoctac{unfold} \coqexternalref{not}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocdefinition{not}} \coqdoctac{in} \coqdocvar{H}; \coqdocvar{exfalso}; \coqdoctac{apply} \coqdocvar{H}; \coqdoctac{auto}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Export} \coqexternalref{}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Program.Equality}{\coqdoclibrary{Coq.Program.Equality}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Export} \coqexternalref{}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Logic.Eqdep\_dec}{\coqdoclibrary{Eqdep\_dec}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Export} \coqexternalref{}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Arith.EqNat}{\coqdoclibrary{Coq.Arith.EqNat}}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Add} \coqdocvar{LoadPath} "/home/paul/Documents/coqs/protosynth".\coqdoceol
+\coqdocnoindent
+\coqdockw{Add} \coqdocvar{LoadPath} "/home/paul/Documents/coqs/protosynth/cpdt/src" \coqdockw{as} \coqdocvar{Cpdt}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Export} \coqdoclibrary{CrushEquality}.\coqdoceol
+\coqdocemptyline
+\coqdocemptyline
+\coqdocindent{0.50em}
+\coqdockw{Print} "=".\coqdoceol
+\coqdocnoindent
+\coqdockw{Notation} \coqdef{MyShortHand.::x '=' x '=' x}{"}{"} x = y = z" := (\coqdocvar{x} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocvar{y} \coqexternalref{:type scope:x '/x5C' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\land}}} \coqdocvar{x} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocvar{z}) .\coqdoceol
+\coqdocnoindent
+\coqdockw{Notation} \coqdef{MyShortHand.::x '=' x '=' x '=' x}{"}{"} x = y = z = a" := (\coqdocvar{x} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocvar{y} \coqexternalref{:type scope:x '/x5C' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\land}}} \coqdocvar{x} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocvar{z} \coqexternalref{:type scope:x '/x5C' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\land}}} \coqdocvar{x} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocvar{a}) (\coqdoctac{at} \coqdockw{level} 200).\coqdoceol
+\coqdocnoindent
+\coqdockw{Notation} \coqdef{MyShortHand.::x '=' x '=' x '=' x '=' x}{"}{"} x = y = z = a = b" := (\coqdocvar{x} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocvar{y} \coqexternalref{:type scope:x '/x5C' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\land}}} \coqdocvar{x} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocvar{z} \coqexternalref{:type scope:x '/x5C' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\land}}} \coqdocvar{x} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocvar{a} \coqexternalref{:type scope:x '/x5C' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\land}}} \coqdocvar{x} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocvar{b}) (\coqdoctac{at} \coqdockw{level} 200).\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "ass" := \coqdoctac{assumption}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "refl" := \coqdoctac{reflexivity}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "dest" \coqdocvar{tactic} (\coqdocvar{c}) := \coqdoctac{destruct} \coqdocvar{c} .\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "ind" \coqdocvar{tactic} (\coqdocvar{c}) := \coqdoctac{induction} \coqdocvar{c}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "inv" \coqdocvar{ident}(\coqdocvar{c}) := \coqdoctac{inversion} \coqdocvar{c}; \coqdoctac{subst}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "gd" \coqdocvar{tactic} (\coqdocvar{c}) := \coqdoctac{generalize} \coqdoctac{dependent} \coqdocvar{c}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "s" := \coqdoctac{simpl}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "s" \coqdocvar{ident} (\coqdocvar{c}) := \coqdoctac{simpl} \coqdoctac{in} \coqdocvar{c}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "c" := \coqdoctac{constructor}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Export} \coqexternalref{}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Strings.String}{\coqdoclibrary{String}}. \coqdockw{Open} \coqdockw{Scope} \coqdocvar{string\_scope}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{move\_to\_top} \coqdocvar{x} :=\coqdoceol
+\coqdocindent{1.00em}
+\coqdockw{match} \coqdocvar{reverse} \coqdockw{goal} \coqdockw{with}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{H} : \coqdocvar{\_} \ensuremath{\vdash} \coqdocvar{\_} \ensuremath{\Rightarrow} \coqdoctac{try} \coqdoctac{move} \coqdocvar{x} \coqdockw{after} \coqdocvar{H}\coqdoceol
+\coqdocindent{1.00em}
+\coqdockw{end}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Tactic Notation} "assert\_eq" \coqdocvar{ident}(\coqdocvar{x}) \coqdockw{constr}(\coqdocvar{v}) :=\coqdoceol
+\coqdocindent{1.00em}
+\coqdockw{let} \coqdocvar{H} := \coqdoctac{fresh} \coqdoctac{in}\coqdoceol
+\coqdocindent{1.00em}
+\coqdoctac{assert} (\coqdocvar{x} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} \coqdocvar{v}) \coqdockw{as} \coqdocvar{H} \coqdoctac{by} \coqdoctac{reflexivity};\coqdoceol
+\coqdocindent{1.00em}
+\coqdoctac{clear} \coqdocvar{H}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Tactic Notation} "Case\_aux" \coqdocvar{ident}(\coqdocvar{x}) \coqdockw{constr}(\coqdocvar{name}) :=\coqdoceol
+\coqdocindent{1.00em}
+\coqdoctac{first} [\coqdoceol
+\coqdocindent{2.00em}
+\coqdoctac{set} (\coqdocvar{x} := \coqdocvar{name}); \coqdocvar{move\_to\_top} \coqdocvar{x}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{assert\_eq} \coqdocvar{x} \coqdocvar{name}; \coqdocvar{move\_to\_top} \coqdocvar{x}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdoctac{fail} 1 "because we are working on a different case" ].\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Tactic Notation} "Case" \coqdockw{constr}(\coqdocvar{name}) := \coqdocvar{Case\_aux} \coqdocvar{Case} \coqdocvar{name}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "SCase" \coqdockw{constr}(\coqdocvar{name}) := \coqdocvar{Case\_aux} \coqdocvar{SCase} \coqdocvar{name}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "SSCase" \coqdockw{constr}(\coqdocvar{name}) := \coqdocvar{Case\_aux} \coqdocvar{SSCase} \coqdocvar{name}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "SSSCase" \coqdockw{constr}(\coqdocvar{name}) := \coqdocvar{Case\_aux} \coqdocvar{SSSCase} \coqdocvar{name}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "SSSSCase" \coqdockw{constr}(\coqdocvar{name}) := \coqdocvar{Case\_aux} \coqdocvar{SSSSCase} \coqdocvar{name}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "SSSSSCase" \coqdockw{constr}(\coqdocvar{name}) := \coqdocvar{Case\_aux} \coqdocvar{SSSSSCase} \coqdocvar{name}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "SSSSSSCase" \coqdockw{constr}(\coqdocvar{name}) := \coqdocvar{Case\_aux} \coqdocvar{SSSSSSCase} \coqdocvar{name}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "SSSSSSSCase" \coqdockw{constr}(\coqdocvar{name}) := \coqdocvar{Case\_aux} \coqdocvar{SSSSSSSCase} \coqdocvar{name}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Add} \coqdocvar{LoadPath} "/home/paul/Documents/coqs/protosynth/cpdt/src" \coqdockw{as} \coqdocvar{Cpdt}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Require} \coqdockw{Import} \coqdoclibrary{Cpdt.CpdtTactics}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Definition} \coqdef{MyShortHand.xor}{xor}{\coqdocdefinition{xor}} (\coqdocvar{A} : \coqdockw{Prop}) (\coqdocvar{B}: \coqdockw{Prop}) := \coqexternalref{:type scope:x '/x5C' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{(}}\coqdocvariable{A} \coqexternalref{:type scope:x 'x5C/' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\lor}}} \coqdocvariable{B}\coqexternalref{:type scope:x '/x5C' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{:type scope:x '/x5C' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\land}}} \coqexternalref{:type scope:'x7E' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\~{}(}}\coqdocvariable{A} \coqexternalref{:type scope:x '/x5C' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{\ensuremath{\land}}} \coqdocvariable{B}\coqexternalref{:type scope:'x7E' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{)}}.\coqdoceol
+\coqdocemptyline
+\end{coqdoccode}
+proof command that aids in simple proofs of equality.
+ \begin{coqdoccode}
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{equal} := \coqdocvar{autounfold} \coqdockw{with} \coqdocvar{unfoldEq}; \coqdoctac{repeat} \coqdocvar{decide} \coqdocvar{equality}.\coqdoceol
+\coqdocemptyline
+\end{coqdoccode}
+
+
+Handy Ltac  for simplifying Hypothesis' since simpl doesn't do it.
+Note: it will fail if the hypothesis doesn't change.
+\begin{coqdoccode}
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{simpl\_H} :=\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocindent{1.00em}
+[ \coqdocvar{H} : ?\coqdocvar{T} \ensuremath{\vdash} \coqdocvar{\_}] \ensuremath{\Rightarrow} \coqdoctac{progress} (\coqdocvar{autounfold} \coqdoctac{in} \coqdocvar{H}; (\coqdoctac{simpl} \coqdoctac{in} \coqdocvar{H}))\coqdoceol
+\coqdocindent{1.00em}
+\coqdockw{end}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{cbn\_H} :=\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocindent{1.00em}
+[ \coqdocvar{H} : ?\coqdocvar{T} \ensuremath{\vdash} \coqdocvar{\_}] \ensuremath{\Rightarrow} \coqdoctac{progress} (\coqdocvar{autounfold} \coqdockw{with} \ensuremath{\times} \coqdoctac{in} \coqdocvar{H} ; (\coqdocvar{cbn} \coqdoctac{in} \coqdocvar{H}))\coqdoceol
+\coqdocindent{1.00em}
+\coqdockw{end}.\coqdoceol
+\coqdocemptyline
+\end{coqdoccode}
+
+
+The actual command to use in proofs.
+will continue to apply until it fails. 
+\begin{coqdoccode}
+\coqdocnoindent
+\coqdockw{Tactic Notation} "sh" := \coqdoctac{repeat} \coqdocvar{simpl\_H}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "simplAll" := \coqdocvar{sh}; \coqdocvar{autounfold}; \coqdoctac{simpl}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Tactic Notation} "refl" := \coqdoctac{reflexivity}.\coqdoceol
+\coqdocemptyline
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{inversion\_any'} := \coqdockw{match} \coqdockw{goal} \coqdockw{with} \coqdoceol
+\coqdocnoindent
+[\coqdocvar{H} : ?\coqdocvar{x} \coqexternalref{:type scope:x '=' x}{http://coq.inria.fr/distrib/8.6/stdlib/Coq.Init.Logic}{\coqdocnotation{=}} ?\coqdocvar{y} \ensuremath{\vdash} \coqdocvar{\_}] \ensuremath{\Rightarrow} \coqdoctac{progress} ( \coqdoctac{inversion} \coqdocvar{H})\coqdoceol
+\coqdocnoindent
+\coqdockw{end}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Ltac} \coqdocvar{inversion\_any} := \coqdoctac{solve} [(\coqdoctac{repeat} \coqdocvar{inversion\_any'})].\coqdoceol
+\coqdocemptyline
+\coqdocindent{0.50em}
+\end{coqdoccode}
+\end{document}
