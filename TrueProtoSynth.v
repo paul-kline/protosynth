@@ -1677,3 +1677,47 @@ simpl in H2. rewrite H in H2. inversion H2. subst.
 Theorem x : forall d st, findandMeasureItem (getPrivacy (rm_f_Privacy_w_RequestST d st)) d = None.
 intros. destruct st. simpl. destruct p. simpl. auto. Qed. apply x. 
 Qed.
+
+Definition OneProtocolStep2 (st : State) : Statement :=
+IFS IsMyTurntoSend THEN
+  IFS IsAllGood THEN
+    EffectStatement (effect_setAllGood Unset) >>
+    IFS QueuedRequestsExist THEN 
+      IFS CanSend THEN 
+        Compute toSendMESSAGE compGetMessageToSend >>
+        SendStatement (variable toSendMESSAGE) (getMe st) (notMe (getMe st)) >> 
+        Compute (variden 1) compGetfstQueue >>
+        EffectStatement (effect_ReducePrivacyWithRequest (variable (variden 1))) >>
+        EffectStatement effect_rmFstQueued >>
+        EffectStatement (effect_setAllGood Yes) >> (*all good here! *)
+        EndStatement
+      ELSE (*Can't send and queued request exists *)
+        EffectStatement (effect_setAllGood No) >> (* no, this is bad! *) 
+        SendStatement (const constStop) (getMe st) (notMe (getMe st)) >> 
+        StopStatement (*Give up!*)
+    ELSE (*No queued up things for me. So I can continue down my list of things I want. *)
+      IFS ExistsNextDesire THEN 
+        Compute toSendMESSAGE compGetNextRequest >>
+        EffectStatement effect_MvFirstDesire >> 
+        SendStatement (variable toSendMESSAGE) (getMe st) (notMe (getMe st)) >> 
+        EffectStatement (effect_setAllGood Yes) >>
+        EndStatement
+      ELSE (* I must send, nothin queued, nothin left I want, quit! *)
+        EffectStatement (effect_setAllGood Yes) >> (*all is well, just out! *)
+        SendStatement (const constStop) (getMe st) (notMe (getMe st)) >> 
+        StopStatement
+  ELSE
+    SendStatement (const constStop) (getMe st) (notMe (getMe st)) >>
+    StopStatement      
+ELSE
+  ReceiveStatement (receivedMESSAGE) >>
+  IFS (IsMeasurement (variable (receivedMESSAGE))) THEN 
+    EffectStatement (effect_ReduceStatewithMeasurement (variable (receivedMESSAGE)) ) >>   
+    EndStatement
+  ELSE
+    IFS (IsRequest (variable (receivedMESSAGE))) THEN 
+      EffectStatement (effect_StoreRequest (variable (receivedMESSAGE))) >> EndStatement
+    ELSE (*we must have received a stop *)
+      StopStatement.
+Example xx : forall st, OneProtocolStep st = OneProtocolStep2 st. 
+intros. auto. Qed.
